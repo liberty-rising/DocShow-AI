@@ -3,7 +3,7 @@ import streamlit as st
 def app():
     st.title("""
     
-📊 Unlock the Power of Your Data 📊
+📊 Unlock the Power of Your Data
 
 In today's data-driven world, understanding your business metrics is crucial for success. That's where [Your App's Name] comes in. Our cutting-edge machine learning app allows you to import your own data and instantly generate comprehensive Exploratory Data Analytics reports, stunning visualizations, and real-time KPI dashboards.
 

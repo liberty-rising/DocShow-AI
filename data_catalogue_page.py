@@ -5,7 +5,18 @@ from streamlit_pandas_profiling import st_profile_report
 import os
 import pyodbc  # For Azure SQL database
 from credentials import get_conn_str
-from custom_functions import map_dtype
+# from custom_functions import map_dtype
+
+def map_dtype(dtype):
+    if "int" in dtype:
+        return "INT"
+    elif "float" in dtype:
+        return "FLOAT"
+    elif "object" in dtype:
+        return "VARCHAR(255)"
+    else:
+        return "VARCHAR(255)"  # Default data type
+
 
 def app():
     df = None  # Initialize df to None
