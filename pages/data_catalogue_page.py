@@ -1,7 +1,6 @@
 import base64  # For file download
 import streamlit as st
 import pandas as pd
-from streamlit_pandas_profiling import st_profile_report
 import os
 import pyodbc  # For Azure SQL database
 from credentials import get_conn_str

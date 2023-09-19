@@ -1,6 +1,11 @@
 # Use an official Python runtime as a parent image
 FROM python:3.11-slim-buster
 
+# Install system dependencies required for pyodbc
+RUN apt-get update -y \
+    && apt-get install -y unixodbc-dev \
+    && apt-get clean
+
 # Set the working directory in the container
 WORKDIR /app
 
