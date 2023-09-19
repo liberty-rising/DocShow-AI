@@ -4,7 +4,7 @@ from pages import home_page, data_catalogue_page, data_processing_page, data_ana
 
 # import machine_learning_page
 # import llm_page  # Import the new LLM page
-import utils.custom_css as custom_css
+from utils import custom_css
 
 # Add custom CSS for centered title
 custom_css.add_css()

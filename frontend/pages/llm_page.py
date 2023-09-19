@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain import HuggingFaceHub
-from credentials import apikey_hungingface
+from frontend.credentials import apikey_hungingface
 from langchain import PromptTemplate, LLMChain
 import os
 

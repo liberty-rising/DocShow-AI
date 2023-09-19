@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pyodbc  # For Azure SQL database
-from credentials import get_conn_str  # Assuming you have a credentials.py file
+from frontend.credentials import get_conn_str  # Assuming you have a credentials.py file
 
 def app():
     st.title("Data Analytics")

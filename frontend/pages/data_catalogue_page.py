@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import os
 import pyodbc  # For Azure SQL database
-from credentials import get_conn_str
+from frontend.credentials import get_conn_str
 # from custom_functions import map_dtype
 
 def map_dtype(dtype):
