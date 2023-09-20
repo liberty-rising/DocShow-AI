@@ -1,10 +1,6 @@
 # Your existing imports
 import streamlit as st
-import home_page 
-import data_catalogue_page 
-import data_processing_page 
-import data_analytics_page
-import data_visualization_page
+from app_pages import home_page, data_catalogue_page, data_processing_page, data_analytics_page, data_visualization_page
 
 # import machine_learning_page
 # import llm_page  # Import the new LLM page
