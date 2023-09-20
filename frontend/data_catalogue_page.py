@@ -1,137 +1,69 @@
-import base64  # For file download
 import streamlit as st
+import pyodbc
 import pandas as pd
-import os
-import pyodbc  # For Azure SQL database
-from credentials import get_conn_str
-# from custom_functions import map_dtype
-
-def map_dtype(dtype):
-    if "int" in dtype:
-        return "INT"
-    elif "float" in dtype:
-        return "FLOAT"
-    elif "object" in dtype:
-        return "VARCHAR(255)"
-    else:
-        return "VARCHAR(255)"  # Default data type
-
+from credentials import get_conn_str  # Ensure you have a credentials.py that contains this function
 
 def app():
-    df = None  # Initialize df to None
+    # Load the credentials from the credentials.py file
+    conn_str = get_conn_str()
 
-    # Check if a dataset already exists
-    if os.path.exists('./dataset.csv'):
-        df = pd.read_csv('dataset.csv', index_col=None)
+    # Connect to the SQL Server database
+    conn = pyodbc.connect(conn_str)
 
-    choice = st.radio("Navigation", ["Check database tables list","Upload file to database"])
+    # Initialize a cursor
+    cur = conn.cursor()
 
-    if choice == "Upload file to database":
-        st.title("Upload Your Dataset")
-        file = st.file_uploader("Upload Your Dataset", type=["csv"])
-        
-        # Read and display the uploaded CSV file
-        if file:
-            df = pd.read_csv(file, index_col=None)
-            df.to_csv('dataset.csv', index=None)
-            st.dataframe(df)  # Display the dataframe as a table
+    # Execute a query to find all existing tables in the database
+    cur.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
+    tables = cur.fetchall()
 
-            # Replace NaN values with a default value
-            df.fillna(0, inplace=True)  # Replace NaN with 0
+    # Create a Pandas DataFrame for better display
+    df_tables = pd.DataFrame([table[0] for table in tables], columns=["Table Name"])
 
-            # Explicitly convert to float
-            for col in df.select_dtypes(include=['float64']).columns:
-                df[col] = df[col].astype(float)
+    # Display the tables in the Streamlit app
+    st.header("Existing Tables")
+    st.write(df_tables)
 
-            # Button to ingest data into Azure SQL database
-            if st.button("Ingest into Database"):
-                # Azure SQL database connection string
-                conn_str = get_conn_str()
-                conn = pyodbc.connect(conn_str)
-                cursor = conn.cursor()
+    # Create a file uploader widget
+    uploaded_file = st.file_uploader("Upload CSV File")
 
-                # Check if table exists
-                cursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'my_table'")
-                if not cursor.fetchone():
-                    # Create table with the same column names as in the DataFrame
-                    columns = ", ".join([f"{col} {map_dtype(str(df.dtypes[col]))}" for col in df.columns])
-                    create_table_query = f"CREATE TABLE my_table ({columns})"
-                    cursor.execute(create_table_query)
-                    conn.commit()
+    # Check if a file has been uploaded
+    if uploaded_file is not None:
 
-                # Ingest data into the table
-                for index, row in df.iterrows():
-                    try:
-                        placeholders = ', '.join('?' * len(row))
-                        insert_query = f"INSERT INTO my_table VALUES ({placeholders})"
-                        cursor.execute(insert_query, tuple(row))
-                    except Exception as e:
-                        st.error(f"Error inserting row {index}: {e}")
+        # Read the CSV file into a Pandas DataFrame
+        df = pd.read_csv(uploaded_file)
 
-                conn.commit()
-                conn.close()
-                st.success("Data ingested into Azure SQL database successfully!")
+        # Sanitize the column names in the DataFrame
+        df.columns = df.columns.str.replace(" ", "_")
 
-    if choice == "Check database tables list":
-        st.title("Database Tables")
-        
-        # Azure SQL database connection string
-        conn_str = get_conn_str()
-        conn = pyodbc.connect(conn_str)
-        cursor = conn.cursor()
-        
-        # Execute SQL query to get table names
-        cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
-        
-        # Fetch all table names
-        tables = [table[0] for table in cursor.fetchall()]
-        
-        # Search box for tables
-        search_query = st.text_input("Search for tables")
-        
-        # Filter table list based on search query
-        filtered_tables = [table for table in tables if search_query.lower() in table.lower()]
-        
-        # Dropdown to select a table, default is None
-        selected_table = st.selectbox("Select a table", [None] + filtered_tables)
-        
-        # Fetch and display top 3 rows from the selected table
-        if selected_table:
-            cursor.execute(f"SELECT TOP 3 * FROM {selected_table}")  # Changed to TOP 3
-            top_3_rows = cursor.fetchall()  # Renamed to top_3_rows
-            column_names = [column[0] for column in cursor.description]
-            
-            # Create a DataFrame to display in Streamlit
-            df_top_3 = pd.DataFrame.from_records(top_3_rows, columns=column_names)  # Renamed to df_top_3
-            st.table(df_top_3)
-        
-        # Initialize list to hold table details
-        table_details = []
-        
-        # Only proceed if a table is selected
-        if selected_table:
-            for table_name in tables:
-                
-                # Get number of columns
-                cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")
-                num_columns = cursor.fetchone()[0]
-                
-                # Get number of rows
-                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-                num_rows = cursor.fetchone()[0]
-                
-                # Get creation date (Note: SQL Server specific query)
-                cursor.execute(f"SELECT create_date FROM sys.tables WHERE name = '{table_name}'")
-                created_at = cursor.fetchone()[0]
-                
-                # Append details to list
-                table_details.append([table_name, num_columns, num_rows, created_at])
-            
-            # Create a DataFrame to display in Streamlit
-            df_tables = pd.DataFrame(table_details, columns=['Table Name', 'Number of Columns', 'Number of Rows', 'Created At'])
-            st.table(df_tables)
-        
-        # Close the connection
-        conn.close()
+        # Create a new table name for the uploaded CSV file
+        table_name = f"my_table_{len(tables) + 1}"
 
-    
+        # Check if the table name already exists in the database
+        cur.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = ?", (table_name,))
+        if cur.fetchone() is not None:
+            # If the table name already exists, generate a new table name
+            table_name = f"my_table_{len(tables) + 2}"
+
+        # Create a new table in the database
+        column_types = "VARCHAR(MAX)"  # Here, I've set all columns to have the same data type for simplicity
+        columns_with_types = [f"{col} {column_types}" for col in df.columns]
+        cur.execute(f"CREATE TABLE {table_name} ({','.join(columns_with_types)})")
+
+        # Insert the data from the DataFrame into the newly created table
+        for index, row in df.iterrows():
+            placeholders = ', '.join(['?'] * len(row))
+            sql = f"INSERT INTO {table_name} ({', '.join(df.columns)}) VALUES ({placeholders})"
+            cur.execute(sql, tuple(row))
+
+        # Commit the changes
+        conn.commit()
+
+        # Display a success message in the Streamlit app
+        st.success("CSV file uploaded successfully!")
+
+    else:
+        st.info("Please upload a CSV file.")
+
+if __name__ == "__main__":
+    app()

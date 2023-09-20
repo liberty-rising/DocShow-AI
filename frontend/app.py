@@ -13,9 +13,6 @@ from utils import custom_css
 # Add custom CSS for centered title
 custom_css.add_css()
 
-# Path to the local image
-image_path = './utils/logo.jpg'  # Replace 'your_logo.jpg' with the actual file name
-
 
 # Reordered the pages for logical flow and added LLM page
 PAGES = {
@@ -33,7 +30,6 @@ if 'page' not in st.session_state:
     st.session_state.page = "🏠 Home"
 
 with st.sidebar:
-    st.image(image_path, caption='', use_column_width=True)  # Display the image
     st.markdown("<h1 style='text-align: left;'>👋 Welcome</h1>", unsafe_allow_html=True)
 
     # Create buttons for navigation, reordered for logical flow
