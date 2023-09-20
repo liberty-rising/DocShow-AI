@@ -28,7 +28,7 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 EXPOSE 8501
 
 # Set PYTHONPATH
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/frontend
 
 # Run app.py when the container launches
 CMD ["streamlit", "run", "--server.runOnSave=True", "app.py"]

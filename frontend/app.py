@@ -45,3 +45,5 @@ with st.sidebar:
 
 # Load the selected page
 PAGES[st.session_state.page].app()
+
+
