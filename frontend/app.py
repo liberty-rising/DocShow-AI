@@ -1,6 +1,6 @@
 # Your existing imports
 import streamlit as st
-from app_pages import home_page, data_catalogue_page, data_processing_page, data_analytics_page, data_visualization_page
+from app_pages import home_page, data_catalogue_page, data_processing_page, data_analytics_page, data_visualization_page, data_ingestion_page
 
 # import machine_learning_page
 # import llm_page  # Import the new LLM page
@@ -13,6 +13,7 @@ custom_css.add_css()
 # Reordered the pages for logical flow and added LLM page
 PAGES = {
     "🏠 Home": home_page,
+    "📥 Data Ingestion": data_ingestion_page,
     "📖 Data Catalogue": data_catalogue_page,
     "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
@@ -31,8 +32,10 @@ with st.sidebar:
     # Create buttons for navigation, reordered for logical flow
     if st.sidebar.button("🏠 Home"):
         st.session_state.page = "🏠 Home"
+    if st.sidebar.button("📥 Data Ingestion"):
+        st.session_state.page = "📥 Data Ingestion"
     if st.sidebar.button("📖 Data Catalogue"):
-        st.session_state.page = "📖 Data Catalogue"
+        st.session_state.page = "📖 Data Catalogue"    
     if st.sidebar.button("🔄 Data Processing"):
         st.session_state.page = "🔄 Data Processing"
     if st.sidebar.button("📊 Data Analytics"):
