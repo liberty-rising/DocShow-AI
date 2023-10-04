@@ -1,68 +1,85 @@
 from fastapi import FastAPI, File, UploadFile
+from io import StringIO
 from typing import Any
 
+import json
+import pandas as pd
 import requests
 
 def api_request(prompt, url, headers):
     """Helper function to make an API request."""
-    payload = json.dumps({"inputs": prompt})
+    payload = json.dumps(
+        {
+            "input": {
+                "prompt": prompt,
+                "max_new_tokens": 500,
+                "temperature":0.7,
+                "top_k":50,
+                "top_p":0.7,
+                "repetition_penalty":1.2,
+                "batch_size": 8,
+                "stop": ["</s>"]}
+        })
     return requests.post(url, headers=headers, data=payload)
 
-def call_hugging_face_api(file_content):
-    hugging_face_url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf"
-    headers = {"Authorization": "Bearer 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"}
+def call_llm_api(file_content, msg, is_new_table):
+    llm_url = "https://api.runpod.ai/v2/2btspg14jnwza1/runsync"
+    headers = {
+        "Authorization": "Bearer 05IB5U9J6DD7UG8GXO0X1DU2M68JF5AZODD5JC1J",
+        "Content-Type": "application/json"}
 
-    response = requests.post(
-        hugging_face_url,
-        headers=headers,
-        files={"file": file_content}
-    )
+    if is_new_table:
+        sql_response = generate_create_table_statement(file_content,msg,llm_url,headers)
     
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
+    print("SQL: ",sql_response.json())
+    return None
+    # if response.status_code == 200:
+    #     return response.json()
+    # else:
+    #     return None
     
-def generate_create_table_statement(file_content, msg, hugging_face_url, headers):
+def generate_create_table_statement(file_content, msg, llm_url, headers):
     """
-    Generates a SQL "CREATE TABLE" statement and description using Hugging Face API.
+    Generates a SQL "CREATE TABLE" statement and description using provided LLM API.
 
     Parameters:
         file_content (str): Sample data for the SQL statement.
         msg (str): Additional clarification for the table.
-        hugging_face_url (str): Hugging Face API URL.
+        llm_url (str): LLM API URL.
         headers (dict): API request headers.
 
     Returns:
         tuple: API responses for SQL statement and description.
     """
-    
+    sql_context = f"You are specialized in generating SQL table creation statements based on\
+          provided sample data. Ensure the statements are correctly formatted and adhere to SQL syntax standards.\
+          Only provide the SQL response, nothing else. Do not acknowledge the questions or tasks in your answer."
     sql_prompt = f"Create a SQL table statement for this sample data: {file_content}"
-    sql_response = api_request(sql_prompt, hugging_face_url, headers)
-    
-    desc_prompt = "Create a brief description of the data in table."
     if msg:
-        desc_prompt += f" Additional information: {msg}"
-    desc_response = api_request(desc_prompt, hugging_face_url, headers)
+        sql_prompt += f" Additional information about data: {msg}"
+    full_prompt = prompt_format(sql_context,sql_prompt)
 
-    return sql_response, desc_response
+    sql_response = api_request(full_prompt,llm_url,headers)
+
+    return sql_response
     
-def process_file(file: UploadFile, file_type: str) -> Any:
+def process_file(file: UploadFile) -> Any:
     """
     Process the uploaded file based on its type.
 
     Parameters:
         file (UploadFile): The uploaded file.
-        file_type (str): The type of the uploaded file (e.g., 'csv', 'pdf', 'img').
 
     Returns:
         Any: Processed content of the file.
     """
-    file_type = file_type.lower()
+    # Find file type by file extension
+    file_name = file.filename
+    file_type = file_name.split(".")[-1].lower()
 
     if file_type == 'csv':
         df = pd.read_csv(file.file, nrows=10)
-        buffer = BytesIO()
+        buffer = StringIO()
         df.to_csv(buffer, index=False)
         return buffer.getvalue()
     elif file_type == 'pdf':
@@ -73,3 +90,8 @@ def process_file(file: UploadFile, file_type: str) -> Any:
         pass
     else:
         raise ValueError("Unsupported file type")
+    
+
+def prompt_format(context: str, prompt: str):
+    full_prompt = f"""[INST] <<SYS>>{context}<</SYS>>{prompt}[/INST]"""
+    return full_prompt

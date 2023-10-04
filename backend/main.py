@@ -1,9 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from utils import call_hugging_face_api, process_file
-import pandas as pd
-from io import StringIO
-from typing import Any
+from utils import call_llm_api, process_file
 
 app = FastAPI()
 
@@ -24,15 +21,10 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
     Returns:
         JSONResponse: A JSON response containing either a success message and result or an error message.
     """
-    # Read only the first few lines into a DataFrame
-    df = pd.read_csv(file.file, nrows=10)
+    # Process file to string
+    sample_content = process_file(file)
     
-    # Convert the DataFrame back to a CSV string
-    buffer = StringIO()
-    df.to_csv(buffer, index=False)
-    sample_content = buffer.getvalue()
-    
-    result = call_hugging_face_api(sample_content)
+    result = call_llm_api(sample_content,msg,is_new_table)
     
     if result:
         return JSONResponse(content={"message": "File processed successfully", "result": result})
