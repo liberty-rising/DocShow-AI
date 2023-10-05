@@ -1,0 +1,8 @@
+[theme]
+primaryColor="#6c757d"
+backgroundColor="#f8f9fa"
+secondaryBackgroundColor="#e9ecef"
+textColor="#343a40"
+font="monospace"
+cursor="pointer"
+borderRadius="6px"

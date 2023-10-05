@@ -1,63 +1,96 @@
 import streamlit as st
 import pandas as pd
-import pyodbc  # For Azure SQL database
-from credentials import get_conn_str  # Assuming you have a credentials.py file
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from credentials import get_conn_str
+import pyodbc
 
 def app():
     st.title("Data Analytics")
 
-    # Initialize DataFrame
-    df = None
+    st.write("""
+    ## Overview
+    Welcome to the Data Analytics page! This page provides an interface to gain insights from the data stored in the database.
+    
+    ### Features:
+    - **Select Table**: Choose a table from the database to analyze.
+    - **Prepare Data Insights**: Click the button to generate insights from the selected table.
+    - **Correlation Matrix**: Visualize the correlation matrix of the selected table to understand the relationships between variables.
+    - **Outliers Visualization**: View scatter plots of columns with outliers to understand their distribution.
+    - **Density Plots**: View density plots to understand the distribution of data.
+    
+    Simply select a table and click 'Prepare data insights' to view the insights.
+    """)
 
-    # Radio button to select data source
-    data_source = st.radio("Choose your data source:", ["Upload CSV File", "Select Database Table"])
-
-    if data_source == "Upload CSV File":
-        uploaded_file = st.file_uploader("Upload your CSV file:", type=["csv"])
-        if uploaded_file:
-            df = pd.read_csv(uploaded_file)
-            st.write("Uploaded data:")
-            st.dataframe(df)
-
-    elif data_source == "Select Database Table":
-        # Azure SQL database connection string
+    # Fetching table names from the database
+    def get_table_names():
         conn_str = get_conn_str()
-        conn = pyodbc.connect(conn_str)
-        cursor = conn.cursor()
+        with pyodbc.connect(conn_str) as conn:
+            query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE';"
+            tables = pd.read_sql(query, conn)
+        return tables['TABLE_NAME'].tolist()
 
-        # Execute SQL query to get table names
-        cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
-        tables = [table[0] for table in cursor.fetchall()]
+    # Fetching data from the selected table
+    def get_table_data(table_name):
+        conn_str = get_conn_str()
+        with pyodbc.connect(conn_str) as conn:
+            df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+        return df
 
-        # Dropdown to select a table
-        selected_table = st.selectbox("Select a table", [None] + tables)
+    # Dropdown to select a table
+    table_name = st.selectbox("Choose a table", get_table_names())
 
-        # Fetch and display top 3 rows from the selected table
-        if selected_table:
-            cursor.execute(f"SELECT TOP 3 * FROM {selected_table}")
-            top_3_rows = cursor.fetchall()
-            column_names = [column[0] for column in cursor.description]
+    # Button to prepare data insights
+    if st.button("Prepare data insights"):
+        df = get_table_data(table_name)
+        
+        # Exclude non-numerical columns
+        numeric_df = df.select_dtypes(include=[np.number])
+        
+        # Compute and display the correlation matrix
+        corr_matrix = numeric_df.corr()
+        st.write("### Correlation Matrix")
+        
+        # Using seaborn to visualize the correlation matrix
+        fig, ax = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+        st.pyplot(fig)
+
+        # Outliers Visualization using Z-scores and scatter plots
+        st.write("### Outliers Visualization using Z-scores")
+        
+        numerical_cols = numeric_df.columns
+
+        for x in numerical_cols:
+            z_scores = np.abs((df[x] - df[x].mean()) / df[x].std())
+            outliers = df[z_scores > 2]
             
-            # Create a DataFrame to display in Streamlit
-            df = pd.DataFrame.from_records(top_3_rows, columns=column_names)
-            st.write("Selected table data:")
-            st.dataframe(df)
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.scatter(outliers[x], outliers[x], s=10, alpha=0.5, color='#3F5D7D')
+            ax.set_title(x, fontsize=12)
+            ax.set_xlabel(x, fontsize=10)
+            ax.set_ylabel(x, fontsize=10)
+            ax.tick_params(axis='both', which='major', labelsize=10, length=5)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            
+            st.pyplot(fig)
 
-        # Close the connection
-        conn.close()
+        # Density Plots
+        st.write("### Density Plots")
+        
+        for x in numerical_cols:
+            fig, ax = plt.subplots(figsize=(10, 5))
+            sns.kdeplot(df[x], ax=ax, shade=True, color='#3F5D7D')
+            ax.set_title(x, fontsize=12)
+            ax.set_xlabel('')
+            ax.set_ylabel('')
+            ax.tick_params(axis='both', which='major', labelsize=10, length=5)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            
+            st.pyplot(fig)
 
-    # Generate report if DataFrame is not empty
-    if df is not None:
-        st.write("### Data Overview")
-        
-        # Use Streamlit's native features for data exploration
-        st.write("#### Data Summary")
-        st.write(df.describe())
-        
-        st.write("#### Data Types")
-        st.write(df.dtypes)
-        
-        st.write("#### Missing Values")
-        st.write(df.isnull().sum())
-
-        # Add more data exploration features as needed
+if __name__ == "__main__":
+    app()
