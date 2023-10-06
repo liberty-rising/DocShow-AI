@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from utils import create_or_append_llm_table, process_file, save_to_data_lake
+from utils import create_llm_table, append_llm_table, process_file, save_to_data_lake
 
 app = FastAPI()
 
@@ -20,16 +20,20 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
     """
     try:
         # Process the file to get the sample content
-        sample_content = process_file(file)
+        processed_file, sample_file_content = process_file(file)
+
+        # Create new table if necessary
+        if is_new_table:
+            llm_create_result = create_llm_table(sample_file_content,msg)
         
-        # Call the LLM API
-        llm_result = create_or_append_llm_table(sample_content, msg, is_new_table)
+        # Append file to table
+        llm_append_result = append_llm_table(processed_file, msg, is_new_table)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
     
-        if llm_result:
-            return JSONResponse(content={"message": "File processed successfully", "result": llm_result})
+        if llm_create_result and llm_append_result:
+            return JSONResponse(content={"message": "File processed successfully"}, status_code=200)
         else:
             raise HTTPException(status_code=400, detail="Error processing file with LLM API")
     
