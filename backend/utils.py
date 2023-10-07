@@ -1,27 +1,24 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import File, UploadFile
 from io import StringIO
-from typing import Any, Dict, Union
-from .api_utils import api_request_llm, get_llm_api_credentials, poll_for_llm_task_completion
-from .sql_utils import execute_sql_create_query, extract_sql_query, get_table_names, is_valid_create_table_query 
+from typing import Any, Dict, Tuple, Union
+from .api_utils import get_llm_api_credentials
+from .llm_utils import generate_create_table_statement, generate_table_desc
+from .sql_utils import execute_sql_create_query, extract_sql_query, get_table_from_create_query, is_valid_create_table_query, store_table_desc
 
-import json
 import pandas as pd
-import re
-import requests
-import sqlite3
 import time
 
 
-def create_llm_table(sample_file_content: str, msg: str):
+def create_llm_table(sample_file_content: str, msg: str) -> Union[Tuple[Dict, str], None]:
     """
     Creates a table using an LLM. The table is based on sample file content and a message.
 
     Parameters:
     - sample_file_content (str): The sample file content used to create the table.
-    - msg (str): Additional message to log or use in table creation.
+    - msg (str): Additional message to give context to LLM for table creation.
 
     Returns:
-    - Union[Dict, None]: JSON response if successful, None otherwise.
+    - Union[Tuple[Dict, str], None]: Tuple containing the JSON response and SQL query if successful, None otherwise.
     """
     max_retries = 3
     retry_delay = 2  # seconds
@@ -37,7 +34,7 @@ def create_llm_table(sample_file_content: str, msg: str):
 
                 if is_valid_create_table_query(sql_query):
                     execute_sql_create_query(sql_query)
-                    return sql_response.json()
+                    return sql_response.json(), sql_query
                 
                 
             print("Retrying...")
@@ -50,41 +47,44 @@ def create_llm_table(sample_file_content: str, msg: str):
         print(f"An error occurred: {str(e)}")
         return None
 
-def append_llm_table(processed_file: UploadFile = File(...), msg: str = ""):
-    # Code for appending data to existing tables
-    pass
-    
-def generate_create_table_statement(file_content, msg, llm_url, headers):
+def create_table_desc(create_query: str, sample_file_content: str, msg: str) -> Union[Dict, None]:
     """
-    Generates a SQL "CREATE TABLE" statement and description using provided LLM API.
+    Fetches and stores the description of a table created in LLM based on the CREATE TABLE query,
+    sample file content, and a message.
 
     Parameters:
-        file_content (str): Sample data for the SQL statement.
-        msg (str): Additional clarification for the table.
-        llm_url (str): LLM API URL.
-        headers (dict): API request headers.
+    - create_query (str): The CREATE TABLE query used to create the table.
+    - sample_file_content (str): Sample file content used in table creation.
+    - msg (str): Additional message to give context to LLM for generating the table description.
 
     Returns:
-        tuple: API responses for SQL statement and description.
+    - Union[Dict, None]: JSON response containing table description if successful, None otherwise.
     """
-    table_names = get_table_names()
-    sql_context = "Generate only a SQL CREATE TABLE statement based on the provided sample data. Do not include any additional text, explanations, or filler words."
-    sql_prompt = f"Generate SQL CREATE TABLE statement for the following sample data: {file_content}.\
-        Do not include any additional text, explanations, or filler words.\
-        Do not use the following table names as they are already in use: {table_names}"
 
-    if msg:
-        sql_prompt += f" Additional information about data: {msg}"
-    full_prompt = prompt_format(sql_context,sql_prompt)
+    try:
+        # Assume get_llm_api_credentials() returns the LLM API URL and headers
+        llm_url, headers = get_llm_api_credentials()
 
-    sql_response = api_request_llm(full_prompt,llm_url,headers)
+        # Replace this with actual API call to generate and fetch table description
+        description_response = generate_table_desc(create_query, sample_file_content, msg, llm_url, headers)
 
-    task_id = sql_response.json().get('id')
+        if description_response.status_code == 200:
+            table_name = get_table_from_create_query(create_query)
+            description = description_response.json()['output']
+            
+            # Store description in separate table
+            store_table_desc(table_name,description)
 
-    # Poll for task completion
-    sql_response = poll_for_llm_task_completion(task_id,headers)
+            return description_response
 
-    return sql_response
+    except Exception as e:
+        # Log the error message here
+        print(f"An error occurred while fetching table description: {str(e)}")
+        return None
+
+def append_llm_table(processed_file: UploadFile, msg: str, table_name: str):
+    # Code for appending data to existing tables
+    pass
     
 def process_file(file: UploadFile) -> Any:
     """
@@ -120,10 +120,6 @@ def process_file(file: UploadFile) -> Any:
         raise ValueError("Unsupported file type")
     
     return files["processed_file"], files["sample_file_content"]
-
-def prompt_format(context: str, prompt: str):
-    full_prompt = f"""[INST] <<SYS>>{context}<</SYS>>{prompt}[/INST]"""
-    return full_prompt
 
 def save_to_data_lake(file: UploadFile = File(...)):
     pass
