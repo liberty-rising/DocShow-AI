@@ -1,9 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 from utils import create_llm_table, create_llm_table_desc, append_llm_table, process_file, save_to_data_lake
 
+from .models import client_models
+from .database import client_db_config
+
 app = FastAPI()
+
+# Create the tables in the database
+client_models.Base.metadata.create_all(bind=client_db_config.engine)
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table: bool = False):
