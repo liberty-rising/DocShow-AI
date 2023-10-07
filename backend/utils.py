@@ -1,9 +1,8 @@
 from fastapi import File, UploadFile
 from io import StringIO
 from typing import Any, Dict, Tuple, Union
-from .api_utils import get_llm_api_credentials
-from .llm_utils import generate_create_table_statement, generate_table_desc
-from .sql_utils import execute_sql_create_query, extract_sql_query, get_table_from_create_query, is_valid_create_table_query, store_table_desc
+from llm_utils import generate_create_table_statement, generate_table_desc
+from sql_utils import execute_sql_create_query, extract_sql_query, get_table_from_create_query, is_valid_create_table_query, store_table_desc
 
 import pandas as pd
 import time
@@ -24,10 +23,8 @@ def create_llm_table(sample_file_content: str, msg: str) -> Union[Tuple[Dict, st
     retry_delay = 2  # seconds
 
     try:
-        llm_url,headers = get_llm_api_credentials()
-
         for _ in range(max_retries):
-            sql_response = generate_create_table_statement(sample_file_content,msg,llm_url,headers)
+            sql_response = generate_create_table_statement(sample_file_content,msg)
                 
             if sql_response.status_code == 200:
                 sql_query = extract_sql_query(sql_response.json()["output"])
@@ -62,18 +59,15 @@ def create_table_desc(create_query: str, sample_file_content: str, msg: str) -> 
     """
 
     try:
-        # Assume get_llm_api_credentials() returns the LLM API URL and headers
-        llm_url, headers = get_llm_api_credentials()
-
-        # Replace this with actual API call to generate and fetch table description
-        description_response = generate_table_desc(create_query, sample_file_content, msg, llm_url, headers)
+        # API call to generate and fetch table description
+        description_response = generate_table_desc(create_query, sample_file_content, msg)
 
         if description_response.status_code == 200:
             table_name = get_table_from_create_query(create_query)
             description = description_response.json()['output']
             
             # Store description in separate table
-            store_table_desc(table_name,description)
+            store_table_desc(table_name,create_query,description)
 
             return description_response
 

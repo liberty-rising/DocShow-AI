@@ -2,10 +2,10 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from utils import create_llm_table, create_llm_table_desc, append_llm_table, process_file, save_to_data_lake
+from utils import create_llm_table, create_table_desc, append_llm_table, process_file, save_to_data_lake
 
-from .models import client_models
-from .database import client_db_config
+from models import client_models
+from database import client_db_config
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
         # Create new table if necessary
         if is_new_table:
             table_response, create_query = create_llm_table(sample_file_content,msg)
-            desc_response = create_llm_table_desc(create_query,sample_file_content,msg)
+            desc_response = create_table_desc(create_query,sample_file_content,msg)
         
         # Append file to table
         table_name = ""
