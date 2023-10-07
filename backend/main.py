@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from utils import create_llm_table, create_table_desc, append_llm_table, process_file, save_to_data_lake
 
 from models import client_models
+from models.client_models import TableMetadata
 from database import client_db_config
 
 app = FastAPI()
