@@ -1,9 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from utils import create_or_append_llm_table, process_file, save_to_data_lake
+from sqlalchemy.orm import Session
+from utils import create_llm_table, create_table_desc, append_llm_table, process_file, save_to_data_lake
+
+from models import client_models
+from database import client_db_config
 
 app = FastAPI()
+
+# Create the tables in the database
+client_models.Base.metadata.create_all(bind=client_db_config.engine)
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table: bool = False):
@@ -20,16 +27,22 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
     """
     try:
         # Process the file to get the sample content
-        sample_content = process_file(file)
+        processed_file, sample_file_content = process_file(file)
+
+        # Create new table if necessary
+        if is_new_table:
+            table_response, create_query = create_llm_table(sample_file_content,msg)
+            desc_response = create_table_desc(create_query,sample_file_content,msg)
         
-        # Call the LLM API
-        llm_result = create_or_append_llm_table(sample_content, msg, is_new_table)
+        # Append file to table
+        table_name = ""
+        llm_append_result = append_llm_table(processed_file, msg, table_name)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
     
-        if llm_result:
-            return JSONResponse(content={"message": "File processed successfully", "result": llm_result})
+        if llm_create_result and llm_append_result:
+            return JSONResponse(content={"message": "File processed successfully"}, status_code=200)
         else:
             raise HTTPException(status_code=400, detail="Error processing file with LLM API")
     
