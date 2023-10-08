@@ -76,6 +76,14 @@ def create_table_desc(create_query: str, sample_file_content: str, msg: str) -> 
         print(f"An error occurred while fetching table description: {str(e)}")
         return None
 
+def get_table_name(sample_file_content, msg):
+    # Implement logic to get the table name
+    return "some_table_name"
+
+def handle_table_creation(sample_file_content, msg):
+    table_response, create_query = create_llm_table(sample_file_content, msg)
+    desc_response = create_table_desc(create_query, sample_file_content, msg)
+
 def append_llm_table(processed_file: UploadFile, msg: str, table_name: str):
     # Code for appending data to existing tables
     pass
