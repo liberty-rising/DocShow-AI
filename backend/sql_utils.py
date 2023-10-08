@@ -3,7 +3,7 @@ This module contains utility functions for interacting with SQL databases.
 It includes functions for creating, reading, updating, and deleting records,
 as well as other database operations.
 """
-from database.client_db_config import SessionLocal
+from databases.client_db_config import SessionLocal
 from models.client_models import TableMetadata
 
 import re
