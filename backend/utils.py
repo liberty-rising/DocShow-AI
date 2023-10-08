@@ -1,12 +1,40 @@
-from fastapi import File, UploadFile
+from sql_utils import append_to_table
+
+from fastapi import File, HTTPException, UploadFile
 from io import StringIO
 from typing import Any, Dict, Tuple, Union
-from llm_utils import generate_create_table_statement, generate_table_desc
+from llm_utils import generate_create_table_statement, generate_table_desc, fetch_llm_table_from_sample
 from sql_utils import execute_sql_create_query, extract_sql_query, get_table_from_create_query, is_valid_create_table_query, store_table_desc
 
 import pandas as pd
 import time
 
+
+def determine_and_append_to_table(processed_file: UploadFile, sample_file_content: str, msg: str):
+    """
+    Determines the appropriate table based on sample data and a message, and then appends the uploaded file to that table.
+
+    Parameters:
+    - processed_file (UploadFile): The uploaded file to be appended.
+    - sample_file_content (str): The sample file content to analyze.
+    - msg (str): Additional metadata or instructions.
+
+    Side-effects:
+    - Calls append_to_table function to append data to the determined table.
+    - Raises an HTTPException if the table name cannot be determined.
+    """
+    table_name = get_table_name(sample_file_content, msg)
+    print(table_name)
+    return
+
+    if table_name is None:
+        raise HTTPException(status_code=400, detail="Could not determine table name")
+    
+    try:
+        append_to_table(processed_file, table_name)
+    except Exception as e:
+        print(f"An error occurred while appending data to table {table_name}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 def create_llm_table(sample_file_content: str, msg: str) -> Union[Tuple[Dict, str], None]:
     """
@@ -76,17 +104,30 @@ def create_table_desc(create_query: str, sample_file_content: str, msg: str) -> 
         print(f"An error occurred while fetching table description: {str(e)}")
         return None
 
-def get_table_name(sample_file_content, msg):
-    # Implement logic to get the table name
-    return "some_table_name"
+def get_table_name(sample_file_content: str, msg: str) -> str:
+    """
+    Fetches the appropriate table name for the sample data using an API call to an LLM.
+    
+    Parameters:
+    - sample_file_content (str): The sample file content to analyze.
+    - msg (str): Additional metadata or instructions.
+
+    Returns:
+    - str: The predicted table name, or None if an error occurs.
+
+    Side-effects:
+    - Logs an error message to the console if the table name cannot be fetched.
+    """
+    try:
+        table_response = fetch_llm_table_from_sample(sample_file_content, msg)
+        return table_response.json()['output']
+    except Exception as e:
+        print(f"An error occurred while fetching table name: {str(e)}")
+        return None
 
 def handle_table_creation(sample_file_content, msg):
     table_response, create_query = create_llm_table(sample_file_content, msg)
     desc_response = create_table_desc(create_query, sample_file_content, msg)
-
-def append_llm_table(processed_file: UploadFile, msg: str, table_name: str):
-    # Code for appending data to existing tables
-    pass
     
 def process_file(file: UploadFile) -> Any:
     """

@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from utils import append_llm_table, get_table_name, handle_table_creation, process_file, save_to_data_lake
+from utils import determine_and_append_to_table, handle_table_creation, process_file, save_to_data_lake
 
 from models import app_models, client_models
 from databases import app_db_config, client_db_config
@@ -35,8 +35,7 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
             handle_table_creation(sample_file_content, msg)
         
         # Append file to table
-        table_name = get_table_name(sample_file_content, msg)
-        llm_append_result = append_llm_table(processed_file, msg, table_name)
+        determine_and_append_to_table(processed_file, sample_file_content, msg)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
