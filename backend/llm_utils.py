@@ -1,7 +1,61 @@
-from api_utils import api_request_llm, get_llm_api_credentials, poll_for_llm_task_completion
-from sql_utils import get_table_names
+from models.client_models import TableMetadata
 
-from typing import Dict, Union
+from api_utils import api_request_llm, get_llm_api_credentials, poll_for_llm_task_completion
+from sql_utils import get_table_metadata, get_table_names
+
+from typing import Dict, List, Union
+
+
+def fetch_llm_table_from_sample(sample_file_content: str, msg: str) -> Union[Dict, None]:
+    """
+    Fetches the appropriate table name from an LLM based on the sample data and existing table metadata.
+    
+    Parameters:
+    - sample_file_content (str): The sample file content to analyze.
+    - msg (str): Additional metadata or instructions.
+
+    Returns:
+    - Union[Dict, None]: JSON response containing predicted table name if successful, None otherwise.
+    """
+    llm_url, headers = get_llm_api_credentials()
+
+    # Get and format existing table metadata
+    table_metadata_rows = get_table_metadata()
+    formatted_metadata = format_table_metadata_for_llm(table_metadata_rows)
+
+    context = "Based on the sample data and existing table metadata, determine to which table the sample data should be appended."
+    prompt = f"Sample Data: {sample_file_content}\n\nExisting Table Metadata:\n{formatted_metadata}"
+
+    if msg:
+        prompt += f"\n\nAdditional information about the sample data: {msg}"
+
+    full_prompt = prompt_format(context, prompt)
+
+    # Make an API request to the LLM
+    table_response = api_request_llm(full_prompt, llm_url, headers)
+    task_id = table_response.json().get('id')
+
+    # Poll for task completion
+    table_response = poll_for_llm_task_completion(task_id, headers)
+
+    return table_response
+
+def format_table_metadata_for_llm(rows: List[TableMetadata]) -> str:
+    """
+    Formats the table metadata into a natural language string suitable for querying a Large Language Model.
+    
+    Parameters:
+    - rows (List[TableMetadata]): A list of TableMetadata objects representing the rows in the table_metadata database table.
+
+    Returns:
+    - str: A formatted string containing the table metadata.
+    """
+    formatted_metadata = '\n'.join(
+        f"Table: {row.table_name}\nCreate Statement: {row.create_statement}\nDescription: {row.description}"
+        for row in rows
+    )
+
+    return formatted_metadata
 
 def generate_create_table_statement(file_content, msg):
     """
@@ -23,7 +77,7 @@ def generate_create_table_statement(file_content, msg):
         Do not use the following table names as they are already in use: {table_names}"
 
     if msg:
-        sql_prompt += f" Additional information about data: {msg}"
+        sql_prompt += f"Additional information about the sample data: {msg}"
     full_prompt = prompt_format(sql_context,sql_prompt)
 
     sql_response = api_request_llm(full_prompt,llm_url,headers)
@@ -65,7 +119,7 @@ def generate_table_desc(create_query: str, sample_file_content: str, msg: str) -
         """
     
     if msg:
-        desc_prompt += f" Additional information about the data: {msg}"
+        desc_prompt += f"Additional information about the sample data: {msg}"
 
     full_prompt = prompt_format(desc_context,desc_prompt)
 

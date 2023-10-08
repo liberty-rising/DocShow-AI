@@ -6,9 +6,50 @@ as well as other database operations.
 from databases.client_db_config import SessionLocal
 from models.client_models import TableMetadata
 
+from fastapi import HTTPException, UploadFile
+from typing import List
+import csv
 import re
 import sqlite3
 
+def append_to_table(processed_file: UploadFile, table_name: str):
+    """
+    Appends the content of an uploaded CSV file to a specified table in the database.
+
+    Parameters:
+    - processed_file (UploadFile): The uploaded file to be appended.
+    - table_name (str): The name of the table to which the file will be appended.
+
+    Side-effects:
+    - Updates the database table with new rows from the processed_file.
+    - Logs an error message to the console if the operation fails.
+    """
+    try:
+        # Initialize the connection to SQLite database
+        conn = sqlite3.connect("client_database.db")
+        cursor = conn.cursor()
+
+        # Read the file content into a list of lists
+        file_content = csv.reader(processed_file.file.read().decode().splitlines())
+
+        # Skip the header row and prepare the data
+        next(file_content)
+        data_to_insert = [tuple(row) for row in file_content]
+
+        # Prepare the SQL statement to append the data
+        placeholders = ", ".join("?" * len(data_to_insert[0]))
+        sql = f"INSERT INTO {table_name} VALUES ({placeholders})"
+
+        # Execute the SQL statement
+        cursor.executemany(sql, data_to_insert)
+        conn.commit()
+
+    except Exception as e:
+        print(f"An error occurred while appending data to table {table_name}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    finally:
+        conn.close()
 
 def execute_sql_create_query(query: str):
     db_path = get_db_path()
@@ -52,6 +93,24 @@ def get_table_from_create_query(create_query: str):
         return match.group(1)
     else:
         return "Invalid CREATE TABLE query"
+    
+def get_table_metadata() -> List[TableMetadata]:
+    """
+    Fetches all rows from the table_metadata database table.
+
+    Returns:
+    - List[TableMetadata]: A list of TableMetadata objects representing each row in the table_metadata table.
+
+    Raises:
+    - HTTPException: An exception with a 500 status code if a database error occurs.
+    """
+    db = SessionLocal()
+    try:
+        return db.query(TableMetadata).all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        db.close()
 
 def get_table_names() -> str:
     """Get names of all tables in database."""
