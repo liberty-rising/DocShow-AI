@@ -51,8 +51,18 @@ def generate_table_desc(create_query: str, sample_file_content: str, msg: str) -
     llm_url, headers = get_llm_api_credentials()
 
     desc_context = "Generate a description of the table based on the SQL CREATE TABLE query. Do not include any additional text, explanations, or filler words."
-    desc_prompt = f"Generate a description for the table created using the following SQL CREATE TABLE query: {create_query}. \
-        Here is a sample of the data: {sample_file_content}"
+    desc_prompt = f"""
+        Generate a comprehensive description for the table that will be created using the SQL CREATE TABLE query below. 
+        This description should help in:
+        1. Categorizing new data into this table or instead to other existing tables.
+        2. Providing the context needed to generate suggested queries for reports and analytics in the future.
+
+        SQL CREATE TABLE Query:
+        {create_query}
+
+        Sample Data:
+        {sample_file_content}
+        """
     
     if msg:
         desc_prompt += f" Additional information about the data: {msg}"
