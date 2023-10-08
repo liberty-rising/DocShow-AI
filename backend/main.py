@@ -2,15 +2,15 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from utils import create_llm_table, create_table_desc, append_llm_table, process_file, save_to_data_lake
+from utils import append_llm_table, get_table_name, handle_table_creation, process_file, save_to_data_lake
 
-from models import client_models
-from models.client_models import TableMetadata
-from database import client_db_config
+from models import app_models, client_models
+from database import app_db_config, client_db_config
 
 app = FastAPI()
 
-# Create the tables in the database
+# Create the tables in the databases
+app_models.Base.metadata.create_all(bind=app_db_config.engine)
 client_models.Base.metadata.create_all(bind=client_db_config.engine)
 
 @app.post("/upload/")
@@ -32,20 +32,20 @@ async def upload_file(file: UploadFile = File(...), msg: str = "", is_new_table:
 
         # Create new table if necessary
         if is_new_table:
-            table_response, create_query = create_llm_table(sample_file_content,msg)
-            desc_response = create_table_desc(create_query,sample_file_content,msg)
+            handle_table_creation(sample_file_content, msg)
         
         # Append file to table
-        table_name = ""
+        table_name = get_table_name(sample_file_content, msg)
         llm_append_result = append_llm_table(processed_file, msg, table_name)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
     
-        if llm_create_result and llm_append_result:
-            return JSONResponse(content={"message": "File processed successfully"}, status_code=200)
-        else:
-            raise HTTPException(status_code=400, detail="Error processing file with LLM API")
+        return JSONResponse(content={"message": "File processed successfully"}, status_code=200)
+        
+    except HTTPException as e:
+        # Specific error handling for HTTP exceptions
+        return JSONResponse(content={"message": f"HTTP Exception: {e.detail}"}, status_code=e.status_code)
     
     except Exception as e:
         # General error handling
