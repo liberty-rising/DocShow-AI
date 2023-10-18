@@ -4,3 +4,4 @@ __pycache__/
 env/
 /backend/app_database.db
 /backend/client_database.db
+backend/.env
