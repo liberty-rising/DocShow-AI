@@ -112,6 +112,23 @@ def get_table_metadata() -> List[TableMetadata]:
     finally:
         db.close()
 
+def format_table_metadata_for_llm(rows: List[TableMetadata]) -> str:
+    """
+    Formats the table metadata into a natural language string suitable for querying a Large Language Model.
+    
+    Parameters:
+    - rows (List[TableMetadata]): A list of TableMetadata objects representing the rows in the table_metadata database table.
+
+    Returns:
+    - str: A formatted string containing the table metadata.
+    """
+    formatted_metadata = '\n'.join(
+        f"Table: {row.table_name}\nCreate Statement: {row.create_statement}\nDescription: {row.description}"
+        for row in rows
+    )
+
+    return formatted_metadata
+
 def get_table_names() -> str:
     """Get names of all tables in database."""
     db_path = get_db_path()
