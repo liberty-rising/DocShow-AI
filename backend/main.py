@@ -43,7 +43,7 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
         # Process the file to get the sample content
         processed_file, sample_content = process_file(file)
 
-        # Instatiate TableManager
+        # Instantiate TableManager
         table_manager = TableManager(database="client", llm=llm)
 
         # Create new table if necessary
