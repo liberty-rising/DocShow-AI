@@ -6,7 +6,7 @@ import openai
 import os
 
 class GPTLLM(BaseLLM):
-    def __init__(self):
+    def __init__(self, history: list = []):
         """Initialize API key, model, token limit, and conversation history."""
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key is None:
@@ -15,7 +15,7 @@ class GPTLLM(BaseLLM):
         self.model = "gpt-4"
         self.model_info = openai.Model.retrieve(self.model)
         self.max_tokens = self.model_info['max_tokens']
-        self.history = []
+        self.history = history
         self.is_system_added = False  # Flag to check if system message is added
     
     def api_call(self, payload: dict) -> str:
@@ -50,18 +50,26 @@ class GPTLLM(BaseLLM):
     def get_system_message_content(self, assistant_type: str = "generic") -> str:
         """Generate a system message based on the assistant type."""
         messages = {
-            "sql": "You are an SQL statement assistant. Generate SQL statements based on the given prompt. Return only the pure code.",
-            "poetic": "You are a poetic assistant, skilled in generating beautiful poems.",
+            "sql_code": "You are an SQL statement assistant. Generate SQL statements based on the given prompt. Return only the pure code.",
+            "sql_desc": "You are an SQL table description assistant. Generate concise, informative descriptions of SQL tables based on CREATE TABLE queries and sample data. \
+                Your descriptions should help in categorizing new data and provide context for future queries, reports, and analytics.",
+            "table_categorization": "You are a table categorization assistant. Your task is to analyze sample data and existing table metadata to identify the most suitable \
+                table for appending the sample data. Return only the name of the table.",
             "generic": "You are a generic assistant."
         }
         return messages.get(assistant_type, "You are a generic assistant.")
+    
+    def create_message(self, role: str, prompt: str):
+        """Create either a user, system, or assistant message."""
+        return {"role":f"{role}", "content": f"{prompt}"}
     
     def add_system_message(self, assistant_type: str) -> None:
         """
         Adds a system message based on the given assistant type.
         Replaces the existing system message if one is present.
         """
-        system_message  = {"role": "system", "content": self.get_system_message_content(assistant_type)}
+        system_message_content = self.get_system_message_content(assistant_type)
+        system_message  = self.create_message("system", system_message_content)
 
         if self.is_system_added:
             # Replace the existing system message
@@ -75,34 +83,96 @@ class GPTLLM(BaseLLM):
                 self.history.append(system_message)
             
             self.is_system_added = True
-        
     
-    def generate_create_statement(self, sample_content: str, existing_table_names: str, desc: str) -> str:
+    def generate_create_statement(self, sample_content: str, existing_table_names: str, extra_desc: str) -> str:
         """Generate an SQL CREATE statement based on the given sample content and constraints."""
-        self.add_system_message("sql")
+        self.add_system_message(assistant_type="sql_code")
 
         prompt = f"Generate SQL CREATE TABLE statement for the following sample data: \n{sample_content}"
         if existing_table_names:
-            prompt += f"\nDo not use the following table names as they are already in use: {existing_table_names}"
-        if desc:
-            prompt += f"\nAdditional information about the sample data: {desc}"
-        user_message = {"role": "user", "content": prompt}
+            prompt += f"\n\nDo not use the following table names as they are already in use: \n{existing_table_names}"
+        if extra_desc:
+            prompt += f"\n\nAdditional information about the sample data: \n{extra_desc}"
+        user_message = self.create_message("user", prompt)
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
         self.truncate_history(self.history)
 
         # Make API call
-        assistant_message = self.api_call({"messages": self.history})
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
 
         # Append assistant's reply to history
-        self.history.append({"role": "assistant", "content": assistant_message})
+        self.history.append(assistant_message)
 
         return assistant_message
     
-    def generate_table_desc(self, create_query: str, sample_content: str, desc: str) -> str:
-        # TODO Determine whether to use the generic assistant
-        self.add_system_message()
+    def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
+        
+        self.add_system_message(assistant_type="sql_desc")
 
+        prompt = f"""
+            Generate a brief description for the table that will be created using the SQL CREATE TABLE query below. 
+            This description should help in determining whether to categorize new data into this table 
+            and should also provide the context needed to generate suggested queries for reports and analytics in the future.
+
+            SQL CREATE TABLE Query:
+            {create_query}
+
+            Sample Data:
+            {sample_content}
+
+            Only generate the description, no formatting or title. Do not include any additional text, explanations, or filler words.
+            """
+        if extra_desc:
+            prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
+
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message
     
+    def fetch_table_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
+
+        self.add_system_message(assistant_type="table_categorization")
+
+        prompt = f"""
+            Based on the sample data and existing table metadata, determine to which table the sample data should be appended. 
+
+            Sample Data: 
+            {sample_content}
+
+            Existing Table Metadata:
+            {table_metadata}
+
+            Return only the name of the table.
+            """
+        if extra_desc:
+            prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
+
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message
 
