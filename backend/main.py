@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from utils import determine_and_append_to_table, handle_table_creation, process_file, save_to_data_lake
+from utils.utils import determine_and_append_to_table, handle_table_creation, process_file, save_to_data_lake
 
 from models import app_models, client_models
 from databases import app_db_config, client_db_config

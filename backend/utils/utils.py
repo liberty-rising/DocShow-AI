@@ -2,8 +2,9 @@ from fastapi import File, HTTPException, UploadFile
 from io import StringIO
 from typing import Any, Dict, Tuple, Union
 
-from backend.databases.db_utils import ClientDatabaseManager, SQLExecutor, SQLStringManipulator, TableMetadataManager
+from backend.databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadataManager
 from backend.llms.base import BaseLLM
+from backend.utils.sql_string_manipulator import SQLStringManipulator
 
 import pandas as pd
 
