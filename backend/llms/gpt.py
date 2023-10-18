@@ -85,7 +85,17 @@ class GPTLLM(BaseLLM):
             self.is_system_added = True
     
     def generate_create_statement(self, sample_content: str, existing_table_names: str, extra_desc: str) -> str:
-        """Generate an SQL CREATE statement based on the given sample content and constraints."""
+        """
+        Generate an SQL CREATE TABLE statement based on sample data and additional constraints.
+        
+        Parameters:
+            sample_content (str): Sample data that the SQL table will store.
+            existing_table_names (str): Names of tables that already exist and should not be used.
+            extra_desc (str): Additional information or context about the sample data.
+            
+        Returns:
+            str: The generated SQL CREATE TABLE statement.
+        """
         self.add_system_message(assistant_type="sql_code")
 
         prompt = f"Generate SQL CREATE TABLE statement for the following sample data: \n{sample_content}"
@@ -109,6 +119,17 @@ class GPTLLM(BaseLLM):
         return assistant_message
     
     def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
+        """
+        Generate a concise description for a SQL table based on its CREATE TABLE query and sample data.
+    
+        Parameters:
+            create_query (str): The SQL CREATE TABLE query that defines the table.
+            sample_content (str): A sample of the data that will be stored in the table.
+            extra_desc (str): Additional context or information about the sample data.
+            
+        Returns:
+            str: A brief, focused description of the SQL table without any additional formatting, titles, or filler text.
+        """
         
         self.add_system_message(assistant_type="sql_desc")
 
@@ -144,6 +165,17 @@ class GPTLLM(BaseLLM):
         return assistant_message
     
     def fetch_table_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
+        """
+        Determine the most appropriate existing table to which the sample data should be appended.
+        
+        Parameters:
+            sample_content (str): The sample data that needs to be categorized into an existing table.
+            extra_desc (str): Additional context or instructions regarding the sample data.
+            table_metadata (str): Metadata of existing tables.
+            
+        Returns:
+            str: The name of the existing table to which the sample data should be appended.
+        """
 
         self.add_system_message(assistant_type="table_categorization")
 
