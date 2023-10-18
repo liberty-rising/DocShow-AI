@@ -4,11 +4,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from utils.utils import process_file, save_to_data_lake
 
-from backend.models import app_models, client_models
-from backend.databases import app_db_config, client_db_config
-from backend.llms.base import BaseLLM
-from backend.llms.gpt import GPTLLM
-from backend.utils.table_manager import TableManager
+from models import app_models, client_models
+from databases import app_db_config, client_db_config
+from llms.base import BaseLLM
+from llms.gpt import GPTLLM
+from utils.table_manager import TableManager
 
 app = FastAPI()
 

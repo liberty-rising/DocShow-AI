@@ -1,11 +1,12 @@
 from fastapi import HTTPException, UploadFile
 from typing import List, Optional
 
-from backend.databases.app_db_config import SessionLocal as AppSessionLocal
-from backend.databases.client_db_config import SessionLocal as ClientSessionLocal
-from backend.models.client_models import TableMetadata
+from databases.app_db_config import SessionLocal as AppSessionLocal
+from databases.client_db_config import SessionLocal as ClientSessionLocal
+from models.client_models import TableMetadata
 
 import csv
+import io
 import re
 import sqlite3
 
@@ -37,16 +38,18 @@ class SQLExecutor:
         self.conn = conn
         self.database_type = "sqlite"
     
-    def append_csv_to_table(self, processed_file: UploadFile, table_name: str):
+    def append_csv_to_table(self, processed_file: UploadFile, table_name: str, is_header: bool = True):
         with self.conn:
             try:
                 cursor = self.conn.cursor()
 
                 # Read the file content into a list of lists
-                file_content = csv.reader(processed_file.file.read().decode().splitlines())
+                file_content = csv.reader(io.TextIOWrapper(processed_file.file))
 
-                # Skip the header row and prepare the data
-                next(file_content)
+                if is_header:
+                    # Skip the header row and prepare the data
+                    next(file_content, None)
+                
                 data_to_insert = [tuple(row) for row in file_content]
 
                 # Prepare the SQL statement to append the data
@@ -55,6 +58,7 @@ class SQLExecutor:
 
                 # Execute the SQL statement
                 cursor.executemany(sql, data_to_insert)
+                
                 self.conn.commit()
 
             except Exception as e:

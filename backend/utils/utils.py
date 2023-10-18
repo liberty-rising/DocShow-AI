@@ -1,11 +1,6 @@
-from fastapi import File, HTTPException, UploadFile
+from fastapi import File, UploadFile
 from io import StringIO
-from typing import Any, Dict, Tuple, Union
-
-from backend.databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadataManager
-from backend.llms.base import BaseLLM
-from backend.utils.sql_string_manipulator import SQLStringManipulator
-from backend.utils.table_manager import TableManager
+from typing import Any
 
 import pandas as pd
 
@@ -30,6 +25,9 @@ def process_file(file: UploadFile) -> Any:
         df = pd.read_csv(file.file, nrows=10)
         buffer = StringIO()
         df.to_csv(buffer, index=False)
+
+        # Reset the file pointer to the beginning of the file
+        file.file.seek(0)
 
         files["processed_file"] = file
         files["sample_file_content"] = buffer.getvalue()

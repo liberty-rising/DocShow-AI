@@ -1,9 +1,8 @@
 from .base import BaseLLM
 
-from tiktoken import Tokenizer
-
 import openai
 import os
+import tiktoken
 
 class GPTLLM(BaseLLM):
     def __init__(self, history: list = []):
@@ -13,8 +12,7 @@ class GPTLLM(BaseLLM):
             raise ValueError("API key not set in environment variables")
         openai.api_key = api_key
         self.model = "gpt-4"
-        self.model_info = openai.Model.retrieve(self.model)
-        self.max_tokens = self.model_info['max_tokens']
+        self.max_tokens = 8192  # As of Oct 2023
         self.history = history
         self.is_system_added = False  # Flag to check if system message is added
     
@@ -28,8 +26,8 @@ class GPTLLM(BaseLLM):
 
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in the given text."""
-        tokenizer = Tokenizer()
-        token_count = sum(1 for _ in tokenizer.tokenize(text))
+        encoding = tiktoken.encoding_for_model(self.model) 
+        token_count = len(encoding.encode(text))  # Use the .encode() method to tokenize and count the tokens
         return token_count
     
     def total_tokens(self, history):
@@ -116,7 +114,7 @@ class GPTLLM(BaseLLM):
         # Append assistant's reply to history
         self.history.append(assistant_message)
 
-        return assistant_message
+        return assistant_message_content
     
     def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
         """
@@ -162,7 +160,7 @@ class GPTLLM(BaseLLM):
         # Append assistant's reply to history
         self.history.append(assistant_message)
 
-        return assistant_message
+        return assistant_message_content
     
     def fetch_table_name_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
         """
@@ -206,5 +204,5 @@ class GPTLLM(BaseLLM):
         # Append assistant's reply to history
         self.history.append(assistant_message)
 
-        return assistant_message
+        return assistant_message_content
 

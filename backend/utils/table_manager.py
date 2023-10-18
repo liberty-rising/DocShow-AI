@@ -1,8 +1,8 @@
 from fastapi import HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from backend.databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadataManager
-from backend.llms.base import BaseLLM
-from backend.utils.sql_string_manipulator import SQLStringManipulator
+from databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadataManager
+from llms.base import BaseLLM
+from utils.sql_string_manipulator import SQLStringManipulator
 
 class TableManager:
     def __init__(self, database: str, llm: BaseLLM):
@@ -26,7 +26,7 @@ class TableManager:
                 sql_executor = SQLExecutor(conn)
                 table_names = sql_executor.get_all_table_names()
                 
-            raw_create_query = self.llm.generate_create_statement(sample_content, extra_desc, table_names)
+            raw_create_query = self.llm.generate_create_statement(sample_content, table_names, extra_desc)
 
             create_query = SQLStringManipulator(raw_create_query).extract_sql_query_from_text()  # Just in case
 
