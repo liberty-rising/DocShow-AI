@@ -1,33 +1,38 @@
 from fastapi import File, HTTPException, UploadFile
 from io import StringIO
 from typing import Any, Dict, Tuple, Union
-from sql_utils import append_to_table, execute_sql_create_query, extract_sql_query, format_table_metadata_for_llm, get_table_from_create_query, get_table_metadata, is_valid_create_table_query, store_table_desc, get_table_names
-from llms.base import BaseLLM
+
+from backend.databases.db_utils import ClientDatabaseManager, SQLExecutor, SQLStringManipulator, TableMetadataManager
+from backend.llms.base import BaseLLM
 
 import pandas as pd
-import time
 
 
-def create_llm_table(sample_file_content: str, msg: str, llm: BaseLLM) -> Union[Tuple[Dict, str], None]:
+def create_llm_table(sample_file_content: str, msg: str, llm: BaseLLM) -> str:
     """
-    Creates a table using an LLM. The table is based on sample file content and a message.
+    Creates a table using an LLM based on sample file content and a message.
 
     Parameters:
     - sample_file_content (str): The sample file content used to create the table.
     - msg (str): Additional message to give context to LLM for table creation.
-    - llm
+    - llm (BaseLLM): The language learning model used for generating SQL statements.
 
     Returns:
-    - Union[Tuple[Dict, str], None]: Tuple containing the JSON response and SQL query if successful, None otherwise.
+    - create_query: str containing the SQL create table query if successful, None otherwise.
     """
     try:
-        table_names = get_table_names()
-        raw_create_query = llm.generate_create_statement(sample_file_content,msg,table_names)
+        with ClientDatabaseManager() as conn:
+            sql_executor = SQLExecutor(conn)
+            table_names = sql_executor.get_all_table_names()
             
-        create_query = extract_sql_query(raw_create_query)  # Just in case
+        raw_create_query = llm.generate_create_statement(sample_file_content,msg,table_names)
 
-        if is_valid_create_table_query(create_query):
-            execute_sql_create_query(create_query)
+        create_query = SQLStringManipulator(raw_create_query).extract_sql_query_from_text()  # Just in case
+
+        if SQLStringManipulator(create_query).is_valid_create_table_query():  # Checks if the query is valid
+            with ClientDatabaseManager() as conn:
+                sql_executor = SQLExecutor(conn)
+                sql_executor.execute_create_query(create_query)
             return create_query
     except Exception as e:
         # Log the error message here
@@ -53,10 +58,11 @@ def create_table_desc(create_query: str, sample_file_content: str, extra_desc: s
         # API call to generate and fetch table description
         description = llm.generate_table_desc(create_query, sample_file_content, extra_desc)
         
-        table_name = get_table_from_create_query(create_query)
+        table_name = SQLStringManipulator(create_query).get_table_from_create_query()
         
         # Store description in separate table
-        store_table_desc(table_name,create_query,description)
+        with TableMetadataManager(database="client") as manager:
+            manager.store_table_desc(table_name, create_query, description)
 
     except Exception as e:
         # Log the error message here
@@ -69,33 +75,31 @@ def handle_table_creation(sample_file_content, msg, llm):
 
 def determine_and_append_to_table(processed_file: UploadFile, sample_content: str, extra_desc: str, llm: BaseLLM):
     """
-    Determines the appropriate table based on sample data and a message, and then appends the uploaded file to that table.
+    Determines the appropriate table based on sample data and a message, then appends the uploaded file to that table.
+    Uses ClientDatabaseManager for database connection and SQLExecutor for SQL operations.
 
     Parameters:
     - processed_file (UploadFile): The uploaded file to be appended.
-    - sample_file_content (str): The sample file content to analyze.
+    - sample_content (str): The sample content for table determination.
     - extra_desc (str): Additional metadata or instructions.
-    - llm (BaseLLM)
+    - llm (BaseLLM): An instance of a language learning model.
 
     Side-effects:
-    - Calls append_to_table function to append data to the determined table.
+    - Appends data to the table determined by the LLM.
     - Raises an HTTPException if the table name cannot be determined.
     """
-    table_metadata = get_table_metadata
-    formatted_table_metadata = format_table_metadata_for_llm(table_metadata)
-    table_name = llm.fetch_table_from_sample(sample_content, extra_desc, formatted_table_metadata)
-    
-    print(table_name)
-    return
+    with TableMetadataManager(database="client") as manager:
+        table_metadata = manager.get_metadata()
+        formatted_table_metadata = manager.format_table_metadata_for_llm(table_metadata)
 
-    if table_name is None:
+    table_name = llm.fetch_table_from_sample(sample_content, extra_desc, formatted_table_metadata)
+
+    if table_name:
+        with ClientDatabaseManager() as conn:
+            sql_executor = SQLExecutor(conn)
+            sql_executor.append_csv_to_table(processed_file, table_name)
+    else:
         raise HTTPException(status_code=400, detail="Could not determine table name")
-    
-    try:
-        append_to_table(processed_file, table_name)
-    except Exception as e:
-        print(f"An error occurred while appending data to table {table_name}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     
 def process_file(file: UploadFile) -> Any:
     """
