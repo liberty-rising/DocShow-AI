@@ -164,7 +164,7 @@ class GPTLLM(BaseLLM):
 
         return assistant_message
     
-    def fetch_table_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
+    def fetch_table_name_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
         """
         Determine the most appropriate existing table to which the sample data should be appended.
         

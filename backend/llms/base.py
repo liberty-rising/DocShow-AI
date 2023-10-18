@@ -17,5 +17,5 @@ class BaseLLM:
     def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
         raise NotImplementedError
     
-    def fetch_table_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
+    def fetch_table_name_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
         raise NotImplementedError

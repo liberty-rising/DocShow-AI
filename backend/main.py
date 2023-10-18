@@ -2,12 +2,13 @@ from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from utils.utils import determine_and_append_to_table, handle_table_creation, process_file, save_to_data_lake
+from utils.utils import process_file, save_to_data_lake
 
-from models import app_models, client_models
-from databases import app_db_config, client_db_config
-from llms.base import BaseLLM
-from llms.gpt import GPTLLM
+from backend.models import app_models, client_models
+from backend.databases import app_db_config, client_db_config
+from backend.llms.base import BaseLLM
+from backend.llms.gpt import GPTLLM
+from backend.utils.table_manager import TableManager
 
 app = FastAPI()
 
@@ -40,14 +41,19 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
     """
     try:
         # Process the file to get the sample content
-        processed_file, sample_file_content = process_file(file)
+        processed_file, sample_content = process_file(file)
+
+        # Instatiate TableManager
+        table_manager = TableManager(database="client", llm=llm)
 
         # Create new table if necessary
         if is_new_table:
-            handle_table_creation(sample_file_content, extra_desc, llm)
+            create_table_query = table_manager.create_table_with_llm(sample_content, extra_desc)
+            table_manager.create_table_desc_with_llm(create_table_query, sample_content, extra_desc)
         
         # Append file to table
-        determine_and_append_to_table(processed_file, sample_file_content, extra_desc)
+        table_name = table_manager.determine_table(sample_content, extra_desc)
+        table_manager.append_to_table(processed_file, table_name)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
