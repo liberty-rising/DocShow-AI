@@ -1,5 +1,7 @@
-# Navigate to the /backend directory
-cd /backend
+# For DEV only
+
+# Navigate to the /backend/databases directory
+cd /backend/databases
 
 # Create client_database.db if it doesn't exist
 if [ ! -f client_database.db ]; then

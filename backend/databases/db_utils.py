@@ -13,7 +13,7 @@ import sqlite3
 
 class AppDatabaseManager:
     def __init__(self):
-        self.db_path = "app_database.db"
+        self.db_path = "databases/app_database.db"
     
     def __enter__(self):
         self.conn = sqlite3.connect(self.db_path)
@@ -24,7 +24,7 @@ class AppDatabaseManager:
 
 class ClientDatabaseManager:
     def __init__(self):
-        self.db_path = "client_database.db"
+        self.db_path = "databases/client_database.db"
     
     def __enter__(self):
         self.conn = sqlite3.connect(self.db_path)
@@ -58,7 +58,7 @@ class SQLExecutor:
 
                 # Execute the SQL statement
                 cursor.executemany(sql, data_to_insert)
-                
+
                 self.conn.commit()
 
             except Exception as e:
