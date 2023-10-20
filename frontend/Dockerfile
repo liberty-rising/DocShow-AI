@@ -31,4 +31,4 @@ EXPOSE 8501
 ENV PYTHONPATH=/app/frontend
 
 # Run app.py when the container launches
-CMD ["streamlit", "run", "--server.runOnSave=True", "app.py"]
+CMD ["streamlit", "run", "--server.runOnSave=True", "--server.watchFileSystem=True", "app.py"]
