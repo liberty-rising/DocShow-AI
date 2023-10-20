@@ -1,7 +1,12 @@
 credentials.py
 __pycache__/
 *.pyc
-env/
+
+# Databases
 /backend/databases/app_database.db
 /backend/databases/client_database.db
+
+# Environment variables
 backend/.env
+frontend/.env
+env/

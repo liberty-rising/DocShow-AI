@@ -3,6 +3,7 @@ pandas==2.1.0
 numpy==1.26.0
 pyodbc==4.0.39
 sqlalchemy==1.4.22
+httpx==0.25.0
 PyPDF2
 matplotlib
 seaborn
