@@ -6,3 +6,6 @@ textColor="#343a40"
 font="monospace"
 cursor="pointer"
 borderRadius="6px"
+
+[server]
+fileWatcherType = "poll"
