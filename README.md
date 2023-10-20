@@ -7,14 +7,6 @@ This repository contains a Streamlit frontend and a FastAPI backend. Below are i
 - Docker installed on your machine
 - Docker Compose installed on your machine
 
-## Initial Setup
-
-Before building and running the application for the first time, make sure to set up the necessary databases. Run the shell script `setup_db.sh` located in the repository root directory:
-
-    ```bash
-    ./setup_db.sh
-    ```
-
 ## Build and Run Using Docker Compose
 
 ### Instructions
