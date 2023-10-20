@@ -1,7 +1,7 @@
 # Your existing imports
 import streamlit as st
 from app_pages import home_page
-from app_pages import data_ingestion_page
+from app_pages import data_upload_page
 from app_pages import data_catalogue_page
 from app_pages import data_processing_page
 from app_pages import data_analytics_page
@@ -15,7 +15,7 @@ custom_css.add_css()
 # Reordered the pages for logical flow
 PAGES = {
     "🏠 Home": home_page,
-    "📥 Data Ingestion": data_ingestion_page,
+    "📥 Data Upload": data_upload_page,
     "📖 Data Catalogue": data_catalogue_page,
     "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
