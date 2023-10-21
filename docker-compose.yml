@@ -10,6 +10,7 @@ services:
       - "8501:8501"
     volumes:
       - ./frontend:/app/frontend
+
   backend:
     build:
       context: ./backend
@@ -20,3 +21,55 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app/backend
+
+  postgres_db:
+    image: postgres
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+    volumes:
+      - superset_db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d  # Added line for initialization script
+
+  superset:
+    build:
+      context: ./superset  # Updated to point to the superset directory
+    depends_on:
+      - postgres_db
+    environment:
+      # You can also set the admin credentials here as environment variables if needed
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - POSTGRES_DB=superset
+      - SUPERSET_SECRET_KEY=uwBS1V+RsmEiEdy7kkQ3Gcs4FnaaKhYOcqasXWd9uUjZ4ng1tn5XoBCw
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset_data:/home/superset/.superset
+      - ./superset/superset_config.py:/app/superset_config.py  # Assuming superset_config.py is in the superset directory
+
+  superset_init:
+    build:
+      context: ./superset  # Updated to point to the superset directory
+    depends_on:
+      - postgres_db
+      - superset
+    environment:
+      # Environment variables for admin credentials can also be specified here if needed
+      - POSTGRES_USER=superset
+      - POSTGRES_PASSWORD=superset
+      - POSTGRES_DB=superset
+      - ADMIN_USERNAME=admin
+      - ADMIN_FIRST_NAME=admin
+      - ADMIN_LAST_NAME=admin
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=adminpassword
+      - SUPERSET_SECRET_KEY=uwBS1V+RsmEiEdy7kkQ3Gcs4FnaaKhYOcqasXWd9uUjZ4ng1tn5XoBCw
+    volumes:
+      - superset_data:/home/superset/.superset
+      - ./superset/superset_custom.sh:/app/superset_custom.sh  # Mapping the custom script into the container
+
+volumes:
+  superset_db_data:
+  superset_data:

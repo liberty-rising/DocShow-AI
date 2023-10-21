@@ -1,6 +1,7 @@
 from io import StringIO
 import httpx
 import streamlit as st
+import traceback
 import pandas as pd
 import PyPDF2
 from sqlalchemy import create_engine, MetaData
@@ -34,24 +35,30 @@ def app():
     # file_type = st.radio("Choose file type", ["CSV", "PDF"])
 
     # Create a file uploader widget
-    uploaded_file = st.file_uploader(f"Upload {file_type} File")
+    uploaded_file = st.file_uploader(f"Upload Your File")
 
     # Check if a file has been uploaded
     if uploaded_file is not None:
-        # Send a POST request with the file to the backend
-        with httpx.Client() as client:
-            response = client.post(
-                "http://127.0.0.1:8000/upload",
-                files={"file": uploaded_file}
-            )
+        try:
+            # Send a POST request with the file to the backend
+            with httpx.Client() as client:
+                response = client.post(
+                    "http://backend:8000/upload/",
+                    files={"file": uploaded_file}
+                )
+            
+            # Check the response status code to see if the upload was successful
+            if response.status_code == 200:
+                st.success("File uploaded successfully!")
+            else:
+                st.error(f"Failed to upload file: {response.text}")
 
-        # Check the response status code to see if the upload was successful
-        if response.status_code == 200:
-            st.success("File uploaded successfully!")
-        else:
-            st.error(f"Failed to upload file: {response.text}")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+            st.text(traceback.format_exc())
+
     else:
-        st.info(f"Please upload a {file_type} file.")
+        st.info(f"Please upload a file.")
 
 if __name__ == "__main__":
     app()

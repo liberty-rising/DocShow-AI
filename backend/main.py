@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from utils.utils import process_file, save_to_data_lake
