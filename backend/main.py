@@ -1,4 +1,6 @@
-from fastapi import FastAPI, File, UploadFile, Depends
+import logging
+
+from fastapi import FastAPI, File, Form, UploadFile, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -27,7 +29,7 @@ def get_llm_sql_object():
     return llm
 
 @app.post("/upload/")
-async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new_table: bool = False, llm: BaseLLM = Depends(get_llm_sql_object)):
+async def upload_file(file: UploadFile = File(...), extra_desc: str = Form(default=""), is_new_table: bool = Form(default=False), encoding: str = Form(default=""), llm: BaseLLM = Depends(get_llm_sql_object)):
     """
     Upload a file and optionally include a message to clarify user data for the LLM.
 
@@ -35,6 +37,7 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
         file (UploadFile, required): The file to be uploaded and processed.
         extra_desc (str, optional): An optional message sent to the LLM to clarify the data from the user.
         is_new_table (bool, optional): Indicates whether the table is new. Defaults to False.
+        encoding (str, optional): Indicates the encoding of the file. Useful for CSVs.
         llm (BaseLLM, required): An instance of a Language Learning Model (LLM), obtained through dependency injection. Responsible for generating the SQL table.
 
     Returns:
@@ -42,7 +45,7 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
     """
     try:
         # Process the file to get the sample content
-        processed_file, sample_content = process_file(file)
+        processed_df, sample_content = process_file(file, encoding, is_header=True)
 
         # Instantiate TableManager
         table_manager = TableManager(database="client", llm=llm)
@@ -54,7 +57,7 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
         
         # Append file to table
         table_name = table_manager.determine_table(sample_content, extra_desc)
-        table_manager.append_to_table(processed_file, table_name)
+        table_manager.append_to_table(processed_df, table_name)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
@@ -68,3 +71,11 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = "", is_new
     except Exception as e:
         # General error handling
         return JSONResponse(content={"message": f"An error occured: {str(e)}"}, status_code=500)
+
+@app.get("/encodings/")
+async def get_encodings(file_type: str = ""):
+    return ["utf_8","ascii","latin_1","utf_16","ANSI"]
+
+@app.get("/file_types/")
+async def get_file_types():
+    return ["csv"]

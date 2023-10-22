@@ -1,11 +1,19 @@
 from io import StringIO
 import httpx
+import logging
 import streamlit as st
 import traceback
 import pandas as pd
 import PyPDF2
 from sqlalchemy import create_engine, MetaData
 from credentials import get_conn_str  # Ensure you have a credentials.py that contains this function
+
+# Enable httpx logging
+httpx_log = logging.getLogger("httpx")
+httpx_log.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+httpx_log.addHandler(handler)
 
 def extract_text_from_pdf(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -32,19 +40,49 @@ def app():
     """)
 
     # Let the user choose the file type using radio buttons
-    # file_type = st.radio("Choose file type", ["CSV", "PDF"])
+    with httpx.Client() as client:
+        file_types = client.get(
+            "http://backend:8000/file_types/",
+        ).json()
+        uppercased_file_types = [file_type.upper() for file_type in file_types]
+    file_type = st.radio("Choose file type", uppercased_file_types).lower()
+    
+    if file_type == "csv":
+        with httpx.Client() as client:
+            encodings = client.get(
+                "http://backend:8000/encodings/",
+            ).json()
+            uppercased_encodings = [encoding.upper() for encoding in encodings]
+
+        encoding = st.selectbox('Choose an encoding:', uppercased_encodings).lower()
+
+    # Add an extra message
+    extra_desc = st.text_input("Add a description (optional)")
+
+    # Figure out if a new table needs to be created
+    is_new_table = st.radio("Is a new table needed?", ["Yes", "No"])
 
     # Create a file uploader widget
-    uploaded_file = st.file_uploader(f"Upload Your File")
+    with st.form(key='upload_form'):
+        uploaded_file = st.file_uploader(f"Upload Your File")
+        submit_button = st.form_submit_button(label="Submit")
 
     # Check if a file has been uploaded
-    if uploaded_file is not None:
+    if submit_button and uploaded_file is not None:
+        data = {
+        'extra_desc': extra_desc if extra_desc else "",
+        'is_new_table': is_new_table == "Yes",
+        'encoding': encoding if encoding else "",
+        }
+
         try:
             # Send a POST request with the file to the backend
             with httpx.Client() as client:
                 response = client.post(
                     "http://backend:8000/upload/",
-                    files={"file": uploaded_file}
+                    files={"file": uploaded_file},
+                    data=data,
+                    timeout=30.0  # Timeout is in seconds
                 )
             
             # Check the response status code to see if the upload was successful

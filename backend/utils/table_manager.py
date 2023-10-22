@@ -4,6 +4,8 @@ from databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadata
 from llms.base import BaseLLM
 from utils.sql_string_manipulator import SQLStringManipulator
 
+import pandas as pd
+
 class TableManager:
     def __init__(self, database: str, llm: BaseLLM):
         """database is app or client"""
@@ -83,7 +85,7 @@ class TableManager:
         table_name = self.llm.fetch_table_name_from_sample(sample_content, extra_desc, formatted_table_metadata)
         return table_name
 
-    def append_to_table(self, processed_file: UploadFile, table_name: str):
+    def append_to_table(self, processed_df: pd.DataFrame, table_name: str):
         """
         Appends the uploaded file to the given table.
         Uses ClientDatabaseManager for database connection and SQLExecutor for SQL operations.
@@ -101,7 +103,7 @@ class TableManager:
         if table_name:
             with ClientDatabaseManager() as conn:
                 sql_executor = SQLExecutor(conn)
-                sql_executor.append_csv_to_table(processed_file, table_name)
+                sql_executor.append_df_to_table(processed_df, table_name)
         else:
             raise HTTPException(status_code=400, detail="Could not determine table name")
 

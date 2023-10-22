@@ -7,6 +7,7 @@ from models.client_models import TableMetadata
 
 import csv
 import io
+import pandas as pd
 import re
 import sqlite3
 
@@ -38,19 +39,13 @@ class SQLExecutor:
         self.conn = conn
         self.database_type = "sqlite"
     
-    def append_csv_to_table(self, processed_file: UploadFile, table_name: str, is_header: bool = True):
+    def append_df_to_table(self, df: pd.DataFrame, table_name: str):
         with self.conn:
             try:
                 cursor = self.conn.cursor()
 
-                # Read the file content into a list of lists
-                file_content = csv.reader(io.TextIOWrapper(processed_file.file))
-
-                if is_header:
-                    # Skip the header row and prepare the data
-                    next(file_content, None)
-                
-                data_to_insert = [tuple(row) for row in file_content]
+                # Convert the DataFrame to a list of tuples
+                data_to_insert = [tuple(row) for row in df.values]
 
                 # Prepare the SQL statement to append the data
                 placeholders = ", ".join("?" * len(data_to_insert[0]))
