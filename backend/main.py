@@ -74,7 +74,11 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = Form(defau
 
 @app.get("/encodings/")
 async def get_encodings(file_type: str = ""):
-    return ["utf_8","ascii","latin_1","utf_16","ANSI"]
+    encodings = {
+        "csv":["utf_8","ascii","latin_1","utf_16","ANSI"],
+        "pdf":[]
+    }
+    return encodings.get("csv",None)
 
 @app.get("/file_types/")
 async def get_file_types():

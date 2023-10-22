@@ -51,6 +51,7 @@ def app():
         with httpx.Client() as client:
             encodings = client.get(
                 "http://backend:8000/encodings/",
+                params={"file_type":file_type}
             ).json()
             uppercased_encodings = [encoding.upper() for encoding in encodings]
 
