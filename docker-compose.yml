@@ -39,8 +39,8 @@ services:
       - postgres_db
     environment:
       # You can also set the admin credentials here as environment variables if needed
-      - POSTGRES_USER=superset
-      - POSTGRES_PASSWORD=superset
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=superset
       - SUPERSET_SECRET_KEY=uwBS1V+RsmEiEdy7kkQ3Gcs4FnaaKhYOcqasXWd9uUjZ4ng1tn5XoBCw
     ports:
