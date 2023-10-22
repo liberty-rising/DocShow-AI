@@ -1,26 +1,7 @@
-from io import StringIO
 import httpx
-import logging
 import streamlit as st
 import traceback
-import pandas as pd
-import PyPDF2
-from sqlalchemy import create_engine, MetaData
-from credentials import get_conn_str  # Ensure you have a credentials.py that contains this function
 
-# Enable httpx logging
-httpx_log = logging.getLogger("httpx")
-httpx_log.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-httpx_log.addHandler(handler)
-
-def extract_text_from_pdf(uploaded_file):
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-    text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-    return text
 
 def app():
     st.title("Data Upload")

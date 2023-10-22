@@ -2,11 +2,11 @@
 import streamlit as st
 from app_pages import home_page
 from app_pages import data_upload_page
+from app_pages import ai_assistant_page
 from app_pages import data_catalogue_page
 from app_pages import data_processing_page
 from app_pages import data_analytics_page
 from app_pages import machine_learning_page
-#data_processing_page, data_analytics_page, data_quality_dashboard_page, 
 from utils import custom_css
 
 # Add custom CSS for centered title
@@ -16,14 +16,12 @@ custom_css.add_css()
 PAGES = {
     "🏠 Home": home_page,
     "📥 Data Upload": data_upload_page,
-    "📖 Data Catalogue": data_catalogue_page,
-    "🔄 Data Processing": data_processing_page,
+    # "📖 Data Catalogue": data_catalogue_page,
+    # "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
-    "🤖 Machine Learning": machine_learning_page,
-    # Uncomment these if you have these pages ready
+    "🤖 AI Assisstant": ai_assistant_page,
+    # "🖥️ Machine Learning": machine_learning_page,
     # "📈 Data Quality Dashboard": data_visualization_page,
-
-    # "🦙 LLM": llm_page  # New LLM page with llama emoji
 }
 
 # Initialize session state for page navigation

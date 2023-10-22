@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from credentials import get_conn_str
-import pyodbc
 
 def app():
     st.title("Data Analytics")
@@ -24,73 +22,73 @@ def app():
     """)
 
     # Fetching table names from the database
-    def get_table_names():
-        conn_str = get_conn_str()
-        with pyodbc.connect(conn_str) as conn:
-            query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE';"
-            tables = pd.read_sql(query, conn)
-        return tables['TABLE_NAME'].tolist()
+    # def get_table_names():
+    #     conn_str = get_conn_str()
+    #     with pyodbc.connect(conn_str) as conn:
+    #         query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE';"
+    #         tables = pd.read_sql(query, conn)
+    #     return tables['TABLE_NAME'].tolist()
 
     # Fetching data from the selected table
-    def get_table_data(table_name):
-        conn_str = get_conn_str()
-        with pyodbc.connect(conn_str) as conn:
-            df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
-        return df
+    # def get_table_data(table_name):
+    #     conn_str = get_conn_str()
+    #     with pyodbc.connect(conn_str) as conn:
+    #         df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+    #     return df
 
     # Dropdown to select a table
-    table_name = st.selectbox("Choose a table", get_table_names())
+    # table_name = st.selectbox("Choose a table", get_table_names())
 
     # Button to prepare data insights
-    if st.button("Prepare data insights"):
-        df = get_table_data(table_name)
+    # if st.button("Prepare data insights"):
+    #     df = get_table_data(table_name)
         
-        # Exclude non-numerical columns
-        numeric_df = df.select_dtypes(include=[np.number])
+    #     # Exclude non-numerical columns
+    #     numeric_df = df.select_dtypes(include=[np.number])
         
-        # Compute and display the correlation matrix
-        corr_matrix = numeric_df.corr()
-        st.write("### Correlation Matrix")
+    #     # Compute and display the correlation matrix
+    #     corr_matrix = numeric_df.corr()
+    #     st.write("### Correlation Matrix")
         
-        # Using seaborn to visualize the correlation matrix
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
-        st.pyplot(fig)
+    #     # Using seaborn to visualize the correlation matrix
+    #     fig, ax = plt.subplots(figsize=(10, 8))
+    #     sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+    #     st.pyplot(fig)
 
-        # Outliers Visualization using Z-scores and scatter plots
-        st.write("### Outliers Visualization using Z-scores")
+    #     # Outliers Visualization using Z-scores and scatter plots
+    #     st.write("### Outliers Visualization using Z-scores")
         
-        numerical_cols = numeric_df.columns
+    #     numerical_cols = numeric_df.columns
 
-        for x in numerical_cols:
-            z_scores = np.abs((df[x] - df[x].mean()) / df[x].std())
-            outliers = df[z_scores > 2]
+    #     for x in numerical_cols:
+    #         z_scores = np.abs((df[x] - df[x].mean()) / df[x].std())
+    #         outliers = df[z_scores > 2]
             
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.scatter(outliers[x], outliers[x], s=10, alpha=0.5, color='#3F5D7D')
-            ax.set_title(x, fontsize=12)
-            ax.set_xlabel(x, fontsize=10)
-            ax.set_ylabel(x, fontsize=10)
-            ax.tick_params(axis='both', which='major', labelsize=10, length=5)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+    #         fig, ax = plt.subplots(figsize=(10, 5))
+    #         ax.scatter(outliers[x], outliers[x], s=10, alpha=0.5, color='#3F5D7D')
+    #         ax.set_title(x, fontsize=12)
+    #         ax.set_xlabel(x, fontsize=10)
+    #         ax.set_ylabel(x, fontsize=10)
+    #         ax.tick_params(axis='both', which='major', labelsize=10, length=5)
+    #         ax.spines['right'].set_visible(False)
+    #         ax.spines['top'].set_visible(False)
             
-            st.pyplot(fig)
+    #         st.pyplot(fig)
 
-        # Density Plots
-        st.write("### Density Plots")
+    #     # Density Plots
+    #     st.write("### Density Plots")
         
-        for x in numerical_cols:
-            fig, ax = plt.subplots(figsize=(10, 5))
-            sns.kdeplot(df[x], ax=ax, shade=True, color='#3F5D7D')
-            ax.set_title(x, fontsize=12)
-            ax.set_xlabel('')
-            ax.set_ylabel('')
-            ax.tick_params(axis='both', which='major', labelsize=10, length=5)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+    #     for x in numerical_cols:
+    #         fig, ax = plt.subplots(figsize=(10, 5))
+    #         sns.kdeplot(df[x], ax=ax, shade=True, color='#3F5D7D')
+    #         ax.set_title(x, fontsize=12)
+    #         ax.set_xlabel('')
+    #         ax.set_ylabel('')
+    #         ax.tick_params(axis='both', which='major', labelsize=10, length=5)
+    #         ax.spines['right'].set_visible(False)
+    #         ax.spines['top'].set_visible(False)
             
-            st.pyplot(fig)
+    #         st.pyplot(fig)
 
 if __name__ == "__main__":
     app()

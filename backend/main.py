@@ -11,6 +11,7 @@ from models import app_models, client_models
 from databases import app_db_config, client_db_config
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
+from llms.utils import ChatRequest, ChatResponse
 from utils.table_manager import TableManager
 
 app = FastAPI()
@@ -22,6 +23,15 @@ client_models.Base.metadata.create_all(bind=client_db_config.engine)
 def get_llm_sql_object():
     # TODO: Pull LLM SQL history from db and initialise object
     # history = get_llm_sql_history_for_user
+    history = [] # Temporary
+
+    # Initialize LLM object
+    llm = GPTLLM(history)
+    return llm
+
+def get_llm_chat_object():
+    # TODO: Pull LLM SQL history from db and initialise object
+    # history = get_llm_chat_history_for_user
     history = [] # Temporary
 
     # Initialize LLM object
@@ -83,3 +93,10 @@ async def get_encodings(file_type: str = ""):
 @app.get("/file_types/")
 async def get_file_types():
     return ["csv"]
+
+@app.post("/chat/")
+async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)):
+    user_input = request.user_input
+    # Assume llm_chat is a function that sends user_input to your LLM and gets a response
+    model_output = llm.generate_text(user_input)
+    return ChatResponse(model_output=model_output)

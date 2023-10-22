@@ -206,3 +206,22 @@ class GPTLLM(BaseLLM):
 
         return assistant_message_content
 
+    def generate_text(self, input_text):
+        self.add_system_message(assistant_type="generic")
+
+        prompt = input_text
+
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message_content
