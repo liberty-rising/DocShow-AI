@@ -224,6 +224,8 @@ class GPTLLM(BaseLLM):
         user_message = self.create_message("user", prompt)
         self.history.append(user_message)
 
+        print(self.history)
+
         # Check token limit and truncate history if needed
         self.truncate_history(self.history)
 

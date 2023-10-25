@@ -103,3 +103,15 @@ async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_cha
     # Assume llm_chat is a function that sends user_input to your LLM and gets a response
     model_output = llm.generate_text(user_input)
     return ChatResponse(model_output=model_output)
+
+@app.delete("/delete_chat_history/")
+async def delete_chat_history():
+    global user_id
+
+    db_session = ClientSessionLocal()
+    chat_service = ChatHistoryService(db=db_session)
+
+    chat_service.delete_chat_history(user_id)
+
+    return {"message": "Chat history deleted"}
+    

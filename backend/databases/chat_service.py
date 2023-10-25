@@ -21,7 +21,7 @@ class ChatHistoryService:
 
     def get_llm_chat_history_for_user(self, user_id: int, llm_type: str):
         """
-        Fetch the chat history for a specific user and LLM.
+        Fetch the chat history messages for a specific user and LLM.
 
         Args:
             user_id (int): The identifier of the user.
@@ -35,11 +35,10 @@ class ChatHistoryService:
             ChatHistory.llm_type == llm_type
         ).order_by(ChatHistory.timestamp.asc()).all()
 
-        # Deserialize the JSON strings to Python dictionaries
-        for record in chat_history:
-            record.message = json.loads(record.message)
+        # Deserialize the JSON strings to Python dictionaries and extract messages
+        messages = [json.loads(record.message) for record in chat_history]
 
-        return chat_history
+        return messages
     
     def save_message(self, user_id, llm_type, message, is_user):
         new_record = ChatHistory(
@@ -49,4 +48,22 @@ class ChatHistoryService:
             is_user=is_user
         )
         self.db.add(new_record)
+        self.db.commit()
+    
+    def delete_chat_history(self, user_id):
+        """
+        Delete the chat history for a specific user.
+
+        Args:
+            user_id (int): The identifier of the user.
+        """
+        # Query to find all chat history for the given user_id
+        chat_history_query = self.db.query(ChatHistory).filter(
+            ChatHistory.user_id == user_id
+        )
+        
+        # Delete the records
+        chat_history_query.delete(synchronize_session=False)
+        
+        # Commit the transaction
         self.db.commit()
