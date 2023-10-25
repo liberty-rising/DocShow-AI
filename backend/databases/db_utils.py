@@ -5,70 +5,57 @@ from databases.app_db_config import SessionLocal as AppSessionLocal
 from databases.client_db_config import SessionLocal as ClientSessionLocal
 from models.client_models import TableMetadata
 
-import csv
-import io
 import pandas as pd
-import re
-import sqlite3
+import psycopg2
 
 
-class AppDatabaseManager:
-    def __init__(self):
-        self.db_path = "databases/app_database.db"
-    
+class DatabaseManager:
+    def __init__(self, db_name):
+        self.db_name = db_name
+
     def __enter__(self):
-        self.conn = sqlite3.connect(self.db_path)
+        self.conn = psycopg2.connect(
+            dbname=self.db_name,
+            user='admin',
+            password='admin',
+            host='postgres_db',
+            port='5432'
+        )
         return self.conn
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
 
-class ClientDatabaseManager:
+class AppDatabaseManager(DatabaseManager):
     def __init__(self):
-        self.db_path = "databases/client_database.db"
-    
-    def __enter__(self):
-        self.conn = sqlite3.connect(self.db_path)
-        return self.conn
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.conn.close()
+        super().__init__('app_database')
+
+class ClientDatabaseManager(DatabaseManager):
+    def __init__(self):
+        super().__init__('client_database')
 
 class SQLExecutor:
-    def __init__(self, conn):
-        self.conn = conn
-        self.database_type = "sqlite"
+    def __init__(self, conn_str):
+        self.conn = conn_str
+        self.database_type = "postgres"
     
     def append_df_to_table(self, df: pd.DataFrame, table_name: str):
-        with self.conn:
+        with psycopg2.connect(self.conn_str) as conn:
             try:
-                cursor = self.conn.cursor()
-
-                # Convert the DataFrame to a list of tuples
-                data_to_insert = [tuple(row) for row in df.values]
-
-                # Prepare the SQL statement to append the data
-                placeholders = ", ".join("?" * len(data_to_insert[0]))
-                sql = f"INSERT INTO {table_name} VALUES ({placeholders})"
-
-                # Execute the SQL statement
-                cursor.executemany(sql, data_to_insert)
-
-                self.conn.commit()
+                df.to_sql(table_name, conn, if_exists='append', index=False)
 
             except Exception as e:
                 print(f"An error occurred while appending data to table {table_name}: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+                raise
             
     def execute_create_query(self, query: str):
-        with self.conn:
-            cursor = self.conn.cursor()
-
-            try:
-                cursor.execute(query)
-                self.conn.commit()
-            except Exception as e:
-                print(f"An error occurred: {e}")
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor() as cursor:
+                try:
+                    cursor.execute(query)
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+                    raise
     
     def generate_query_for_all_table_names(self):
         """
@@ -84,7 +71,7 @@ class SQLExecutor:
         if self.database_type == "sqlite":
             return "SELECT name FROM sqlite_master WHERE type='table';"
         elif self.database_type == "postgres":
-            return ""
+            return "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
         else:
             return ""
     
@@ -95,18 +82,14 @@ class SQLExecutor:
         Returns:
             str: A string containing the names of all tables in the database, separated by commas.
         """
-        with self.conn:
-            cursor = self.conn.cursor()
-
-            query = self.generate_query_for_all_table_names()
-            cursor.execute(query)
-
-            tables = cursor.fetchall()
-            table_names = [table[0] for table in tables]
-
-            table_names_str = ', '.join(table_names)
-            
-            return table_names_str
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                query = self.generate_query_for_all_table_names()
+                cursor.execute(query)
+                tables = cursor.fetchall()
+                table_names = [table[0] for table in tables]
+                table_names_str = ', '.join(table_names)
+                return table_names_str
 
 class TableMetadataManager:
     """

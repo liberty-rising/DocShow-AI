@@ -1,14 +1,12 @@
-import logging
-
 from fastapi import FastAPI, File, Form, UploadFile, Depends
 from fastapi.exceptions import HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 from utils.utils import process_file, save_to_data_lake
 
 from models import app_models, client_models
 from databases import app_db_config, client_db_config
+from databases.client_db_config import SessionLocal as ClientSessionLocal
+from databases.chat_service import ChatHistoryService
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
 from llms.utils import ChatRequest, ChatResponse
@@ -20,22 +18,27 @@ app = FastAPI()
 app_models.Base.metadata.create_all(bind=app_db_config.engine)
 client_models.Base.metadata.create_all(bind=client_db_config.engine)
 
+# For DEV!!!
+user_id = 1
+
 def get_llm_sql_object():
-    # TODO: Pull LLM SQL history from db and initialise object
-    # history = get_llm_sql_history_for_user
-    history = [] # Temporary
+    global user_id  
+
+    db_session = ClientSessionLocal()
+    chat_service = ChatHistoryService(db=db_session)
 
     # Initialize LLM object
-    llm = GPTLLM(history)
+    llm = GPTLLM(chat_service=chat_service, store_history=False, llm_type="sql")
     return llm
 
 def get_llm_chat_object():
-    # TODO: Pull LLM SQL history from db and initialise object
-    # history = get_llm_chat_history_for_user
-    history = [] # Temporary
+    global user_id
+
+    db_session = ClientSessionLocal()
+    chat_service = ChatHistoryService(db=db_session)
 
     # Initialize LLM object
-    llm = GPTLLM(history)
+    llm = GPTLLM(chat_service=chat_service, store_history=True, llm_type="chat")
     return llm
 
 @app.post("/upload/")

@@ -1,20 +1,30 @@
 from .base import BaseLLM
+from databases.chat_service import ChatHistoryService
 
+import json
 import openai
 import os
 import tiktoken
 
 class GPTLLM(BaseLLM):
-    def __init__(self, history: list = []):
-        """Initialize API key, model, token limit, and conversation history."""
+    def __init__(self, chat_service: ChatHistoryService = None, store_history: bool = False, llm_type: str = "generic"):
+        """Initialize API key, model, token limit, and chat service."""
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key is None:
             raise ValueError("API key not set in environment variables")
         openai.api_key = api_key
         self.model = "gpt-4"
         self.max_tokens = 8192  # As of Oct 2023
-        self.history = history
         self.is_system_added = False  # Flag to check if system message is added
+        self.chat_service = chat_service
+        self.user_id = 1  # TODO: Implement pulling this
+        self.store_history = store_history
+        self.llm_type = llm_type
+
+        if self.store_history:
+            self.history = self.chat_service.get_llm_chat_history_for_user(self.user_id,self.llm_type)
+        else:
+            self.history = []
     
     def api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
@@ -223,5 +233,12 @@ class GPTLLM(BaseLLM):
 
         # Append assistant's reply to history
         self.history.append(assistant_message)
+
+        if self.store_history:  # Saves in table
+            # Serialize to JSON for storage:
+            json_user_message = json.dumps(user_message)
+            json_assistant_message = json.dumps(assistant_message)
+            self.chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)
+            self.chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
 
         return assistant_message_content
