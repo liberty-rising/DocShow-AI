@@ -10,14 +10,14 @@ class ChatHistoryService:
     Attributes:
         db (Session): SQLAlchemy Session object for database interactions.
     """
-    def __init__(self, db: Session):
+    def __init__(self, session: Session):
         """
         Initialize the ChatHistoryService with a database session.
 
         Args:
             db (Session): SQLAlchemy Session object.
         """
-        self.db = db
+        self.session = session
 
     def get_llm_chat_history_for_user(self, user_id: int, llm_type: str):
         """
@@ -30,7 +30,7 @@ class ChatHistoryService:
         Returns:
             List[ChatHistory]: List of ChatHistory objects sorted by timestamp.
         """
-        chat_history = self.db.query(ChatHistory).filter(
+        chat_history = self.session.query(ChatHistory).filter(
             ChatHistory.user_id == user_id,
             ChatHistory.llm_type == llm_type
         ).order_by(ChatHistory.timestamp.asc()).all()
@@ -47,8 +47,8 @@ class ChatHistoryService:
             message=message,
             is_user=is_user
         )
-        self.db.add(new_record)
-        self.db.commit()
+        self.session.add(new_record)
+        self.session.commit()
     
     def delete_chat_history(self, user_id):
         """
@@ -58,7 +58,7 @@ class ChatHistoryService:
             user_id (int): The identifier of the user.
         """
         # Query to find all chat history for the given user_id
-        chat_history_query = self.db.query(ChatHistory).filter(
+        chat_history_query = self.session.query(ChatHistory).filter(
             ChatHistory.user_id == user_id
         )
         
@@ -66,4 +66,4 @@ class ChatHistoryService:
         chat_history_query.delete(synchronize_session=False)
         
         # Commit the transaction
-        self.db.commit()
+        self.session.commit()
