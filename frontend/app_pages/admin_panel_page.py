@@ -5,6 +5,7 @@ import streamlit as st
 def app():
     st.title("⚙️ Admin Panel")
 
+    st.subheader("Table management")
     with httpx.Client() as client:
         tables = client.get("http://backend:8000/tables/").json()
 

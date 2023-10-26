@@ -22,7 +22,7 @@ PAGES = {
     # "📖 Data Catalogue": data_catalogue_page,
     # "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
-    "💬 AI Assisstant": ai_assistant_page,
+    "💬 AI Assistant": ai_assistant_page,
     "⚙️ Admin Panel": admin_panel_page, 
     # "🖥️ Machine Learning": machine_learning_page,
     # "📈 Data Quality Dashboard": data_visualization_page,

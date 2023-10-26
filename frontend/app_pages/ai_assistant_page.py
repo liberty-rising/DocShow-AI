@@ -8,7 +8,7 @@ def app():
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
 
-    user_input = st.text_input("SQL: ", "")
+    user_input = st.text_input("You: ", "")
     if st.button("Send"):
         with httpx.Client(timeout=20.0) as client:
             response = client.post("http://backend:8000/chat/", json={"user_input": user_input})
