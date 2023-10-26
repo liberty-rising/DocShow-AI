@@ -8,6 +8,7 @@ from app_pages import (
     data_processing_page,
     data_analytics_page,
     machine_learning_page,
+    user_panel_page,
     admin_panel_page,
 )
 from utils import custom_css
@@ -23,6 +24,7 @@ PAGES = {
     # "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
     "💬 AI Assistant": ai_assistant_page,
+    "👤 User Panel": user_panel_page,
     "⚙️ Admin Panel": admin_panel_page, 
     # "🖥️ Machine Learning": machine_learning_page,
     # "📈 Data Quality Dashboard": data_visualization_page,

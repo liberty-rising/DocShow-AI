@@ -8,16 +8,18 @@ def app():
     
     st.write("""
     ## Overview
-    Welcome to the Data Upload page! This page provides an interface to upload and ingest your CSV or PDF files into the database.
-    
-    ### Features:
-    - **File Type Selection**: Choose the type of file you want to upload (CSV or PDF).
-    - **File Uploader**: Use the file uploader to select and upload your file.
-    - **Preview**: Once uploaded, the top 5 rows of your data will be displayed for a quick preview.
-    - **Custom Table Name**: Provide a custom name for the table when ingesting it into the database.
-    - **Ingestion**: Click the 'Ingest into database' button to start the ingestion process. A progress bar and status updates will guide you through the process.
-    
-    To begin, select your file type and then upload your desired file.
+    Welcome to the **Data Upload** page! Here, you can easily upload your data files into our system. This simple, user-friendly interface is designed to guide you through the process. 
+
+    ### Steps:
+    1. **Select File Type**: Choose the type of the file you're about to upload (e.g., CSV).
+    2. **Choose Encoding**: For CSV files, select the appropriate file encoding.
+    3. **Optional Description**: Add any extra description or comments about the file or data.
+    4. **New Table**: Indicate whether the uploaded data should be stored in a new table.
+    5. **Upload**: Finally, upload your file by clicking on 'Submit'.
+
+    After uploading, you'll receive a confirmation message. If you encounter any issues, error messages will guide you on what went wrong.
+
+    Happy uploading!
     """)
 
     # Let the user choose the file type using radio buttons

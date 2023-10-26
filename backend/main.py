@@ -9,7 +9,10 @@ from databases.chat_service import ChatHistoryService
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
 from llms.utils import ChatRequest, ChatResponse
+from envs.dev.utils import seed_client_db
 from utils.table_manager import TableManager
+
+import os
 
 app = FastAPI()
 
@@ -23,6 +26,11 @@ client_models.Base.metadata.create_all(bind=client_db_manager.engine)
 
 # For DEV!!!
 user_id = 1
+
+@app.on_event("startup")
+async def startup_event():
+    if os.getenv('APP_ENV') == 'development':
+        await seed_client_db()
 
 def get_llm_sql_object():
     global user_id  
@@ -120,8 +128,7 @@ async def delete_chat_history():
 
 @app.delete("/table/")
 async def drop_table(table_name: str):
-    with ClientDatabaseManager() as session:
-        executor = SQLExecutor(session)
-        executor.drop_table(table_name)
+    manager = TableManager()
+    manager.drop_table(table_name)
     return {"message": f"Dropped table {table_name}"}
     

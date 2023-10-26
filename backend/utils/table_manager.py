@@ -13,8 +13,7 @@ class TableManager:
     Attributes:
         llm (BaseLLM): Instance of a Large Language Model for SQL operations.
     """
-    def __init__(self, llm: BaseLLM):
-        """database is app or client"""
+    def __init__(self, llm: BaseLLM = None):
         self.llm = llm
 
     def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
@@ -91,6 +90,11 @@ class TableManager:
 
         table_name = self.llm.fetch_table_name_from_sample(sample_content, extra_desc, formatted_table_metadata)
         return table_name
+    
+    def create_table_from_df(self, df: pd.DataFrame, table_name: str):
+        with ClientDatabaseManager() as session:
+            executor = SQLExecutor(session)
+            executor.append_df_to_table(df, table_name)
 
     def append_to_table(self, processed_df: pd.DataFrame, table_name: str):
         """
@@ -116,7 +120,14 @@ class TableManager:
 
     def drop_table(self, table_name: str):
         # Logic to drop a table
-        pass
+        try:
+            with ClientDatabaseManager() as session:
+                executor = SQLExecutor(session)
+                executor.drop_table(table_name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            self.session.rollback()
+            raise
 
     def get_table_metadata(self):
         # Logic to get metadata of a table
