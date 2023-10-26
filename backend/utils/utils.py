@@ -1,3 +1,4 @@
+from csv import Sniffer
 from fastapi import File, UploadFile
 from io import StringIO
 from typing import Any
@@ -5,7 +6,7 @@ from typing import Any
 import pandas as pd
 
 
-def process_file(file: UploadFile, encoding: str, is_header: bool) -> Any:
+def process_file(file: UploadFile, encoding: str) -> Any:
     """
     Process the uploaded file based on its type.
 
@@ -22,7 +23,19 @@ def process_file(file: UploadFile, encoding: str, is_header: bool) -> Any:
     files = {"processed_df": None, "sample_file_content": None}
 
     if file_type == 'csv':
-        df = pd.read_csv(file.file, encoding=encoding, header=0 if is_header else None)
+        # Sniff the first 1024 bytes to check for a header
+        sample = file.file.read(4096).decode(encoding)
+        has_header = Sniffer().has_header(sample)
+
+        # Reset the file pointer
+        file.file.seek(0)
+
+        # Read the entire file into a DataFrame
+        df = pd.read_csv(file.file, encoding=encoding, header=0 if has_header else None)
+        df.columns = map(str.lower, df.columns)  # make all columns lowercase
+
+        # Store the header as a string, if it exists
+        header_str = ",".join(df.columns) if has_header else None
 
         # Get the first 10 lines
         sampled_df = df.head(10)
@@ -34,7 +47,8 @@ def process_file(file: UploadFile, encoding: str, is_header: bool) -> Any:
         file.file.seek(0)
 
         files["processed_df"] = df
-        files["sample_file_content"] = buffer.getvalue()
+        files["sample_file_content_str"] = buffer.getvalue()
+        files["header_str"] = header_str
 
     elif file_type == 'pdf':
         # PDF processing logic here
@@ -45,7 +59,7 @@ def process_file(file: UploadFile, encoding: str, is_header: bool) -> Any:
     else:
         raise ValueError("Unsupported file type")
     
-    return files["processed_df"], files["sample_file_content"]
+    return files["processed_df"], files["sample_file_content"], files["header_str"]
 
 def save_to_data_lake(file: UploadFile = File(...)):
     pass

@@ -1,5 +1,6 @@
 from .base import BaseLLM
 from databases.chat_service import ChatHistoryService
+from databases.db_utils import ClientDatabaseManager
 
 import json
 import openai
@@ -7,7 +8,7 @@ import os
 import tiktoken
 
 class GPTLLM(BaseLLM):
-    def __init__(self, chat_service: ChatHistoryService = None, store_history: bool = False, llm_type: str = "generic"):
+    def __init__(self, user_id: int, store_history: bool = False, llm_type: str = "generic", database_type: str = "postgres"):
         """Initialize API key, model, token limit, and chat service."""
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key is None:
@@ -16,10 +17,10 @@ class GPTLLM(BaseLLM):
         self.model = "gpt-4"
         self.max_tokens = 8192  # As of Oct 2023
         self.is_system_added = False  # Flag to check if system message is added
-        self.chat_service = chat_service
-        self.user_id = 1  # TODO: Implement pulling this
+        self.user_id = user_id
         self.store_history = store_history
         self.llm_type = llm_type
+        self.database_type = database_type
 
         if self.store_history:
             self.history = self.chat_service.get_llm_chat_history_for_user(self.user_id,self.llm_type)
@@ -58,7 +59,7 @@ class GPTLLM(BaseLLM):
     def get_system_message_content(self, assistant_type: str = "generic") -> str:
         """Generate a system message based on the assistant type."""
         messages = {
-            "sql_code": "You are an SQL statement assistant. Generate SQL statements based on the given prompt. Return only the pure code.",
+            "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
             "sql_desc": "You are an SQL table description assistant. Generate concise, informative descriptions of SQL tables based on CREATE TABLE queries and sample data. \
                 Your descriptions should help in categorizing new data and provide context for future queries, reports, and analytics.",
             "table_categorization": "You are a table categorization assistant. Your task is to analyze sample data and existing table metadata to identify the most suitable \
@@ -92,7 +93,7 @@ class GPTLLM(BaseLLM):
             
             self.is_system_added = True
     
-    def generate_create_statement(self, sample_content: str, existing_table_names: str, extra_desc: str) -> str:
+    def generate_create_statement(self, sample_content: str, header: str, existing_table_names: str, extra_desc: str) -> str:
         """
         Generate an SQL CREATE TABLE statement based on sample data and additional constraints.
         
@@ -106,7 +107,10 @@ class GPTLLM(BaseLLM):
         """
         self.add_system_message(assistant_type="sql_code")
 
-        prompt = f"Generate SQL CREATE TABLE statement for the following sample data: \n{sample_content}"
+        prompt = f"Generate SQL CREATE TABLE statement for the following sample data:"
+        if header:
+            prompt += f"\n\nHeader:\n{header}"
+        prompt += f"\n\nSample data:\n{sample_content}"
         if existing_table_names:
             prompt += f"\n\nDo not use the following table names as they are already in use: \n{existing_table_names}"
         if extra_desc:
@@ -240,7 +244,9 @@ class GPTLLM(BaseLLM):
             # Serialize to JSON for storage:
             json_user_message = json.dumps(user_message)
             json_assistant_message = json.dumps(assistant_message)
-            self.chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)
-            self.chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
+            with ClientDatabaseManager() as session:
+                chat_service = ChatHistoryService(session)
+                chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)
+                chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
 
         return assistant_message_content

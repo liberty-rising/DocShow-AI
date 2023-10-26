@@ -4,8 +4,7 @@ from fastapi.responses import JSONResponse
 from utils.utils import process_file, save_to_data_lake
 
 from models import app_models, client_models
-from databases import app_db_config, client_db_config
-from databases.client_db_config import SessionLocal as ClientSessionLocal
+from databases.db_utils import AppDatabaseManager, ClientDatabaseManager
 from databases.chat_service import ChatHistoryService
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
@@ -14,9 +13,13 @@ from utils.table_manager import TableManager
 
 app = FastAPI()
 
+# Initialize database managers
+app_db_manager = AppDatabaseManager()
+client_db_manager = ClientDatabaseManager()
+
 # Create the tables in the databases
-app_models.Base.metadata.create_all(bind=app_db_config.engine)
-client_models.Base.metadata.create_all(bind=client_db_config.engine)
+app_models.Base.metadata.create_all(bind=app_db_manager.engine) 
+client_models.Base.metadata.create_all(bind=client_db_manager.engine)
 
 # For DEV!!!
 user_id = 1
@@ -24,21 +27,15 @@ user_id = 1
 def get_llm_sql_object():
     global user_id  
 
-    db_session = ClientSessionLocal()
-    chat_service = ChatHistoryService(db=db_session)
-
     # Initialize LLM object
-    llm = GPTLLM(chat_service=chat_service, store_history=False, llm_type="sql")
+    llm = GPTLLM(user_id, store_history=False, llm_type="sql")
     return llm
 
 def get_llm_chat_object():
     global user_id
 
-    db_session = ClientSessionLocal()
-    chat_service = ChatHistoryService(db=db_session)
-
     # Initialize LLM object
-    llm = GPTLLM(chat_service=chat_service, store_history=True, llm_type="chat")
+    llm = GPTLLM(user_id, store_history=True, llm_type="chat")
     return llm
 
 @app.post("/upload/")
@@ -58,14 +55,14 @@ async def upload_file(file: UploadFile = File(...), extra_desc: str = Form(defau
     """
     try:
         # Process the file to get the sample content
-        processed_df, sample_content = process_file(file, encoding, is_header=True)
+        processed_df, sample_content, header = process_file(file, encoding)
 
         # Instantiate TableManager
-        table_manager = TableManager(database="client", llm=llm)
+        table_manager = TableManager(llm)
 
         # Create new table if necessary
         if is_new_table:
-            create_table_query = table_manager.create_table_with_llm(sample_content, extra_desc)
+            create_table_query = table_manager.create_table_with_llm(sample_content, header, extra_desc)
             table_manager.create_table_desc_with_llm(create_table_query, sample_content, extra_desc)
         
         # Append file to table

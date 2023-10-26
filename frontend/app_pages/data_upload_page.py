@@ -64,7 +64,7 @@ def app():
                     "http://backend:8000/upload/",
                     files={"file": uploaded_file},
                     data=data,
-                    timeout=30.0  # Timeout is in seconds
+                    timeout=60.0  # Timeout is in seconds
                 )
             
             # Check the response status code to see if the upload was successful

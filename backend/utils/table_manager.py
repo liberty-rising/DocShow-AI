@@ -7,12 +7,17 @@ from utils.sql_string_manipulator import SQLStringManipulator
 import pandas as pd
 
 class TableManager:
-    def __init__(self, database: str, llm: BaseLLM):
+    """
+    Manages table operations using a Large Language Model (LLM) and SQLExecutor.
+
+    Attributes:
+        llm (BaseLLM): Instance of a Large Language Model for SQL operations.
+    """
+    def __init__(self, llm: BaseLLM):
         """database is app or client"""
-        self.database = database
         self.llm = llm
 
-    def create_table_with_llm(self, sample_content: str, extra_desc: str):
+    def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
         """
         Creates a table using an LLM based on sample file content and a message.
 
@@ -24,17 +29,18 @@ class TableManager:
         - create_query: str containing the SQL create table query if successful, None otherwise.
         """
         try:
-            with ClientDatabaseManager() as conn:
-                sql_executor = SQLExecutor(conn)
+            with ClientDatabaseManager() as session:
+                sql_executor = SQLExecutor(session)
                 table_names = sql_executor.get_all_table_names()
                 
-            raw_create_query = self.llm.generate_create_statement(sample_content, table_names, extra_desc)
+            raw_create_query = self.llm.generate_create_statement(sample_content, header, table_names, extra_desc)
 
             create_query = SQLStringManipulator(raw_create_query).extract_sql_query_from_text()  # Just in case
 
             if SQLStringManipulator(create_query).is_valid_create_table_query():  # Checks if the query is valid
-                with ClientDatabaseManager() as conn:
-                    sql_executor = SQLExecutor(conn)
+                with ClientDatabaseManager() as session:
+                    print('PRINTTTTTING', create_query)
+                    sql_executor = SQLExecutor(session)
                     sql_executor.execute_create_query(create_query)
                 return create_query
         except Exception as e:
@@ -59,7 +65,8 @@ class TableManager:
             table_name = SQLStringManipulator(create_query).get_table_from_create_query()
             
             # Store description in separate table
-            with TableMetadataManager(database="client") as manager:
+            with ClientDatabaseManager() as session:
+                manager = TableMetadataManager(session)
                 manager.store_table_desc(table_name, create_query, description)
 
         except Exception as e:
@@ -78,7 +85,8 @@ class TableManager:
         Returns:
         - table_name: str containing the table's name.
         """
-        with TableMetadataManager(database="client") as manager:
+        with ClientDatabaseManager() as session:
+            manager = TableMetadataManager(session)
             table_metadata = manager.get_metadata()
             formatted_table_metadata = manager.format_table_metadata_for_llm(table_metadata)
 
@@ -101,8 +109,8 @@ class TableManager:
         """
 
         if table_name:
-            with ClientDatabaseManager() as conn:
-                sql_executor = SQLExecutor(conn)
+            with ClientDatabaseManager() as session:
+                sql_executor = SQLExecutor(session)
                 sql_executor.append_df_to_table(processed_df, table_name)
         else:
             raise HTTPException(status_code=400, detail="Could not determine table name")
