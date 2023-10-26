@@ -48,6 +48,16 @@ class SQLExecutor:
             self.session.rollback()
             raise
     
+    def drop_table(self, table_name: str):
+        try:
+            drop_query = text(f"DROP TABLE {table_name};")
+            self.session.execute(drop_query)
+            self.session.commit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            self.session.rollback()
+            raise
+    
     def generate_query_for_all_table_names(self):
         if self.database_type == "sqlite":
             return "SELECT name FROM sqlite_master WHERE type='table';"
@@ -56,13 +66,21 @@ class SQLExecutor:
         else:
             return ""
     
-    def get_all_table_names(self) -> str:
+    def get_all_table_names_as_str(self) -> str:
         try:
-            query = self.generate_query_for_all_table_names()
-            result = self.session.execute(text(query))
-            table_names = [row[0] for row in result]
+            # Using the engine from the session to get table names
+            table_names = self.get_all_table_names_as_list()
             table_names_str = ', '.join(table_names)
             return table_names_str
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise
+    
+    def get_all_table_names_as_list(self) -> list:
+        try:
+            # Using the engine from the session to get table names
+            table_names = self.session.bind.table_names()
+            return table_names
         except Exception as e:
             print(f"An error occurred: {e}")
             raise

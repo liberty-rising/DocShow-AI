@@ -31,7 +31,7 @@ class TableManager:
         try:
             with ClientDatabaseManager() as session:
                 sql_executor = SQLExecutor(session)
-                table_names = sql_executor.get_all_table_names()
+                table_names = sql_executor.get_all_table_names_as_str()
                 
             raw_create_query = self.llm.generate_create_statement(sample_content, header, table_names, extra_desc)
 
@@ -39,7 +39,6 @@ class TableManager:
 
             if SQLStringManipulator(create_query).is_valid_create_table_query():  # Checks if the query is valid
                 with ClientDatabaseManager() as session:
-                    print('PRINTTTTTING', create_query)
                     sql_executor = SQLExecutor(session)
                     sql_executor.execute_create_query(create_query)
                 return create_query

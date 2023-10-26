@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from utils.utils import process_file, save_to_data_lake
 
 from models import app_models, client_models
-from databases.db_utils import AppDatabaseManager, ClientDatabaseManager
+from databases.db_utils import AppDatabaseManager, ClientDatabaseManager, SQLExecutor
 from databases.chat_service import ChatHistoryService
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
@@ -94,6 +94,13 @@ async def get_encodings(file_type: str = ""):
 async def get_file_types():
     return ["csv"]
 
+@app.get("/tables/")
+async def get_tables():
+    with ClientDatabaseManager() as session:
+        executor = SQLExecutor(session)
+        tables = executor.get_all_table_names_as_list()
+    return tables
+
 @app.post("/chat/")
 async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)):
     user_input = request.user_input
@@ -101,14 +108,20 @@ async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_cha
     model_output = llm.generate_text(user_input)
     return ChatResponse(model_output=model_output)
 
-@app.delete("/delete_chat_history/")
+@app.delete("/chat_history/")
 async def delete_chat_history():
     global user_id
 
-    db_session = ClientSessionLocal()
-    chat_service = ChatHistoryService(db=db_session)
-
-    chat_service.delete_chat_history(user_id)
+    with ClientDatabaseManager() as session:
+        chat_service = ChatHistoryService(session)
+        chat_service.delete_chat_history(user_id)
 
     return {"message": "Chat history deleted"}
+
+@app.delete("/table/")
+async def drop_table(table_name: str):
+    with ClientDatabaseManager() as session:
+        executor = SQLExecutor(session)
+        executor.drop_table(table_name)
+    return {"message": f"Dropped table {table_name}"}
     

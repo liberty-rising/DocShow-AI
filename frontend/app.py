@@ -1,12 +1,15 @@
 # Your existing imports
 import streamlit as st
-from app_pages import home_page
-from app_pages import data_upload_page
-from app_pages import ai_assistant_page
-from app_pages import data_catalogue_page
-from app_pages import data_processing_page
-from app_pages import data_analytics_page
-from app_pages import machine_learning_page
+from app_pages import (
+    home_page,
+    data_upload_page,
+    ai_assistant_page,
+    data_catalogue_page,
+    data_processing_page,
+    data_analytics_page,
+    machine_learning_page,
+    admin_panel_page,
+)
 from utils import custom_css
 
 # Add custom CSS for centered title
@@ -19,7 +22,8 @@ PAGES = {
     # "📖 Data Catalogue": data_catalogue_page,
     # "🔄 Data Processing": data_processing_page,
     "📊 Data Analytics": data_analytics_page,
-    "🤖 AI Assisstant": ai_assistant_page,
+    "💬 AI Assisstant": ai_assistant_page,
+    "⚙️ Admin Panel": admin_panel_page, 
     # "🖥️ Machine Learning": machine_learning_page,
     # "📈 Data Quality Dashboard": data_visualization_page,
 }
