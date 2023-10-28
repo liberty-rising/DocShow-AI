@@ -7,6 +7,6 @@ databases==0.8.0
 sqlalchemy==1.4.49
 openai==0.28.1
 tiktoken==0.5.1
-charset-normalizer==3.3.0
 psycopg2-binary==2.9.2
 pydantic==2.4.2
+httpx==0.25.0

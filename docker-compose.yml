@@ -16,9 +16,15 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
+      superset:
+        condition: service_healthy
     env_file:
       - ./backend/.env
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     ports:
       - "8000:8000"
     volumes:
@@ -29,6 +35,11 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
     volumes:
       - superset_db_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d  # Added line for initialization script
@@ -40,10 +51,16 @@ services:
       - postgres_db
     environment:
       # You can also set the admin credentials here as environment variables if needed
-      - POSTGRES_USER=superset_user
-      - POSTGRES_PASSWORD=superset_password
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=superset
       - SUPERSET_SECRET_KEY=uwBS1V+RsmEiEdy7kkQ3Gcs4FnaaKhYOcqasXWd9uUjZ4ng1tn5XoBCw
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8088 || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
     ports:
       - "8088:8088"
     volumes:
@@ -58,8 +75,8 @@ services:
       - superset
     environment:
       # Environment variables for admin credentials can also be specified here if needed
-      - POSTGRES_USER=superset_user
-      - POSTGRES_PASSWORD=superset_password
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=superset
       - ADMIN_USERNAME=admin
       - ADMIN_FIRST_NAME=admin

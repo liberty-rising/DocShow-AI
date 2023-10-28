@@ -3,7 +3,7 @@ from utils.table_manager import TableManager
 
 import pandas as pd
 
-async def seed_client_db():
+def seed_client_db():
     """
     Asynchronously seed the client database with sample data from CSV files.
     

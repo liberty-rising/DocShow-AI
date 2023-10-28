@@ -4,7 +4,7 @@ import traceback
 
 
 def app():
-    st.title("Data Upload")
+    st.title("📥 Data Upload")
     
     st.write("""
     ## Overview

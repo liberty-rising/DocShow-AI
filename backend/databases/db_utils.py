@@ -18,6 +18,9 @@ class DatabaseManager:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.session.close()
+    
+    def get_uri_str(self):
+        return str(self.engine.url)
 
 class AppDatabaseManager(DatabaseManager):
     def __init__(self):

@@ -3,13 +3,15 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from utils.utils import process_file, save_to_data_lake
 
-from models import app_models, client_models
 from databases.db_utils import AppDatabaseManager, ClientDatabaseManager, SQLExecutor
 from databases.chat_service import ChatHistoryService
+from envs.dev.utils import seed_client_db
 from llms.base import BaseLLM
 from llms.gpt import GPTLLM
 from llms.utils import ChatRequest, ChatResponse
-from envs.dev.utils import seed_client_db
+from models import app_models, client_models
+from superset.superset_manager import SupersetManager
+from superset.utils import seed_superset
 from utils.table_manager import TableManager
 
 import os
@@ -30,7 +32,8 @@ user_id = 1
 @app.on_event("startup")
 async def startup_event():
     if os.getenv('APP_ENV') == 'development':
-        await seed_client_db()
+        seed_client_db()  # Import sample data
+        seed_superset()  # Create sample dashboards
 
 def get_llm_sql_object():
     global user_id  
@@ -113,8 +116,8 @@ async def get_tables():
 async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)):
     user_input = request.user_input
     # Assume llm_chat is a function that sends user_input to your LLM and gets a response
-    model_output = llm.generate_text(user_input)
-    return ChatResponse(model_output=model_output)
+    llm_output = llm.generate_text(user_input)
+    return ChatResponse(llm_output=llm_output)
 
 @app.delete("/chat_history/")
 async def delete_chat_history():
@@ -131,4 +134,15 @@ async def drop_table(table_name: str):
     manager = TableManager()
     manager.drop_table(table_name)
     return {"message": f"Dropped table {table_name}"}
+
+@app.get("/dashboards/")
+async def list_dashboards():
+    try:
+        superset_manager = SupersetManager()
+        superset_manager.authenticate_superset()
+        dashboards = superset_manager.list_dashboards()
+        del superset_manager
+        return {"dashboards": dashboards}
+    except Exception as e:
+        return {"error": str(e)}
     

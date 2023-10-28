@@ -7,6 +7,13 @@ WORKDIR /app/backend
 # Copy the backend directory contents into the container
 COPY . /app/backend
 
+# Install curl and postgres client
+RUN apt-get update && apt-get install -y curl postgresql-client
+
+# Copy wait-for.sh into the container
+COPY wait-for.sh /wait-for.sh
+RUN chmod +x /wait-for.sh
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
@@ -14,4 +21,4 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 EXPOSE 8000
 
 # Define the command to run your app using uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["/wait-for.sh", "postgres_db", "5432", "--", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

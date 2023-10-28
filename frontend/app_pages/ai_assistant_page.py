@@ -13,9 +13,9 @@ def app():
         with httpx.Client(timeout=20.0) as client:
             response = client.post("http://backend:8000/chat/", json={"user_input": user_input})
         if response.status_code == 200:
-            model_output = response.json()["model_output"]
+            llm_output = response.json()["llm_output"]
             st.session_state.chat_history.append({"role": "You", "message": user_input})
-            st.session_state.chat_history.append({"role": "AI", "message": model_output})
+            st.session_state.chat_history.append({"role": "AI", "message": llm_output})
         else:
             st.write("Error: Unable to get a response.")
 
