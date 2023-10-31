@@ -3,7 +3,10 @@ from fastapi import File, UploadFile
 from io import StringIO
 from typing import Any
 
+import logging
+import os
 import pandas as pd
+import sys
 
 
 def process_file(file: UploadFile, encoding: str) -> Any:
@@ -63,3 +66,17 @@ def process_file(file: UploadFile, encoding: str) -> Any:
 
 def save_to_data_lake(file: UploadFile = File(...)):
     pass
+
+def get_app_logger(name):
+    logger = logging.getLogger(name)
+    
+    # Set log level based on the environment
+    log_level = logging.DEBUG if os.getenv('APP_ENV') == 'development' else logging.INFO
+    
+    logger.setLevel(log_level)
+
+    # You can add handlers, formatters here if needed
+    handler = logging.StreamHandler(sys.stdout)
+    logger.addHandler(handler)
+
+    return logger

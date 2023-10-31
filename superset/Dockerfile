@@ -1,5 +1,5 @@
 # Define base image
-FROM apache/superset:1.5.1
+FROM apache/superset:3.0.1
 
 # Switching to root to install the required packages
 USER root

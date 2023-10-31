@@ -1,7 +1,6 @@
 from fastapi import FastAPI, File, Form, UploadFile, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from utils.utils import process_file, save_to_data_lake
 
 from databases.db_utils import AppDatabaseManager, ClientDatabaseManager, SQLExecutor
 from databases.chat_service import ChatHistoryService
@@ -13,8 +12,14 @@ from models import app_models, client_models
 from superset.superset_manager import SupersetManager
 from superset.utils import seed_superset
 from utils.table_manager import TableManager
+from utils.utils import process_file, save_to_data_lake, get_app_logger
 
 import os
+
+APP_ENV = os.getenv('APP_ENV')
+
+logger = get_app_logger(__name__)
+logger.info("Logger initialised.")
 
 app = FastAPI()
 
@@ -31,7 +36,7 @@ user_id = 1
 
 @app.on_event("startup")
 async def startup_event():
-    if os.getenv('APP_ENV') == 'development':
+    if APP_ENV == 'development':
         seed_client_db()  # Import sample data
         seed_superset()  # Create sample dashboards
 

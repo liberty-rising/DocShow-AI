@@ -26,7 +26,7 @@ def app():
     selected_dashboard_id = dashboard_options[selected_dashboard_name]
 
     # Embed the Superset dashboard
-    superset_url = f"http://superset:8088/superset/dashboard/{selected_dashboard_id}/"
+    superset_url = f"http://127.0.0.1:8088/superset/dashboard/{selected_dashboard_id}/?standalone=true"
     st.components.v1.iframe(superset_url, width=800, height=600)
 
 if __name__ == "__main__":
