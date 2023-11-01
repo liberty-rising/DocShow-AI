@@ -1,7 +1,30 @@
 import httpx
 import streamlit as st
 import traceback
+import pandas as pd
 
+def check_file_constraints(file, file_type, encoding):
+    if file_type not in ["csv", "xlsx"]:
+        return "Invalid file type"
+    
+    if file_type == "csv" and encoding.lower() != "utf-8":
+        return "Invalid encoding, should be UTF-8"
+
+    try:
+        if file_type == "csv":
+            df = pd.read_csv(file, encoding=encoding)
+        elif file_type == "xlsx":
+            df = pd.read_excel(file)
+    except Exception as e:
+        return str(e)
+
+    if df.columns.isnull().any():
+        return "Missing header"
+
+    if df.isna().mean().mean() > 0.2:
+        return "More than 20 percent of rows have n/a values"
+
+    return None
 
 def app():
     st.title("📥 Data Upload")
@@ -29,16 +52,14 @@ def app():
         ).json()
         uppercased_file_types = [file_type.upper() for file_type in file_types]
     file_type = st.radio("Choose file type", uppercased_file_types).lower()
-    
+
     if file_type == "csv":
         with httpx.Client() as client:
-            encodings = client.get(
-                "http://backend:8000/encodings/",
-                params={"file_type":file_type}
-            ).json()
+            encodings = client.get("http://backend:8000/encodings/", params={"file_type":file_type}).json()
             uppercased_encodings = [encoding.upper() for encoding in encodings]
-
         encoding = st.selectbox('Choose an encoding:', uppercased_encodings).lower()
+    else:
+        encoding = None
 
     # Add an extra message
     extra_desc = st.text_input("Add a description (optional)")
@@ -49,7 +70,16 @@ def app():
     # Create a file uploader widget
     with st.form(key='upload_form'):
         uploaded_file = st.file_uploader(f"Upload Your File")
+        analyze_button = st.form_submit_button(label="Analyze")
         submit_button = st.form_submit_button(label="Submit")
+
+    if analyze_button and uploaded_file is not None:
+        # Perform checks
+        check_result = check_file_constraints(uploaded_file, file_type, encoding)
+        if check_result:
+            st.error(f"File did not meet constraints: {check_result}")
+        else:
+            st.success("File meets all constraints")
 
     # Check if a file has been uploaded
     if submit_button and uploaded_file is not None:
