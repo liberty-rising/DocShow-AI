@@ -1,16 +1,16 @@
 from .base import BaseLLM
 from databases.chat_service import ChatHistoryService
-from databases.db_utils import ClientDatabaseManager
+from databases.database_managers import ClientDatabaseManager
+from settings import OPENAI_API_KEY
 
 import json
 import openai
-import os
 import tiktoken
 
 class GPTLLM(BaseLLM):
     def __init__(self, user_id: int, store_history: bool = False, llm_type: str = "generic", database_type: str = "postgres"):
         """Initialize API key, model, token limit, and chat service."""
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = OPENAI_API_KEY
         if api_key is None:
             raise ValueError("API key not set in environment variables")
         openai.api_key = api_key

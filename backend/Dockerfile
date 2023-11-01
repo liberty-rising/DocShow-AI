@@ -7,8 +7,11 @@ WORKDIR /app/backend
 # Copy the backend directory contents into the container
 COPY . /app/backend
 
-# Install curl and postgres client
-RUN apt-get update && apt-get install -y curl postgresql-client
+# Install curl, postgres client, and build-essential
+RUN apt-get update && \
+    apt-get install -y curl postgresql-client build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy wait-for.sh into the container
 COPY wait-for.sh /wait-for.sh

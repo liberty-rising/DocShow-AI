@@ -1,6 +1,7 @@
-from fastapi import HTTPException, UploadFile
-from fastapi.responses import JSONResponse
-from databases.db_utils import ClientDatabaseManager, SQLExecutor, TableMetadataManager
+from fastapi import HTTPException
+from databases.database_managers import ClientDatabaseManager
+from databases.sql_executor import SQLExecutor
+from databases.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
 from utils.sql_string_manipulator import SQLStringManipulator
 

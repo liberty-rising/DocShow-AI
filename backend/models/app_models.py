@@ -1,9 +1,16 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
 Base = declarative_base()
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str
 
 class User(Base):
     """
@@ -19,4 +26,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True)
+    hashed_password = Column(String)
+    organization = Column(String, nullable=True)
+    role = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())

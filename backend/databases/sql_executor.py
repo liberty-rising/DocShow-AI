@@ -1,34 +1,8 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session, sessionmaker
-from typing import List, Optional
-from models.client_models import TableMetadata
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 import pandas as pd
 
-
-class DatabaseManager:
-    def __init__(self, db_name):
-        self.db_name = db_name
-        self.engine = create_engine(f'postgresql://admin:admin@postgres_db:5432/{db_name}')
-
-    def __enter__(self):
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
-        return self.session
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.session.close()
-    
-    def get_uri_str(self):
-        return str(self.engine.url)
-
-class AppDatabaseManager(DatabaseManager):
-    def __init__(self):
-        super().__init__('app_db')
-
-class ClientDatabaseManager(DatabaseManager):
-    def __init__(self):
-        super().__init__('client_db')
 
 class SQLExecutor:
     def __init__(self, session: Session):
@@ -87,34 +61,3 @@ class SQLExecutor:
         except Exception as e:
             print(f"An error occurred: {e}")
             raise
-
-class TableMetadataManager:
-    def __init__(self, db_session: Session):
-        self.db_session = db_session
-
-    def get_metadata(self) -> List[TableMetadata]:
-        try:
-            return self.db_session.query(TableMetadata).all()
-        except Exception as e:
-            # Handle exception
-            print(f"Database error: {str(e)}")
-    
-    def format_table_metadata_for_llm(self, rows: List[TableMetadata]) -> str:
-        formatted_metadata = '\n'.join(
-            f"Table: {row.table_name}\nCreate Statement: {row.create_statement}\nDescription: {row.description}"
-            for row in rows
-        )
-        return formatted_metadata
-
-    def store_table_desc(self, table_name: str, create_query: str, description: str):
-        try:
-            table_metadata = TableMetadata(
-                table_name=table_name, 
-                create_statement=create_query, 
-                description=description
-            )
-            self.db_session.merge(table_metadata)
-            self.db_session.commit()
-        except Exception as e:
-            # Handle exception
-            print(f"Database error: {str(e)}")

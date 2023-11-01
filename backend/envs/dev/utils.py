@@ -1,4 +1,5 @@
-from databases.db_utils import ClientDatabaseManager, SQLExecutor
+from databases.database_managers import ClientDatabaseManager
+from databases.sql_executor import SQLExecutor
 from utils.table_manager import TableManager
 
 import pandas as pd

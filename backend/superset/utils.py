@@ -1,4 +1,4 @@
-from databases.db_utils import ClientDatabaseManager
+from databases.database_managers import ClientDatabaseManager
 from superset.superset_manager import SupersetManager
 from utils.utils import get_app_logger
 
