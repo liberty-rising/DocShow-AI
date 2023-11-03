@@ -11,10 +11,9 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     llm_output: str
 
-def get_llm_sql_object():
-    global user_id  
-
+def get_llm_sql_object(current_user: User = Depends(get_current_user)):
     # Initialize LLM object
+    user_id = current_user.id
     llm = GPTLLM(user_id, store_history=False, llm_type="sql")
     return llm
 

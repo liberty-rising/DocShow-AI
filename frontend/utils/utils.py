@@ -89,6 +89,9 @@ def api_request(
     return None
 
 # Set up the headers with the token
-headers = {
-    "Authorization": f"Bearer {st.session_state.access_token}"
-}
+if "access_token" in st.session_state:
+    headers = {
+        "Authorization": f"Bearer {st.session_state.access_token}"
+    }
+else:
+    headers = {}

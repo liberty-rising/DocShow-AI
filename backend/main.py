@@ -118,9 +118,8 @@ async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_cha
     return ChatResponse(llm_output=llm_output)
 
 @app.delete("/chat_history/")
-async def delete_chat_history():
-    global user_id
-
+async def delete_chat_history(current_user: app_models.User = Depends(get_current_user)):
+    user_id = current_user.id
     with ClientDatabaseManager() as session:
         chat_service = ChatHistoryService(session)
         chat_service.delete_chat_history(user_id)
