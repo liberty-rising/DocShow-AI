@@ -1,19 +1,22 @@
 from databases.database_managers import ClientDatabaseManager
+from databases.user_manager import UserManager
+from session_config import session_manager
 from superset.superset_manager import SupersetManager
 from utils.utils import get_app_logger
 
+from fastapi import Depends
+
+import httpx
 import json
 
 logger = get_app_logger(__name__)
 
+def get_superset_manager(user_id: int = Depends(UserManager.get_current_user_id)):
+    return SupersetManager(user_id, session_manager)
+
 def seed_superset():
     logger.debug("Starting seeding of Superset.")
-
-    # Create an instance of SupersetManager
-    superset_manager = SupersetManager()
-
-    # Authenticate
-    superset_manager.authenticate_superset()
+    superset_manager = get_superset_manager()
 
     # Create database connection if it doesn't exist
     db_manager = ClientDatabaseManager()
@@ -72,7 +75,5 @@ def seed_superset():
         }
         # Update the dashboard
         superset_manager.update_dashboard(dashboard_id, json_metadata_payload)
-
-    del superset_manager
 
     logger.debug("Seeding of Superset completed.")

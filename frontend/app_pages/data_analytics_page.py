@@ -25,9 +25,18 @@ def app():
     # Get the selected dashboard ID
     selected_dashboard_id = dashboard_options[selected_dashboard_name]
 
-    # Embed the Superset dashboard
-    superset_url = f"http://127.0.0.1:8088/superset/dashboard/{selected_dashboard_id}/?standalone=true"
-    st.components.v1.iframe(superset_url, width=800, height=600)
+    # # Embed the Superset dashboard
+    # superset_url = f"http://superset:8088/superset/dashboard/{selected_dashboard_id}/?standalone=true"
+    # st.components.v1.iframe(superset_url, width=800, height=600)
+    # Fetch dashboard HTML from FastAPI backend
+    with httpx.Client() as client:
+        response = client.get(f"http://backend:8000/dashboard/{selected_dashboard_id}")  # Replace 1 with the desired dashboard ID
+
+    if response.status_code == 200:
+        dashboard_html = response.text
+        st.components.v1.html(dashboard_html, width=800, height=600)
+    else:
+        st.error("Failed to fetch dashboard.")
 
 if __name__ == "__main__":
     app()

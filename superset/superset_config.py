@@ -6,3 +6,5 @@ SECRET_KEY = 'uwBS1V+RsmEiEdy7kkQ3Gcs4FnaaKhYOcqasXWd9uUjZ4ng1tn5XoBCw'  # Repla
 # TODO: Configure csrf to work in PROD
 WTF_CSRF_ENABLED = False
 TALISMAN_ENABLED = False
+
+ENABLE_PROXY_FIX = True

@@ -35,3 +35,6 @@ def app():
             st.write("Successfully deleted chat history.")
         else:
             st.write("Failed to delete chat history.")
+
+if __name__ == "__main__":
+    app()

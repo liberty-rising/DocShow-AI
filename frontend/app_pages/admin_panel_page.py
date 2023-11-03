@@ -19,3 +19,6 @@ def app():
             st.write(f"Successfully dropped table {selected_table}.")
         else:
             st.write(f"Failed to drop table {selected_table}.")
+
+if __name__ == "__main__":
+    app()

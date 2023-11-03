@@ -1,15 +1,19 @@
-import httpx
 from typing import Optional
 
+from utils.session_manager import SessionManager
 from utils.utils import get_app_logger
+
+import httpx
 
 logger = get_app_logger(__name__)
 
 class SupersetManager:
-    def __init__(self):
-        self.base_url = "http://superset:8088/api/v1"
-        self.auth_url = f"{self.base_url}/security/login"
-        self.session = httpx.Client()  # Create a session object for making requests
+    def __init__(self, user_id: int, session_manager: SessionManager):
+        self.base_url = "http://superset:8088/"
+        self.api_url = f"{self.base_url}api/v1/"
+        self.auth_url = f"{self.api_url}security/login"
+        self.session = session_manager.get_session(user_id)
+        self.authenticate_superset()
     
     def authenticate_superset(self):
         payload = {
@@ -24,7 +28,7 @@ class SupersetManager:
         self.session.headers['Content-Type'] = 'application/json'
     
     def get_csrf_token(self):
-        csrf_url = f"{self.base_url}/security/csrf_token/"
+        csrf_url = f"{self.api_url}security/csrf_token/"
         self.session.headers['Referer'] = csrf_url
         csrf_res = self.session.get(csrf_url)
         csrf_res.raise_for_status()  # Check for HTTP errors
@@ -60,7 +64,7 @@ class SupersetManager:
     
     def get_database_id_by_name(self, db_name):
         self.get_csrf_token()
-        db_list_url = f"{self.base_url}/database/"
+        db_list_url = f"{self.api_url}database/"
         response = self.session.get(db_list_url)
         if response.status_code == 200:
             databases = response.json()['result']
@@ -79,7 +83,7 @@ class SupersetManager:
             "sqlalchemy_uri": sqlalchemy_uri,
             # ... any other optional parameters
         }
-        create_db_url = f"{self.base_url}/database/"
+        create_db_url = f"{self.api_url}database/"
         
         response = self.session.post(create_db_url, json=db_payload)
 
@@ -117,7 +121,7 @@ class SupersetManager:
     
     def get_dataset_id_by_name(self, ds_name):
         self.get_csrf_token()
-        dataset_url = f"{self.base_url}/dataset/"
+        dataset_url = f"{self.api_url}dataset/"
         response = self.session.get(dataset_url)
 
         if response.status_code == 200:
@@ -131,7 +135,7 @@ class SupersetManager:
     
     def create_dataset(self, dataset_payload):
         self.get_csrf_token()
-        dataset_url = f"{self.base_url}/dataset/"
+        dataset_url = f"{self.api_url}dataset/"
         response = self.session.post(dataset_url, json=dataset_payload)
         
         if response.status_code == 201:
@@ -157,7 +161,7 @@ class SupersetManager:
     def get_chart_id_by_name(self, slice_name):
         self.get_csrf_token()
 
-        slice_url = f"{self.base_url}/chart/"
+        slice_url = f"{self.api_url}chart/"
         response = self.session.get(slice_url)
 
         if response.status_code == 200:
@@ -169,7 +173,7 @@ class SupersetManager:
         return None
 
     def create_chart(self, chart_payload):
-        slice_url = f"{self.base_url}/chart/"
+        slice_url = f"{self.api_url}chart/"
         response = self.session.post(slice_url, json=chart_payload)
         if response.status_code == 201:
             print("Successfully created slice.")
@@ -200,7 +204,7 @@ class SupersetManager:
     
     def get_dashboard_id_by_title(self, title):
         self.get_csrf_token()
-        dashboard_url = f"{self.base_url}/dashboard/"
+        dashboard_url = f"{self.api_url}dashboard/"
         response = self.session.get(dashboard_url)
         if response.status_code == 200:
             dashboards = response.json()['result']
@@ -211,7 +215,7 @@ class SupersetManager:
 
     def create_dashboard(self, dashboard_payload):
         self.get_csrf_token()
-        dashboard_url = f"{self.base_url}/dashboard/"
+        dashboard_url = f"{self.api_url}dashboard/"
         response = self.session.post(dashboard_url, json=dashboard_payload)
         if response.status_code == 201:
             print("Successfully created dashboard.")
@@ -220,22 +224,22 @@ class SupersetManager:
             print(f"Failed to create dashboard: {response.content}")
             return None
     
+    def get_dashboard_by_id(self, dashboard_id: int):
+        self.get_csrf_token()
+        # TODO: I believe API authentication is not the same as user authentication and that's why it's not working
+        response = self.session.get(f"{self.base_url}superset/dashboard/{dashboard_id}/?standalone=true")
+        print(response)
+        response.raise_for_status()
+        return response
+    
     def list_dashboards(self) -> Optional[list]:
         self.get_csrf_token()
-        dashboards_url = f"{self.base_url}/dashboard/"
-        
-        if not self.session.headers.get('Authorization'):
-            print("Not authenticated.")
-            return None
-        
+
+        dashboards_url = f"{self.api_url}dashboard/"
         response = self.session.get(dashboards_url)
-        
         if response.status_code == 200:
             dashboards = response.json()['result']
             return [(db['id'], db['dashboard_title']) for db in dashboards]
-        else:
-            print(f"Failed to list dashboards: {response.content}")
-            return None
     
     def update_dashboard(self, dashboard_id, json_metadata):
         """
@@ -249,7 +253,7 @@ class SupersetManager:
             bool: True if the update was successful, False otherwise.
         """
         self.get_csrf_token()
-        url = f"{self.base_url}/dashboard/{dashboard_id}"
+        url = f"{self.api_url}dashboard/{dashboard_id}"
 
         response = self.session.put(url, json=json_metadata)
 
@@ -259,6 +263,3 @@ class SupersetManager:
         else:
             print(f"Failed to update dashboard: {response.content}")
             return False
-    
-    def __del__(self):
-        self.session.close()

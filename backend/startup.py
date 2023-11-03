@@ -11,6 +11,7 @@ Usage:
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 from envs.dev.utils import seed_client_db
+from security import get_password_hash
 from settings import APP_ENV, JWT_SECRET_KEY
 from superset.utils import seed_superset
 from utils.utils import get_app_logger
@@ -42,6 +43,9 @@ def create_admin_user():
         user_manager = UserManager(session)
         existing_user = user_manager.get_user(username)
         if not existing_user:
+            # Hash the password
+            hashed_password = get_password_hash(user.password)
+
             user_manager.create_user(username=username,email=email,password=password,organization=organization,role=role)
             logger.debug("Admin user created.")
         else:

@@ -2,15 +2,18 @@ from fastapi import FastAPI, File, Form, UploadFile, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
+from databases.chat_service import ChatHistoryService
 from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
 from databases.sql_executor import SQLExecutor
-from databases.chat_service import ChatHistoryService
 from llms.base import BaseLLM
-from llms.gpt import GPTLLM
-from llms.utils import ChatRequest, ChatResponse
+from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object, get_llm_sql_object
 from models import app_models, client_models
+from routes.token import router as token_router
+from security import get_current_user
+from session_config import session_manager
 from startup import run_startup_routines
 from superset.superset_manager import SupersetManager
+from superset.utils import get_superset_manager
 from utils.table_manager import TableManager
 from utils.utils import process_file, save_to_data_lake, get_app_logger
 
@@ -19,6 +22,8 @@ logger = get_app_logger(__name__)
 logger.info("Logger initialised.")
 
 app = FastAPI()
+
+app.include_router(token_router)
 
 # Initialize database managers
 app_db_manager = AppDatabaseManager()
@@ -34,20 +39,6 @@ user_id = 1
 @app.on_event("startup")
 async def startup_event():
     run_startup_routines()
-
-def get_llm_sql_object():
-    global user_id  
-
-    # Initialize LLM object
-    llm = GPTLLM(user_id, store_history=False, llm_type="sql")
-    return llm
-
-def get_llm_chat_object():
-    global user_id
-
-    # Initialize LLM object
-    llm = GPTLLM(user_id, store_history=True, llm_type="chat")
-    return llm
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...), extra_desc: str = Form(default=""), is_new_table: bool = Form(default=False), encoding: str = Form(default=""), llm: BaseLLM = Depends(get_llm_sql_object)):
@@ -136,13 +127,27 @@ async def drop_table(table_name: str):
     return {"message": f"Dropped table {table_name}"}
 
 @app.get("/dashboards/")
-async def list_dashboards():
+async def list_dashboards(superset_manager: SupersetManager = Depends(get_superset_manager)):
     try:
-        superset_manager = SupersetManager()
-        superset_manager.authenticate_superset()
         dashboards = superset_manager.list_dashboards()
-        del superset_manager
         return {"dashboards": dashboards}
     except Exception as e:
         return {"error": str(e)}
+
+@app.get("/dashboard/{dashboard_id}")
+async def get_dashboard(dashboard_id: int, superset_manager: SupersetManager = Depends(get_superset_manager)):
+    try:
+        response = superset_manager.get_dashboard_by_id(dashboard_id)
+        return response.text
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/users/me/", response_model=app_models.UserOut)
+async def read_users_me(current_user: app_models.User = Depends(get_current_user)):
+    return current_user
     
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Close all sessions
+    for user_id in session_manager.sessions.keys():
+        session_manager.close_session(user_id)
