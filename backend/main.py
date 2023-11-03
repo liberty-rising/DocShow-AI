@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from databases.chat_service import ChatHistoryService
 from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
 from databases.sql_executor import SQLExecutor
+from databases.user_manager import UserManager
 from llms.base import BaseLLM
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object, get_llm_sql_object
 from models import app_models, client_models
@@ -142,9 +143,35 @@ async def get_dashboard(dashboard_id: int, superset_manager: SupersetManager = D
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/users/")
+async def get_users():
+    # Open a database session and fetch all users
+    with AppDatabaseManager() as session:
+        user_manager = UserManager(session)
+        users = user_manager.get_users_without_password()
+    
+    return users
+
 @app.get("/users/me/", response_model=app_models.UserOut)
 async def read_users_me(current_user: app_models.User = Depends(get_current_user)):
     return current_user
+
+@app.put("/users/update/")
+async def update_user(user_data: app_models.UserUpdate):
+    with AppDatabaseManager() as session:
+        user_manager = UserManager(session)
+        
+        # Update user details
+        updated_user = user_manager.update_user_by_username(
+            username=user_data.username, 
+            organization=user_data.organization, 
+            role=user_data.role
+        )
+        
+        if not updated_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"message": f"Successfully updated details for {user_data.username}."}
     
 @app.on_event("shutdown")
 async def shutdown_event():

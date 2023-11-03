@@ -72,6 +72,19 @@ class UserManager:
             list[User]: List of User objects.
         """
         return self.db_session.query(User).offset(skip).limit(limit).all()
+    
+    def get_users_without_password(self, skip: int = 0, limit: int = 10):
+        users = (
+            self.db_session.query(User)
+            .with_entities(
+                User.id, User.role, User.email, 
+                User.organization, User.username, User.created_at
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        return users
 
     def update_user(self, user_id: int, email: str = None, organization: str = None, role: str = None):
         """
@@ -94,6 +107,15 @@ class UserManager:
                 db_user.organization = organization
             if role:
                 db_user.role = role
+            self.db_session.commit()
+            self.db_session.refresh(db_user)
+        return db_user
+    
+    def update_user_by_username(self, username: str, organization: str, role: str) -> User:
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            db_user.organization = organization
+            db_user.role = role
             self.db_session.commit()
             self.db_session.refresh(db_user)
         return db_user

@@ -69,3 +69,18 @@ class UserOut(BaseModel):
     email: EmailStr
     organization: Optional[str]
     role: Optional[str]
+
+class UserUpdate(BaseModel):
+    """
+    Model representing the data required to update a user's details.
+
+    Attributes:
+    - username (str): The unique username of the user. This will be used as a key to find and update the user.
+    - organization (Optional[str]): The organization to which the user belongs. If not provided, the organization will not be updated.
+    - role (Optional[str]): The role assigned to the user within the system or organization. If not provided, the role will not be updated.
+
+    This model is used when making requests to update user details.
+    """
+    username: str
+    organization: Optional[str]
+    role: Optional[str]

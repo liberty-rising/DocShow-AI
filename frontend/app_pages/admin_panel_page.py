@@ -1,6 +1,8 @@
 import httpx
 import streamlit as st
 
+import pandas as pd
+
 
 def app():
     st.title("⚙️ Admin Panel")
@@ -19,6 +21,38 @@ def app():
             st.write(f"Successfully dropped table {selected_table}.")
         else:
             st.write(f"Failed to drop table {selected_table}.")
+    
+    st.subheader("User management")
+    with httpx.Client() as client:
+        users_data = client.get("http://backend:8000/users/").json()
+    
+    df = pd.DataFrame(users_data)
+
+    st.table(df)
+
+    # Display users in a SelectBox
+    user_names = [user['username'] for user in users_data]
+    selected_user_name = st.selectbox('Choose a user to edit:', user_names)
+    selected_user = next((user for user in users_data if user['username'] == selected_user_name), None)
+
+    # Editable fields for Organization and Role
+    new_org = st.text_input("Organization", selected_user['organization'])
+    new_role = st.text_input("Role", selected_user['role'])
+
+    if st.button("Update"):
+        # Send the updated organization and role to the backend (You'll need to create an endpoint for this)
+        with httpx.Client() as client:
+            data = {
+                'username': selected_user_name,
+                'organization': new_org,
+                'role': new_role
+            }
+            response = client.put("http://backend:8000/users/update/", json=data)
+        
+        if response.status_code == 200:
+            st.write(f"Successfully updated details for {selected_user_name}.")
+        else:
+            st.write(f"Failed to update details for {selected_user_name}.")
 
 if __name__ == "__main__":
     app()
