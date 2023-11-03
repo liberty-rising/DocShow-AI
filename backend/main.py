@@ -42,7 +42,13 @@ async def startup_event():
     run_startup_routines()
 
 @app.post("/upload/")
-async def upload_file(file: UploadFile = File(...), extra_desc: str = Form(default=""), is_new_table: bool = Form(default=False), encoding: str = Form(default=""), llm: BaseLLM = Depends(get_llm_sql_object)):
+async def upload_file(
+    file: UploadFile = File(...), 
+    extra_desc: str = Form(default=""), 
+    is_new_table: bool = Form(default=False), 
+    encoding: str = Form(default=""), 
+    llm: BaseLLM = Depends(get_llm_sql_object)
+):
     """
     Upload a file and optionally include a message to clarify user data for the LLM.
 

@@ -1,6 +1,6 @@
 # registration_page.py
 import streamlit as st
-import requests
+from utils.utils import api_request
 
 def app():
     st.title("User Registration")
@@ -22,7 +22,7 @@ def app():
             "password": password,
         }
 
-        response = requests.post(url, json=payload)
+        response = api_request(url, "POST", json=payload)
 
         # Handle response
         if response.status_code == 200:

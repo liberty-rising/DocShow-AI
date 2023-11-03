@@ -1,6 +1,5 @@
 import streamlit as st
-import httpx
-from app_pages import registration_page
+from utils.utils import api_request
 
 def app():
     st.title("Login")
@@ -12,9 +11,8 @@ def app():
     
     # Call backend API to authenticate
     if login_button:
-        # Replace with actual authentication logic
-        with httpx.Client() as client:
-            response = client.post("http://backend:8000/token/", data={"username": username, "password": password})
+        data={"username": username, "password": password}
+        response = api_request("http://backend:8000/token/", "POST", data=data)
         
         if response.status_code == 200:  # if login successful
             st.session_state.access_token = response.json()["access_token"]

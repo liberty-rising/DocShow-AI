@@ -23,7 +23,9 @@ class GPTLLM(BaseLLM):
         self.database_type = database_type
 
         if self.store_history:
-            self.history = self.chat_service.get_llm_chat_history_for_user(self.user_id,self.llm_type)
+            with ClientDatabaseManager() as session:
+                chat_service = ChatHistoryService(session)
+                self.history = chat_service.get_llm_chat_history_for_user(self.user_id,self.llm_type)
         else:
             self.history = []
     

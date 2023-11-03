@@ -1,6 +1,8 @@
 import streamlit as st
 import httpx
 
+from utils.utils import api_request, headers
+
 def app():
     st.title("💬 AI Assistant")
 
@@ -10,8 +12,7 @@ def app():
 
     user_input = st.text_input("You: ", "")
     if st.button("Send"):
-        with httpx.Client(timeout=20.0) as client:
-            response = client.post("http://backend:8000/chat/", json={"user_input": user_input})
+        response = api_request("http://backend:8000/chat/", "POST", json={"user_input": user_input}, headers=headers)
         if response.status_code == 200:
             llm_output = response.json()["llm_output"]
             st.session_state.chat_history.append({"role": "You", "message": user_input})
@@ -28,8 +29,7 @@ def app():
         st.session_state.chat_history.clear()
 
         # Make an HTTP request to delete the user's history from the database
-        with httpx.Client() as client:
-            response = client.delete("http://backend:8000/chat_history/")  # TODO: Implement logic for only deleting a single user's history
+        response = api_request("http://backend:8000/chat_history/", "DELETE")  # TODO: Implement logic for only deleting a single user's history
         
         if response.status_code == 200:
             st.write("Successfully deleted chat history.")

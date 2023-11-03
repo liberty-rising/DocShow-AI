@@ -1,19 +1,15 @@
 import httpx
 import streamlit as st
 
+from utils.utils import api_request, headers
+
 def app():
     st.title("👤 User Panel")
 
     # Get current user data
     url = "http://backend:8000/users/me/"
 
-    # Set up the headers with the token
-    headers = {
-        "Authorization": f"Bearer {st.session_state.access_token}"
-    }
-
-    with httpx.Client() as client:
-        response = client.get(url, headers=headers)
+    response = api_request(url, headers=headers)
 
     # Check if the request was successful
     if response.status_code == 200:
