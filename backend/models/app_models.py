@@ -1,3 +1,4 @@
+from enum import Enum
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -70,6 +71,12 @@ class UserOut(BaseModel):
     organization: Optional[str]
     role: Optional[str]
 
+class UserRole(str, Enum):
+    NONE = None
+    GUEST = "guest"
+    USER = "user"
+    ADMIN = "admin"
+
 class UserUpdate(BaseModel):
     """
     Model representing the data required to update a user's details.
@@ -83,4 +90,4 @@ class UserUpdate(BaseModel):
     """
     username: str
     organization: Optional[str]
-    role: Optional[str]
+    role: Optional[UserRole]

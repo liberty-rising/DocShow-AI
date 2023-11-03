@@ -156,6 +156,10 @@ async def get_users():
 async def read_users_me(current_user: app_models.User = Depends(get_current_user)):
     return current_user
 
+@app.get("/users/roles/")
+async def get_user_roles():
+    return list(app_models.UserRole)
+
 @app.put("/users/update/")
 async def update_user(user_data: app_models.UserUpdate):
     with AppDatabaseManager() as session:

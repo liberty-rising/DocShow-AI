@@ -25,7 +25,8 @@ def app():
     st.subheader("User management")
     with httpx.Client() as client:
         users_data = client.get("http://backend:8000/users/").json()
-    
+        roles_data = client.get("http://backend:8000/users/roles/").json()
+
     df = pd.DataFrame(users_data)
 
     st.table(df)
@@ -37,20 +38,21 @@ def app():
 
     # Editable fields for Organization and Role
     new_org = st.text_input("Organization", selected_user['organization'])
-    new_role = st.text_input("Role", selected_user['role'])
-
+    selected_role = st.selectbox("Select a new role:", roles_data)
+    
     if st.button("Update"):
         # Send the updated organization and role to the backend (You'll need to create an endpoint for this)
         with httpx.Client() as client:
             data = {
                 'username': selected_user_name,
                 'organization': new_org,
-                'role': new_role
+                'role': selected_role
             }
             response = client.put("http://backend:8000/users/update/", json=data)
         
         if response.status_code == 200:
             st.write(f"Successfully updated details for {selected_user_name}.")
+            st.experimental_rerun() 
         else:
             st.write(f"Failed to update details for {selected_user_name}.")
 
