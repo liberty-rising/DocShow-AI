@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.utils import api_request, headers
+from utils.utils import api_request, HEADERS
 
 def app():
     st.title("📊 Data Analytics")
@@ -10,17 +10,11 @@ def app():
     Welcome to the Data Analytics page! This page provides an interface to gain insights from the data stored in the database.
     """)
 
-
+    headers = HEADERS
     # Fetch list of available dashboards from FastAPI backend
     response = api_request("http://backend:8000/dashboards/", headers=headers)  # Replace with your FastAPI URL
     
-    if response.status_code == 401:  # Unauthorized
-        st.warning("Your session with the analytics dashboard has expired. Please re-authenticate.")
-
-        # Provide a link to Superset's login page.
-        st.markdown("[Click here to authenticate with the analytics dashboard](http://127.0.0.1:8088/login/)")
-        return
-    elif response.status_code == 200:
+    if response.status_code == 200:
         dashboards_data = response.json()["dashboards"]
         dashboard_options = {name: id_ for id_, name in dashboards_data}
     else:
@@ -39,7 +33,13 @@ def app():
     # Fetch dashboard HTML from FastAPI backend
     response = api_request(f"http://backend:8000/dashboard/{selected_dashboard_id}", headers=headers)
 
-    if response.status_code == 200:
+    if response.status_code == 401:  # Unauthorized
+        st.warning("Your session with the analytics dashboard has expired. Please re-authenticate.")
+        
+        # Provide a link to Superset's login page.
+        st.markdown("[Click here to authenticate with the analytics dashboard](http://superset:8088/login/)")
+        return
+    elif response.status_code == 200:
         dashboard_html = response.text
         st.components.v1.html(dashboard_html, width=800, height=600)
     else:

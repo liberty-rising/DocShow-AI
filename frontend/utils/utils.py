@@ -75,8 +75,8 @@ def api_request(
     try:
         response = send_api_request(url, method, request_kwargs)
 
-        if response.status_code == 401:  # Unauthorized
-            handle_expired_session()
+        # if response.status_code == 401:  # Unauthorized
+        #     handle_expired_session()
 
         response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
         return response
@@ -90,8 +90,8 @@ def api_request(
 
 # Set up the headers with the token
 if "access_token" in st.session_state:
-    headers = {
+    HEADERS = {
         "Authorization": f"Bearer {st.session_state.access_token}"
     }
 else:
-    headers = {}
+    HEADERS = {}

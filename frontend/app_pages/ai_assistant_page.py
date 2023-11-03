@@ -1,10 +1,11 @@
 import streamlit as st
 import httpx
 
-from utils.utils import api_request, headers
+from utils.utils import api_request, HEADERS
 
 def app():
     st.title("💬 AI Assistant")
+    headers = HEADERS
 
     # Initialize or get the existing chat history
     if 'chat_history' not in st.session_state:
