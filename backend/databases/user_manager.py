@@ -1,32 +1,91 @@
-# databases/user_manager.py
+"""
+This module provides a UserManager class that handles database operations related to the User model.
+It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user data.
+"""
 from sqlalchemy.orm import Session
 from models.app_models import User
 
 class UserManager:
-    def __init__(self, session: Session):
-        self.db_session = session
+    """
+    A class to manage CRUD operations related to the User model.
     
-    @staticmethod
-    def get_current_user_id():
-        # TODO: Implement logic to get the current user id
-        return 1
+    Attributes:
+        db_session (Session): An active database session for performing operations.
+    """
+    def __init__(self, session: Session):
+        """
+        Initializes the UserManager with the given database session.
+        
+        Args:
+            session (Session): The database session to be used for operations.
+        """
+        self.db_session = session
 
     def get_user(self, username: str):
+        """
+        Get a user based on their username.
+        
+        Args:
+            username (str): The username of the user.
+            
+        Returns:
+            User: The User object if found, else None.
+        """
         return self.db_session.query(User).filter(User.username == username).first()
     
     def get_email(self, email: str):
+        """
+        Get a user based on their email.
+        
+        Args:
+            email (str): The email of the user.
+            
+        Returns:
+            User: The User object if found, else None.
+        """
         return self.db_session.query(User).filter(User.email == email).first()
 
     def create_user(self, user: User):
+        """
+        Add a new user to the database.
+        
+        Args:
+            user (User): The User object to be added.
+            
+        Returns:
+            User: The created User object.
+        """
         self.db_session.add(user)
         self.db_session.commit()
         self.db_session.refresh(user)
         return user
 
     def get_users(self, skip: int = 0, limit: int = 10):
+        """
+        Retrieve a list of users from the database with pagination.
+        
+        Args:
+            skip (int, optional): Number of entries to skip. Defaults to 0.
+            limit (int, optional): Maximum number of entries to return. Defaults to 10.
+            
+        Returns:
+            list[User]: List of User objects.
+        """
         return self.db_session.query(User).offset(skip).limit(limit).all()
 
     def update_user(self, user_id: int, email: str = None, organization: str = None, role: str = None):
+        """
+        Update a user's details in the database.
+        
+        Args:
+            user_id (int): The ID of the user to be updated.
+            email (str, optional): The updated email. Defaults to None.
+            organization (str, optional): The updated organization. Defaults to None.
+            role (str, optional): The updated role. Defaults to None.
+            
+        Returns:
+            User: The updated User object if found, else None.
+        """
         db_user = self.db_session.query(User).filter(User.id == user_id).first()
         if db_user:
             if email:
@@ -40,6 +99,15 @@ class UserManager:
         return db_user
 
     def delete_user(self, user_id: int):
+        """
+        Delete a user from the database.
+        
+        Args:
+            user_id (int): The ID of the user to be deleted.
+            
+        Returns:
+            User: The deleted User object if found, else None.
+        """
         db_user = self.db_session.query(User).filter(User.id == user_id).first()
         if db_user:
             self.db_session.delete(db_user)

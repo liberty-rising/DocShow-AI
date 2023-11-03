@@ -1,22 +1,30 @@
-from databases.database_managers import ClientDatabaseManager
+from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
 from databases.user_manager import UserManager
+from models.app_models import User
+from security import get_current_user
 from session_config import session_manager
 from superset.superset_manager import SupersetManager
 from utils.utils import get_app_logger
 
 from fastapi import Depends
 
-import httpx
 import json
 
 logger = get_app_logger(__name__)
 
-def get_superset_manager(user_id: int = Depends(UserManager.get_current_user_id)):
-    return SupersetManager(user_id, session_manager)
+def get_superset_manager(user: User = Depends(get_current_user)):
+    return SupersetManager(user.id, session_manager)
 
 def seed_superset():
     logger.debug("Starting seeding of Superset.")
-    superset_manager = get_superset_manager()
+
+    # Open database session and fetch 'admin' user details
+    with AppDatabaseManager() as session:
+        user_manager = UserManager(session)
+        admin_user = user_manager.get_user(username="admin")
+
+    # Initialize Superset manager with the admin user details
+    superset_manager = get_superset_manager(admin_user)
 
     # Create database connection if it doesn't exist
     db_manager = ClientDatabaseManager()
