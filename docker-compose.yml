@@ -49,6 +49,8 @@ services:
       context: ./superset  # Updated to point to the superset directory
     depends_on:
       - postgres_db
+    env_file:
+      - ./superset/.env
     environment:
       # You can also set the admin credentials here as environment variables if needed
       - POSTGRES_USER=admin
@@ -73,6 +75,8 @@ services:
     depends_on:
       - postgres_db
       - superset
+    env_file:
+      - ./superset/.env
     environment:
       # Environment variables for admin credentials can also be specified here if needed
       - POSTGRES_USER=admin

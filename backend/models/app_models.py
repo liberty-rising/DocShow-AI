@@ -16,7 +16,7 @@ class TokenData(BaseModel):
 
 class User(Base):
     """
-    Represents a user interacting with the LLM.
+    Represents a user interacting with the app.
 
     Attributes:
         id (int): The unique identifier for each user.

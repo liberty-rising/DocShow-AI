@@ -11,6 +11,7 @@ Usage:
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 from envs.dev.utils import seed_client_db
+from models.app_models import User
 from security import get_password_hash
 from settings import APP_ENV, JWT_SECRET_KEY
 from superset.utils import seed_superset
@@ -33,20 +34,19 @@ def check_jwt_secret_key():
 
 def create_admin_user():
     """Creates an admin user if it doesn't already exist."""
-    username = 'admin'
-    password = 'admin'
-    email = 'admin@docshow.ai'
-    organization = 'docshowai'
-    role = 'admin'
+    admin_user = User(
+        username = 'admin',
+        hashed_password = get_password_hash('admin'),
+        email = 'admin@docshow.ai',
+        organization = 'docshowai',
+        role = 'admin'
+    )
 
     with AppDatabaseManager() as session:
         user_manager = UserManager(session)
-        existing_user = user_manager.get_user(username)
+        existing_user = user_manager.get_user(admin_user.username)
         if not existing_user:
-            # Hash the password
-            hashed_password = get_password_hash(user.password)
-
-            user_manager.create_user(username=username,email=email,password=password,organization=organization,role=role)
+            user_manager.create_user(admin_user)
             logger.debug("Admin user created.")
         else:
             logger.debug("Admin user already exists.")

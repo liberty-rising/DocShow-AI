@@ -33,13 +33,7 @@ def app():
     # Fetch dashboard HTML from FastAPI backend
     response = api_request(f"http://backend:8000/dashboard/{selected_dashboard_id}", headers=headers)
 
-    if response.status_code == 401:  # Unauthorized
-        st.warning("Your session with the analytics dashboard has expired. Please re-authenticate.")
-        
-        # Provide a link to Superset's login page.
-        st.markdown("[Click here to authenticate with the analytics dashboard](http://superset:8088/login/)")
-        return
-    elif response.status_code == 200:
+    if response.status_code == 200:
         dashboard_html = response.text
         st.components.v1.html(dashboard_html, width=800, height=600)
     else:
