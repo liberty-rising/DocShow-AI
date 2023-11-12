@@ -9,3 +9,6 @@ borderRadius="6px"
 
 [server]
 fileWatcherType = "poll"
+
+[browser]
+gatherUsageStats = false
