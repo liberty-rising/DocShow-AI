@@ -1,12 +1,12 @@
 import httpx
 import streamlit as st
 
-from utils.utils import api_request, HEADERS
+from utils.utils import api_request, get_headers
 
 def app():
     st.title("👤 User Panel")
 
-    headers = HEADERS
+    headers = get_headers()
 
     # Get current user data
     url = "http://backend:8000/users/me/"

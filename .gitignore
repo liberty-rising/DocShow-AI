@@ -9,4 +9,5 @@ __pycache__/
 # Environment variables
 backend/.env
 frontend/.env
+superset/.env
 env/

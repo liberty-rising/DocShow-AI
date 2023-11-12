@@ -7,7 +7,7 @@ from typing import Any, Union
 
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
-from models.app_models import TokenData
+from models.app_models import User
 
 import os
 
@@ -83,7 +83,7 @@ def decode_token(token: str):
     except JWTError:
         return None
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     """
     Retrieve the current user based on the JWT token.
     

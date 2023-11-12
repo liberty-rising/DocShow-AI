@@ -1,5 +1,6 @@
 from typing import Optional
 
+from settings import SUPERSET_TOKEN
 from utils.session_manager import SessionManager
 from utils.utils import get_app_logger
 
@@ -9,10 +10,11 @@ logger = get_app_logger(__name__)
 
 class SupersetManager:
     def __init__(self, user_id: int, session_manager: SessionManager):
-        self.base_url = "http://superset:8088/"
-        self.api_url = f"{self.base_url}api/v1/"
+        self.base_url = "http://superset:8088"
+        self.api_url = f"{self.base_url}/api/v1/"
         self.auth_url = f"{self.api_url}security/login"
         self.session = session_manager.get_session(user_id)
+        self.superset_token = SUPERSET_TOKEN
         self.authenticate_superset()
     
     def authenticate_superset(self):
@@ -226,10 +228,16 @@ class SupersetManager:
     
     def get_dashboard_by_id(self, dashboard_id: int):
         self.get_csrf_token()
-        # TODO: I believe API authentication is not the same as user authentication and that's why it's not working
-        response = self.session.get(f"{self.base_url}superset/dashboard/{dashboard_id}/?standalone=true")
-        print(response)
+        
+        # Construct the URL with the token for authentication
+        url = f"{self.base_url}/login/?token={SUPERSET_TOKEN}&next=/superset/dashboard/{dashboard_id}?standalone=3"
+        print(f"Dashboard URL: {url}")
+
+        # Make the GET request to retrieve the dashboard
+        response = self.session.get(url, follow_redirects=True)
+
         response.raise_for_status()
+
         return response
     
     def list_dashboards(self) -> Optional[list]:

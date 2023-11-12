@@ -16,24 +16,27 @@ SECURE_TOKEN = os.environ.get("SECURE_TOKEN")
 WTF_CSRF_ENABLED = False
 TALISMAN_ENABLED = False
 
-ENABLE_PROXY_FIX = True
+ENABLE_JAVASCRIPT_CONTROLS = True
 
 # Create a custom view to authenticate the user
 AuthRemoteUserView=BaseSecurityManager.authremoteuserview
 class CustomAuthUserView(AuthRemoteUserView):
     @expose('/login/')
     def login(self):
+        print(f"Request url: {request.url}")
         token = request.args.get('token')
         next = request.args.get('next')
         sm = self.appbuilder.sm
         session = sm.get_session
-        user = session.query(sm.user_model).filter_by(username='admin').first()  # TODO: Change based on who's accessing superset
-
-        if token == SECURE_TOKEN:  # TODO: Change for PROD
+        user = session.query(sm.user_model).filter_by(username='admin').first()
+        print(f"Token: {token}\nSToken: {SECURE_TOKEN}\nNext: {next}\nUser: {user}")
+        if token == SECURE_TOKEN:
             login_user(user, remember=False, force=True)
             if (next is not None):
+                print(f"Next is not null, redirecting...")
                 return redirect(next)
             else:
+                print(f"Next is null, redirecting...\nRedirect url: {self.appbuilder.get_url_for_index}")
                 return redirect(self.appbuilder.get_url_for_index)
         else:
             flash('Unable to auto login', 'warning')
