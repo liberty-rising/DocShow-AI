@@ -11,13 +11,11 @@
 # Arguments:
 #   HOST: The hostname of the Postgres server.
 #   PORT: The port number of the Postgres server.
-#   COMMAND: The command to execute once Postgres and Superset are available.
+#   COMMAND: The command to execute once Postgres is available.
 #
 # Functions:
 #   - wait_for_postgres: Continuously checks the availability of the Postgres server
 #                        using the psql command, and sleeps for 1 second between checks.
-#   - wait_for_superset: Continuously checks the availability of the Superset service
-#                        using the curl command, and sleeps for 1 second between checks.
 #
 # Environment Variables:
 #   - POSTGRES_USER: The username to use for connecting to Postgres.
@@ -41,15 +39,5 @@ wait_for_postgres() {
   >&2 echo "Postgres is up - executing command"
 }
 
-wait_for_superset() {
-  until curl -sfL "http://superset:8088/health"; do
-    >&2 echo "Superset is unavailable - sleeping"
-    sleep 1
-  done
-
-  >&2 echo "Superset is up"
-}
-
 wait_for_postgres
-wait_for_superset
 exec $cmd

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -8,11 +8,10 @@ from typing import Any, Union
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 from models.app_models import User
+from settings import JWT_SECRET_KEY
 
-import os
 
 # Configuration for JWT token
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'mysecretkey')
 ALGORITHM = "HS256"  # HMAC SHA-256
 
 # Setup for OAuth2 password-based token authentication
@@ -78,17 +77,18 @@ def decode_token(token: str):
         None: If decoding fails.
     """
     try:
+        token = token.replace("Bearer ", "", 1)  # Remove Bearer prefix
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
         return None
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+def get_current_user(request: Request) -> User:
     """
-    Retrieve the current user based on the JWT token.
+    Retrieve the current user based on the JWT token stored in the cookie.
     
     Args:
-        token: The JWT token.
+        request (Request): The request object.
     
     Returns:
         User: The user object associated with the token.
@@ -96,14 +96,20 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     Raises:
         HTTPException: If token is invalid or user is not found.
     """
-    payload = decode_token(token)
-    if payload is None or "sub" not in payload:
+    token = request.cookies.get("access_token")
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Token has expired or is invalid. Please log in again."
+            detail="Not authenticated"
         )
-    
-    username = payload["sub"]
+
+    try:
+        payload = decode_token(token)
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    except JWTError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     with AppDatabaseManager() as session:
         user_manager = UserManager(session)

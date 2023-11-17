@@ -16,6 +16,7 @@ APP_DB_URL = config('APP_DB_URL')
 ACCESS_TOKEN_EXPIRE_MINUTES = config('ACCESS_TOKEN_EXPIRE_MINUTES', default=30)
 CLIENT_DB_URL = config('CLIENT_DB_URL')
 DB_SERVER_URL = config('DB_SERVER_URL')
+IS_HTTPS = config('IS_HTTPS').lower() == 'true'
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default='mysecretkey')
 OPENAI_API_KEY = config('OPENAI_API_KEY')
 SUPERSET_TOKEN = config('SUPERSET_TOKEN')

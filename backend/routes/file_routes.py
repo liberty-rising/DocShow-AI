@@ -19,7 +19,7 @@ async def get_encodings(file_type: str = ""):
 
 @file_router.get("/file_types/")
 async def get_file_types():
-    return ["csv"]
+    return ["csv", "pdf"]
 
 @file_router.post("/upload/")
 async def upload_file(

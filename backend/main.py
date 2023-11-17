@@ -1,14 +1,15 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
 from models import app_models, client_models
+from routes.auth_routes import auth_router
 from routes.chat_routes import chat_router
 from routes.file_routes import file_router
 from routes.superset_routes import superset_router
 from routes.table_routes import table_router
-from routes.token import router as token_router
 from routes.user_routes import user_router
-from session_config import session_manager
+# from session_config import session_manager
 from startup import run_startup_routines
 from utils.utils import get_app_logger
 
@@ -18,11 +19,12 @@ logger.info("Logger initialised.")
 
 app = FastAPI()
 
+# Add routers
+app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(file_router)
 app.include_router(superset_router)
 app.include_router(table_router)
-app.include_router(token_router)
 app.include_router(user_router)
 
 # Initialize database managers

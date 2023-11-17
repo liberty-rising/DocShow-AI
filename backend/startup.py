@@ -14,7 +14,6 @@ from envs.dev.utils import seed_client_db
 from models.app_models import User
 from security import get_password_hash
 from settings import APP_ENV, JWT_SECRET_KEY
-from superset.utils import seed_superset
 from utils.utils import get_app_logger
 
 
@@ -26,7 +25,6 @@ def run_startup_routines():
     if APP_ENV == 'development':
         create_admin_user()
         seed_client_db()
-        seed_superset()
 
 def check_jwt_secret_key():
     if APP_ENV != 'development' and JWT_SECRET_KEY == 'mysecretkey':

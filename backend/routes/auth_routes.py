@@ -3,29 +3,43 @@ This module provides routes for token-based user authentication and registration
 It integrates with a database manager to perform CRUD operations on the User model and leverages 
 the security module for creating JWT tokens and password hashing/verification.
 """
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 from models.app_models import Token, User, UserCreate
 from security import create_access_token, verify_password, get_password_hash
 from settings import ACCESS_TOKEN_EXPIRE_MINUTES
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
-router = APIRouter()
+auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.post("/token/", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+class LoginResponse(BaseModel):
+    message:str
+
+class RegistrationResponse(BaseModel):
+    message:str
+
+class LogoutResponse(BaseModel):
+    message:str
+
+@auth_router.post("/token/", response_model=LoginResponse)
+async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     """
-    Authenticate a user using their username and password.
+    Authenticate a user and set a JWT token in a cookie upon successful authentication. 
     
+    This endpoint verifies the provided username and password. If the credentials are valid, 
+    it creates a JWT token and sets it in a secure, HttpOnly cookie in the response.
+
     Args:
-        form_data (OAuth2PasswordRequestForm): User's provided username and password.
-        
+        form_data (OAuth2PasswordRequestForm): Contains the user's provided username and password.
+
     Returns:
-        dict: A JWT token if authentication is successful.
+        dict: A success message indicating successful authentication. The JWT token is not returned in the response body but is set in a secure cookie.
     """
     with AppDatabaseManager() as session:
         user_manager = UserManager(session)
@@ -47,18 +61,24 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/register/", response_model=Token)
-async def register(user: UserCreate):
-    """
-    Register a new user using the provided details.
+    # Set cookie
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=1800, secure=True, samesite='Lax')
     
+    return {"message": "Login successful"}
+
+@auth_router.post("/register/", response_model=RegistrationResponse)
+async def register(response: Response, user: UserCreate):
+    """
+    Register a new user and set a JWT token in a cookie upon successful registration.
+
+    This endpoint registers a new user with the provided details. It checks for the uniqueness of the username and email. If the registration is successful, it creates a JWT token, sets it in a secure, HttpOnly cookie in the response, and returns a success message.
+
     Args:
-        user (UserCreate): Pydantic model containing the user's details.
-        
+        user (UserCreate): Pydantic model containing the user's registration details, such as username, email, and password.
+
     Returns:
-        dict: A JWT token if registration is successful.
+        dict: A success message indicating successful registration. The JWT token is not returned in the response body but is set in a secure cookie.
     """
     with AppDatabaseManager() as session:
         user_manager = UserManager(session)
@@ -87,4 +107,13 @@ async def register(user: UserCreate):
         access_token = create_access_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
-        return {"access_token": access_token, "token_type": "bearer"}
+
+        # Set cookie
+        response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=1800, secure=True, samesite='Lax')
+
+        return {"message": "Registration successful"}
+
+@auth_router.post("/logout/", response_model=LogoutResponse)
+async def logout(response: Response):
+    response.delete_cookie(key="access_token")
+    return {"message": "Logged out successfully"}
