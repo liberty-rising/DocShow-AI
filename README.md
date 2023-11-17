@@ -7,7 +7,17 @@ This repository contains a Streamlit frontend and a FastAPI backend. Below are i
 - Docker installed on your machine
 - Docker Compose installed on your machine
 
-## Build and Run Using Docker Compose
+## Setup Process
+
+### Creating SSL/TLS Certificates for Local Development
+
+Generate locally-trusted SSL/TLS certificates using `mkcert`.
+
+1. Install `mkcert`.
+
+2. Create a directory/folder called `certs/` in the project's root.
+
+3. Generate certificates `localhost.key` and `localhost.crt` within `certs/` using `mkcert`.
 
 ### Instructions
 

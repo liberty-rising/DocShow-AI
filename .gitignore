@@ -2,6 +2,9 @@ credentials.py
 __pycache__/
 *.pyc
 
+# Certifications
+certs/
+
 # Databases
 /backend/databases/app_database.db
 /backend/databases/client_database.db
