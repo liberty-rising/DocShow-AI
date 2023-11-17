@@ -5,8 +5,8 @@ from databases.database_managers import AppDatabaseManager, ClientDatabaseManage
 from models import app_models, client_models
 from routes.auth_routes import auth_router
 from routes.chat_routes import chat_router
+from routes.dashboard_routes import dashboard_router
 from routes.file_routes import file_router
-from routes.superset_routes import superset_router
 from routes.table_routes import table_router
 from routes.user_routes import user_router
 # from session_config import session_manager
@@ -22,8 +22,8 @@ app = FastAPI()
 # Add routers
 app.include_router(auth_router)
 app.include_router(chat_router)
+app.include_router(dashboard_router)
 app.include_router(file_router)
-app.include_router(superset_router)
 app.include_router(table_router)
 app.include_router(user_router)
 
