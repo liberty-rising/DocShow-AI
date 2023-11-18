@@ -42,5 +42,4 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     # Close all sessions
-    for user_id in session_manager.sessions.keys():
-        session_manager.close_session(user_id)
+    pass

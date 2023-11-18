@@ -30,7 +30,7 @@ function LoginPage({ onLogin }) {
         if (response.status === 200) {
             // Here you might want to do additional checks or set state
             updateAuth(true);
-            navigate('/'); 
+            navigate('/dashboards'); 
         }
     } catch (error) {
         console.error('Login error:', error);

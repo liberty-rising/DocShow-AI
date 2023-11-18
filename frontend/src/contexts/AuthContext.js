@@ -1,6 +1,5 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 
 // Create a new Context for authentication. 
 //Contexts in React are used for passing data deeply through the component tree without having to pass props down manually at every level

@@ -1,18 +1,21 @@
 // TableManagement.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
-import { Card, CardContent, Typography, Select, MenuItem, Button, Grid, FormControl, InputLabel } from '@mui/material';
+import { Alert, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText,
+  DialogTitle, FormControl, Grid, InputLabel, MenuItem, Select, Snackbar, Typography } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function TableManagement() {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState('');
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'error' or 'success'
 
-  useEffect(() => {
-    fetchTables();
-  }, []);
 
-  const fetchTables = () => {
+  const fetchTables = useCallback(() => {
     axios.get(`${API_URL}tables/`)
       .then(response => {
         setTables(response.data);
@@ -21,15 +24,29 @@ function TableManagement() {
         }
       })
       .catch(error => console.error('Error fetching tables', error));
-  };
+  }, [selectedTable]); // Include selectedTable as dependency if it's used in the fetchTables function
+
+  useEffect(() => {
+    fetchTables();
+  }, [fetchTables]);
 
   const handleDropTable = () => {
     axios.delete(`${API_URL}table/`, { params: { table_name: selectedTable } })
       .then(response => {
         fetchTables(); // Refresh the tables list
+        setSnackbarMessage('Table dropped successfully.');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
       })
       .catch(error => {
         console.error('Error dropping table', error);
+        // Show error in snackbar
+        setSnackbarMessage('Error dropping table.');
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
+      })
+      .finally(() => {
+        setOpenDialog(false); // Close the dialog
       });
   };
 
@@ -59,6 +76,41 @@ function TableManagement() {
           </Grid> */}
         </Grid>
       </CardContent>
+
+      {/* Snackbar for showing notifications */}
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setOpenSnackbar(false)}>
+        <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Dialog for confirmation */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Table Deletion"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this table? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button 
+            variant="contained"
+            color="error"
+            onClick={() => setOpenDialog(true)}
+            fullWidth
+            startIcon={<DeleteIcon />}
+            disabled={!selectedTable}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }

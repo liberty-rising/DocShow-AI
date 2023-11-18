@@ -128,7 +128,7 @@ class TableManager:
         except Exception as e:
             print(f"An error occurred: {e}")
             self.session.rollback()
-            raise
+            raise HTTPException(status_code=400, detail=str(e))
 
     def get_table_metadata(self):
         # Logic to get metadata of a table

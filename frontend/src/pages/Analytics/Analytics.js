@@ -1,24 +1,37 @@
 // AnalyticsPage.js
 import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import DashboardSelector from './DashboardSelector';
 import ChartAdder from './ChartAdder';
 import ChartDataSelector from './ChartDataSelector';
 import ChartDisplay from './ChartDisplay';
 
 function AnalyticsPage() {
-  const [selectedDashboard, setSelectedDashboard] = useState('');
   const [chartType, setChartType] = useState('');
   const [selectedData, setSelectedData] = useState([]);
 
   // Mock data fetching
   const fetchData = (columns) => {
-    // Fetch data based on selected columns
-  };
+    // Mock dataset
+    const mockData = [
+      { product: "Product A", sales: 200, expenses: 150, profit: 50 },
+      { product: "Product B", sales: 300, expenses: 200, profit: 100 },
+      { product: "Product C", sales: 150, expenses: 100, profit: 50 },
+      // ... add more data as needed
+    ];
 
-  const handleDashboardSelect = (dashboard) => {
-    setSelectedDashboard(dashboard);
-    // Load dashboard data or set up a new dashboard
+    // If no columns are selected, return an empty array
+    if (!columns || columns.length === 0) {
+      return [];
+    }
+
+    // Filter the data based on selected columns
+    return mockData.map(row => {
+      const filteredRow = { product: row.product };
+      columns.forEach(column => {
+        filteredRow[column] = row[column];
+      });
+      return filteredRow;
+    });
   };
 
   const handleAddChart = (type) => {
@@ -40,9 +53,8 @@ function AnalyticsPage() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
-      <DashboardSelector onSelectDashboard={handleDashboardSelect} />
-      <ChartAdder onAddChart={handleAddChart} />
-      {chartType && <ChartDataSelector chartType={chartType} onDataSelect={handleDataSelect} />}
+      {/* <ChartAdder onAddChart={handleAddChart} />
+      {chartType && <ChartDataSelector chartType={chartType} onDataSelect={handleDataSelect} />} */}
       <ChartDisplay chartType={chartType} data={fetchData(selectedData)} />
     </Box>
   );

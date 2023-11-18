@@ -4,7 +4,8 @@ import LineChartComponent from './Charts/LineChart';
 import PieChartComponent from './Charts/PieChart';
 
 const ChartDisplay = ({ chartType, data }) => {
-  switch(chartType) {
+  const mockChartType = 'Bar'
+  switch(mockChartType) {
     case 'Bar':
       return <BarChartComponent data={data} />;
     case 'Line':

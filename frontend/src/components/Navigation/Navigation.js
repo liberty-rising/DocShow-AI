@@ -6,7 +6,6 @@ import ChatIcon from '@mui/icons-material/Chat';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DashboardIcon from '@mui/icons-material/Dashboard'
-import HomeIcon from '@mui/icons-material/Home';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -23,7 +22,7 @@ const Navigation = () => {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Dashboards', icon: <DashboardIcon />, path: '/dashboards' },
     { text: 'Data Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Data Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
     { text: 'AI Assistant', icon: <ChatIcon />, path: '/ai-assistant' },

@@ -1,18 +1,21 @@
 import { React } from 'react';
 import {
   BrowserRouter as Router,
+  Navigate,
   Routes,
   Route
 } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import AppLayout from './components/layouts/AppLayout';
-import LandingLayout from './components/layouts/LandingLayout';
+import AppLayout from './components/Layouts/AppLayout';
+import LandingLayout from './components/Layouts/LandingLayout';
+import RequireAuth from './components/Auth/RequireAuth';
 import AboutPage from './pages/About';
 import AdminPage from './pages/Admin/Admin';
 import AIAssistantPage from './pages/AIAssistant';
-// import AnalyticsPage from './pages/Analytics/Analytics';
+import AnalyticsPage from './pages/Analytics/Analytics';
 import BlogPage from './pages/Blog';
-import DashboardPage from './pages/Dashboard';
+import DashboardMenuPage from './pages/Dashboard/DashboardMenu';
+import Dashboard from './pages/Dashboard/Dashboard';
 import LandingPage from './pages/Landing';
 import LoginPage from './pages/Login';
 import PricingPage from './pages/Pricing';
@@ -41,25 +44,26 @@ function App() {
       <Routes>
         <Route 
           path="/" 
-          element={isAuthenticated ? <AppLayout><DashboardPage /></AppLayout> : <LandingLayout><LandingPage /></LandingLayout>} 
+          element={<LandingLayout><LandingPage /></LandingLayout>} 
         />
         <Route 
           path="/login" 
-          element={<LandingLayout>
-                <LoginPage />
-            </LandingLayout>
-          } 
+          element={isAuthenticated ? <Navigate to ="/dashboards" /> : 
+            <LandingLayout><LoginPage /></LandingLayout>} 
         />
         <Route path="/register" element={<LandingLayout><RegisterPage /></LandingLayout>} />
         <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
         <Route path="/blog" element={<LandingLayout><BlogPage /></LandingLayout>} />
         <Route path="/about" element={<LandingLayout><AboutPage /></LandingLayout>} />
-        <Route path="/upload" element={<AppLayout><UploadPage /></AppLayout>} />
-        {/* <Route path="/analytics" element={<AppLayout><AnalyticsPage /></AppLayout>} /> */}
-        <Route path="/ai-assistant" element={<AppLayout><AIAssistantPage /></AppLayout>} />
-        <Route path="/user" element={<AppLayout><UserPage /></AppLayout>} />
-        <Route path="/admin" element={<AppLayout><AdminPage /></AppLayout>} />
-        <Route path="/logout" element={<Logout />} />
+
+        <Route path="/dashboards" element={<RequireAuth><AppLayout><DashboardMenuPage /></AppLayout></RequireAuth>} />
+        <Route path="/dashboards/:dashboardId" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
+        <Route path="/upload" element={<RequireAuth><AppLayout><UploadPage /></AppLayout></RequireAuth>} />
+        <Route path="/analytics" element={<RequireAuth><AppLayout><AnalyticsPage /></AppLayout></RequireAuth>} />
+        <Route path="/ai-assistant" element={<RequireAuth><AppLayout><AIAssistantPage /></AppLayout></RequireAuth>} />
+        <Route path="/user" element={<RequireAuth><AppLayout><UserPage /></AppLayout></RequireAuth>} />
+        <Route path="/admin" element={<RequireAuth><AppLayout><AdminPage /></AppLayout></RequireAuth>} />
+        <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />
       </Routes>
     </Router>
   );
