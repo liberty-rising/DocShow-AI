@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@mui/material';
+import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@mui/material';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -53,15 +53,15 @@ const Navigation = () => {
         <List sx={{ overflow: 'hidden' }}> {/* Adjust height based on Toolbar height */}
           {menuItems.map((item) => (
             isDrawerOpen ? // Only show Tooltip when drawer is closed
-              <ListItem button key={item.text} onClick={() => navigate(item.path)}>
+              <ListItemButton onClick={() => navigate(item.path)}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
-              </ListItem>
+              </ListItemButton>
             :
               <Tooltip title={item.text} placement="right" key={item.text}>
-                <ListItem button onClick={() => navigate(item.path)}>
+                <ListItemButton onClick={() => navigate(item.path)}>
                   <ListItemIcon>{item.icon}</ListItemIcon>
-                </ListItem>
+                </ListItemButton>
               </Tooltip>
           ))}
         </List>
@@ -69,7 +69,7 @@ const Navigation = () => {
       <IconButton
         onClick={toggleDrawer}
         sx={{
-          position: 'absolute',
+          position: 'fixed',
           top: '50%', // Center vertically
           // right: isDrawerOpen ? '825px' : '60px', // You might need to adjust this value
           marginLeft: isDrawerOpen ? `${drawerWidth - 24}px` : '37px',
