@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 import { API_URL } from '../../utils/constants';
 
 function DashboardMenuPage() {
@@ -28,6 +29,8 @@ function DashboardMenuPage() {
           <TableRow>
             <TableCell>Name</TableCell>
             <TableCell>Description</TableCell>
+            <TableCell>Created at</TableCell>
+            <TableCell>Updated at</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -37,6 +40,8 @@ function DashboardMenuPage() {
                 <Link to={`/dashboards/${dashboard.id}`}>{dashboard.name}</Link>
               </TableCell>
               <TableCell>{dashboard.description}</TableCell>
+              <TableCell>{format(new Date(dashboard.created_at), 'yyyy-MM-dd')}</TableCell>
+              <TableCell>{format(new Date(dashboard.updated_at), 'yyyy-MM-dd')}</TableCell>
             </TableRow>
           ))}
         </TableBody>

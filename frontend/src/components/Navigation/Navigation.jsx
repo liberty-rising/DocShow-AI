@@ -42,7 +42,7 @@ const Navigation = () => {
           [`& .MuiDrawer-paper`]: { 
             width: drawerWidth, 
             boxSizing: 'border-box', 
-            position: 'relative', // This might still constrain the IconButton
+            position: 'fixed', // This might still constrain the IconButton
             overflow: 'visible', // Set overflow to visible
             height: '100vh',
           },
@@ -50,7 +50,7 @@ const Navigation = () => {
       >
         <Toolbar />
         <Divider />
-        <List sx={{ overflow: 'hidden', height: 'calc(100vh - 64px)' }}> {/* Adjust height based on Toolbar height */}
+        <List sx={{ overflow: 'hidden' }}> {/* Adjust height based on Toolbar height */}
           {menuItems.map((item) => (
             isDrawerOpen ? // Only show Tooltip when drawer is closed
               <ListItem button key={item.text} onClick={() => navigate(item.path)}>
@@ -69,9 +69,10 @@ const Navigation = () => {
       <IconButton
         onClick={toggleDrawer}
         sx={{
-          position: 'relative',
+          position: 'absolute',
           top: '50%', // Center vertically
-          right: 15, // You might need to adjust this value
+          // right: isDrawerOpen ? '825px' : '60px', // You might need to adjust this value
+          marginLeft: isDrawerOpen ? `${drawerWidth - 24}px` : '37px',
           transform: 'translateY(-50%)',
           zIndex: 1300, // Higher z-index to ensure visibility
           borderRadius: '30%', // Optional styling

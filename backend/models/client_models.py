@@ -60,6 +60,8 @@ class Dashboard(Base):
     name = Column(String, index=True)
     description = Column(String, index=True)
     organization = Column(String, index=True)
+    created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now())
 
     # Relationship to charts
     charts = relationship("Chart", back_populates="dashboard")

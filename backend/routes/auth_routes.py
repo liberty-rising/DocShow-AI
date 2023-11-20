@@ -11,8 +11,8 @@ from pydantic import BaseModel
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 from models.app_models import Token, User, UserCreate
-from security import create_access_token, verify_password, get_password_hash
-from settings import ACCESS_TOKEN_EXPIRE_MINUTES
+from security import authenticate_user, create_token, get_password_hash, set_tokens_in_cookies, verify_refresh_token, update_user_refresh_token
+from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 auth_router = APIRouter()
@@ -41,31 +41,44 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
     Returns:
         dict: A success message indicating successful authentication. The JWT token is not returned in the response body but is set in a secure cookie.
     """
-    with AppDatabaseManager() as session:
-        user_manager = UserManager(session)
-        user = user_manager.get_user(username=form_data.username)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if not verify_password(form_data.password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    # Create access token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-
-    # Set cookie
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=1800, secure=True, samesite='Lax')
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
+    access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+    update_user_refresh_token(user.id, refresh_token)
+
+    set_tokens_in_cookies(response, access_token, refresh_token)
     return {"message": "Login successful"}
+
+@auth_router.post("/refresh-token/")
+async def refresh_access_token(response: Response, user: User = Depends(verify_refresh_token)):
+    """
+    Refresh the access token using a valid refresh token.
+
+    Args:
+        refresh_token (str): The refresh token provided by the user.
+
+    Returns:
+        dict: The new access token.
+    """
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+    
+    access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    new_refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+
+    update_user_refresh_token(user.id, new_refresh_token)
+
+    set_tokens_in_cookies(response, access_token, new_refresh_token)
 
 @auth_router.post("/register/", response_model=RegistrationResponse)
 async def register(response: Response, user: UserCreate):

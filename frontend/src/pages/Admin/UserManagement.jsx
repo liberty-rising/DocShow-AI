@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, CardContent, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import axios from 'axios';
-import { API_URL } from '../../utils/constants';
+import { API_URL } from '../../utils/constants.jsx';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);

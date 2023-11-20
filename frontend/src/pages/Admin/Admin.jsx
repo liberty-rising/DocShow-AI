@@ -1,5 +1,5 @@
 import { Typography, Grid } from '@mui/material';
-import TableManagement from './TableManagement';
+import TableManagement from './TableManagement.jsx';
 import UserManagement from './UserManagement';
 
 function AdminPage() {

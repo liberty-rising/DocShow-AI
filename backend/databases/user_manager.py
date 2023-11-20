@@ -86,7 +86,7 @@ class UserManager:
         )
         return users
 
-    def update_user(self, user_id: int, email: str = None, organization: str = None, role: str = None):
+    def update_user(self, user_id: int, email: str = None, organization: str = None, role: str = None, refresh_token: str = None):
         """
         Update a user's details in the database.
         
@@ -95,6 +95,7 @@ class UserManager:
             email (str, optional): The updated email. Defaults to None.
             organization (str, optional): The updated organization. Defaults to None.
             role (str, optional): The updated role. Defaults to None.
+            refresh_token (str, optional): The updated refresh token. Defaults to None.
             
         Returns:
             User: The updated User object if found, else None.
@@ -107,6 +108,8 @@ class UserManager:
                 db_user.organization = organization
             if role:
                 db_user.role = role
+            if refresh_token:
+                db_user.refresh_token = refresh_token
             self.db_session.commit()
             self.db_session.refresh(db_user)
         return db_user

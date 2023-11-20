@@ -1,7 +1,7 @@
 // TableManagement.js
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { API_URL } from '../../utils/constants';
+import { API_URL } from '../../utils/constants.jsx';
 import { Alert, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText,
   DialogTitle, FormControl, Grid, InputLabel, MenuItem, Select, Snackbar, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';

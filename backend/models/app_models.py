@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from typing import Optional
@@ -23,6 +23,7 @@ class User(Base):
         username (str): The username chosen by the user.
         email (str): The email address of the user.
         created_at (datetime): The timestamp when the user was created.
+        refresh_token (str, optional): The refresh token for the user.
     """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -32,6 +33,7 @@ class User(Base):
     organization = Column(String, nullable=True)
     role = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
+    refresh_token = Column(Text, nullable=True)
 
 class UserCreate(BaseModel):
     """
