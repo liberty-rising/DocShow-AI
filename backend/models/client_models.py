@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -66,6 +67,17 @@ class Dashboard(Base):
     # Relationship to charts
     charts = relationship("Chart", back_populates="dashboard")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "organization": self.organization,
+            "create_at": self.created_at,
+            "updated_at": self.updated_at,
+            "charts": [chart.to_dict() for chart in self.charts]
+        }
+
     def __repr__(self):
         return f"<Dashboard(name='{self.name}', description='{self.description}')>"
 
@@ -89,21 +101,27 @@ class Chart(Base):
     Attributes:
     - id (int): Unique identifier for each chart.
     - dashboard_id (int): Foreign key linking the chart to its dashboard.
-    - type (str): Type of the chart (e.g., bar, line, pie).
-    - data_source (str): Information about the data source for the chart.
     - order (int): Integer indicating the chart's position on the dashboard.
+    - config = (JSONB): The configuration of the chart. Specifies attributes such as chart type, data source structure, styling, etc.
     - dashboard (relationship): Relationship back to the Dashboard model.
     """
     __tablename__ = 'charts'
 
     id = Column(Integer, primary_key=True)
     dashboard_id = Column(Integer, ForeignKey('dashboards.id'))
-    type = Column(String)
-    data_source = Column(String)
     order = Column(Integer)
+    config = Column(JSONB)  # Note: JSONB is specific to PostgreSQL
 
     # Relationship to dashboard
     dashboard = relationship("Dashboard", back_populates="charts")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "dashboard_id": self.dashboard_id,
+            "order": self.order,
+            "config": self.config
+        }
 
     def __repr__(self):
         """Provide a readable representation of a Chart object."""

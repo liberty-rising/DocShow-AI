@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from databases.dashboard_manager import DashboardManager
 from databases.database_managers import ClientDatabaseManager
 from models.client_models import Dashboard, DashboardCreate
@@ -10,8 +10,10 @@ async def get_dashboard(id: int):
     with ClientDatabaseManager() as session:
         manager = DashboardManager(session)
         dashboard = manager.get_dashboard(id)
-    
-    return dashboard
+        if dashboard:
+            return dashboard.to_dict()
+        else:
+            raise HTTPException(status_code=404, detail="Dashboard not found")
 
 @dashboard_router.get("/dashboards/")
 async def get_dashboards():

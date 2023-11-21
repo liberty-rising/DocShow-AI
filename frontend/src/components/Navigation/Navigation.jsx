@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@mui/material';
+import { Box, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@mui/material';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -53,7 +53,7 @@ const Navigation = () => {
         <List sx={{ overflow: 'hidden' }}> {/* Adjust height based on Toolbar height */}
           {menuItems.map((item) => (
             isDrawerOpen ? // Only show Tooltip when drawer is closed
-              <ListItemButton onClick={() => navigate(item.path)}>
+              <ListItemButton key={item.text} onClick={() => navigate(item.path)}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>

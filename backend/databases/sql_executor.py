@@ -24,6 +24,18 @@ class SQLExecutor:
             print(f"An error occurred: {e}")
             self.session.rollback()
             raise
+
+    def execute_select_query(self, query: str):
+        try:
+            result_proxy = self.session.execute(text(query))
+            # Fetch all results
+            result_set = result_proxy.fetchall()
+            # Convert to a list of dictionaries
+            result = [dict(row) for row in result_set]
+            return result
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise
     
     def drop_table(self, table_name: str):
         try:

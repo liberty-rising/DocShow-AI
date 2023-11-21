@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
+from databases.table_manager import TableManager
 from llms.base import BaseLLM
 from llms.utils import get_llm_sql_object
-from utils.table_manager import TableManager
 from utils.utils import process_file, save_to_data_lake
 
 file_router = APIRouter()

@@ -1,9 +1,9 @@
 // AnalyticsPage.js
 import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import ChartAdder from './ChartAdder';
-import ChartDataSelector from './ChartDataSelector';
-import ChartDisplay from './ChartDisplay';
+// import ChartAdder from './ChartAdder';
+// import ChartDataSelector from './ChartDataSelector';
+// import ChartDisplay from './ChartDisplay';
 
 function AnalyticsPage() {
   const [chartType, setChartType] = useState('');
@@ -55,7 +55,6 @@ function AnalyticsPage() {
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
       {/* <ChartAdder onAddChart={handleAddChart} />
       {chartType && <ChartDataSelector chartType={chartType} onDataSelect={handleDataSelect} />} */}
-      <ChartDisplay chartType={chartType} data={fetchData(selectedData)} />
     </Box>
   );
 }

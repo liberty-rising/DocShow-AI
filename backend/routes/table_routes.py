@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from databases.database_managers import ClientDatabaseManager
 from databases.sql_executor import SQLExecutor
-from utils.table_manager import TableManager
+from databases.table_manager import TableManager
 
 table_router = APIRouter()
 

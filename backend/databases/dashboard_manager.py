@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload, Session
 from typing import List
 from models.client_models import Dashboard
 
@@ -20,7 +20,10 @@ class DashboardManager:
         self.db_session = db_session
     
     def get_dashboard(self, id: int):
-        return self.db_session.query(Dashboard).filter(Dashboard.id == id).first()
+        return self.db_session.query(Dashboard)\
+            .options(joinedload(Dashboard.charts))\
+            .filter(Dashboard.id == id)\
+            .first()
     
     def get_dashboard_by_name(self, name: str, organization: str):
         return self.db_session.query(Dashboard).filter(
