@@ -1,6 +1,6 @@
 # docshowai
 
-This repository contains a Streamlit frontend and a FastAPI backend. Below are instructions for setting up the development environment using Docker Compose.
+This repository contains a React frontend and a FastAPI backend. Below are instructions for setting up the development environment using Docker Compose.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ Generate locally-trusted SSL/TLS certificates using `mkcert`.
 
 3. Generate certificates `localhost.key` and `localhost.crt` within `certs/` using `mkcert`.
 
-### Instructions
+### Building the Docker containers
 
 1. Open a terminal (for Linux/Mac users) or Command Prompt (for Windows users) and navigate to the repository root directory.
 
@@ -29,18 +29,33 @@ Generate locally-trusted SSL/TLS certificates using `mkcert`.
     docker-compose up --build
     ```
 
+### Building the frontend
+
+1. Open a terminal (for Linux/Mac users) or Command Prompt (for Windows users) and navigate to the repository root directory.
+
+2. Navigate inside the frontend directory, and run `npm install`.
+
+    ```bash
+    cd frontend/
+    npm install
+    ```
+
+3. Once the packages finish installing, run `npm run dev`.
+
+    ```bash
+    npm run dev
+    ```
+
+### Success
+
 After executing these commands, you should be able to access:
 
-- The Streamlit app at [http://localhost:8501/](http://localhost:8501/)
-- The FastAPI backend at [http://localhost:8000/](http://localhost:8000/)
+- The React frontend at [https://127.0.0.1/](https://127.0.0.1/)
+- The FastAPI backend at [https://127.0.0.1/api](https://127.0.0.1/api)
 
 ### Stopping Services
 
-To stop the services, press `Ctrl+C` in the terminal where `docker-compose up` is running, or run:
-
-```bash
-docker-compose down
-```
+To stop the services, press `Ctrl+C` in the terminals where `docker-compose up` and React are running.
 
 ### Logs
 
