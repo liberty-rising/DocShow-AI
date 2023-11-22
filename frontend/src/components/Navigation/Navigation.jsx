@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 const Navigation = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true); // State to manage drawer toggle
-  const drawerWidth = isDrawerOpen ? 240 : 60; // 60px for collapsed width
+  const drawerWidth = isDrawerOpen ? 220 : 60; // 60px for collapsed width
 
   // Toggle drawer function
   const toggleDrawer = () => {

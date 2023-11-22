@@ -17,7 +17,7 @@ const AppLayout = ({ children }) => {
         <Box sx={{ display: 'flex' }}>
             <Header navLinks={navLinks}/>
             <Navigation />
-            <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}>
+            <Box component="main" sx={{ flexGrow: 1, p: 6, marginTop: '10px' }}>
                 <Toolbar />
                 {children}
             </Box>

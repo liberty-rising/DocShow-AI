@@ -49,7 +49,7 @@ const AIAssistant = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Typography variant="h4">💬 AI Assistant</Typography>
       <Paper style={{ height: '200px', width: '100%', overflowY: 'auto', padding: '10px', marginTop: '10px', marginBottom: '10px' }}>
         {chatHistory.map((chat, index) => (

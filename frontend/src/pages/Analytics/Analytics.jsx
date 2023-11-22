@@ -51,7 +51,7 @@ function AnalyticsPage() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
       {/* <ChartAdder onAddChart={handleAddChart} />
       {chartType && <ChartDataSelector chartType={chartType} onDataSelect={handleDataSelect} />} */}

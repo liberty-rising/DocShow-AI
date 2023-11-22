@@ -19,12 +19,12 @@ function Dashboard() {
   }, [dashboardId]);
 
   if (!dashboardData) return <div>Loading...</div>;
-  console.log(dashboardData.charts[0].config)
+  console.log(dashboardData.charts[2].config)
   return (
     <div>
       <Box sx={{ p: 3 }}>
         <Typography variant="h5" gutterBottom>📊 {dashboardData.name} </Typography>
-        <Typography variant="h6" gutterBottom>Description: {dashboardData.description}</Typography>
+        <Typography variant="subtitle1" gutterBottom>Description: {dashboardData.description}</Typography>
         <Grid container spacing={2}>
           {dashboardData.charts && dashboardData.charts.map((chart, index) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={index}>

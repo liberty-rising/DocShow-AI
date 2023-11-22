@@ -72,7 +72,7 @@ def create_sample_bar_chart(sql_executor: SQLExecutor):
         "type": "bar",
         "title": "Sales Per Product",
         "keys": ["sales"],
-        "index_by": "productline",
+        "indexBy": "productline",
         "data": chart_data,
         "options": {
             # Additional options like axis settings, color schemes, etc.
@@ -127,10 +127,13 @@ def create_sample_line_chart(sql_executor: SQLExecutor):
 
     line_chart_config = {
         "type": "line",
-        "data": {
-            "id": "yearly_sales",
-            "data": chart_data
-        },
+        "title": "Yearly Sales",
+        "data": [
+            {
+                "id": "yearly_sales",
+                "data": chart_data
+            }
+        ],
         "options": {
             # Additional options like axis settings, etc.
         }
