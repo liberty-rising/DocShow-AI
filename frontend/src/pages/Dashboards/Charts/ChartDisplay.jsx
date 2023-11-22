@@ -1,7 +1,7 @@
 import React from 'react';
-import BarChartComponent from './Charts/BarChart';
-import LineChartComponent from './Charts/LineChart';
-import PieChartComponent from './Charts/PieChart';
+import BarChartComponent from './BarChart';
+import LineChartComponent from './LineChart';
+import PieChartComponent from './PieChart';
 
 const ChartDisplay = ({ chartType, config }) => {
   switch(chartType) {

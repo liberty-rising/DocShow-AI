@@ -59,7 +59,7 @@ const CreateDashboardPage = () => {
         Create Dashboard
       </Button>
       <Button fullWidth variant="outlined" sx={{ mt: 1 }} onClick={handleBack}>
-        Back to Dashboard
+        Back to Dashboards
       </Button>
     </Box>
   );

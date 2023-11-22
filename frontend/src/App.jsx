@@ -16,6 +16,7 @@ import AdminPage from './pages/Admin/Admin';
 import AIAssistantPage from './pages/AIAssistant';
 import AnalyticsPage from './pages/Analytics/Analytics';
 import BlogPage from './pages/Blog';
+import CreateChartPage from './pages/Dashboards/Charts/CreateChart';
 import CreateDashboardPage from './pages/Dashboards/CreateDashboard';
 import DashboardMenuPage from './pages/Dashboards/DashboardsMenuPage';
 import Dashboard from './pages/Dashboards/Dashboard';
@@ -65,6 +66,7 @@ function App() {
       <Route path="/dashboards" element={<RequireAuth><AppLayout><DashboardMenuPage /></AppLayout></RequireAuth>} />
       <Route path="/dashboards/create" element={<RequireAuth><AppLayout><CreateDashboardPage /></AppLayout></RequireAuth>} />
       <Route path="/dashboards/:dashboardId" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
+      <Route path="/dashboards/:dashboardId/charts/create" element={<RequireAuth><AppLayout><CreateChartPage /></AppLayout></RequireAuth>} />
       <Route path="/upload" element={<RequireAuth><AppLayout><UploadPage /></AppLayout></RequireAuth>} />
       <Route path="/analytics" element={<RequireAuth><AppLayout><AnalyticsPage /></AppLayout></RequireAuth>} />
       <Route path="/ai-assistant" element={<RequireAuth><AppLayout><AIAssistantPage /></AppLayout></RequireAuth>} />

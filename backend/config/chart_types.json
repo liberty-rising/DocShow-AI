@@ -1,0 +1,5 @@
+[
+    {"name": "bar", "description": "A bar chart."},
+    {"name": "line", "description": "A line chart."},
+    {"name": "pie", "description": "A pie chart."}
+]
