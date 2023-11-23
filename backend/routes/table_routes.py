@@ -6,6 +6,10 @@ from databases.table_manager import TableManager
 
 table_router = APIRouter()
 
+@table_router.get("/table/columns/")
+async def get_table_columns(table_name: str):
+    return ['test1','test2','test3']
+
 @table_router.get("/tables/")
 async def get_tables():
     with ClientDatabaseManager() as session:

@@ -28,7 +28,7 @@ function Dashboard() {
   console.log(dashboardData.charts[2].config)
   return (
     <div>
-      <Box sx={{ p: 3 }}>
+      <Box>
         <Typography variant="h5" gutterBottom>📊 {dashboardData.name} </Typography>
         <Typography variant="subtitle1" gutterBottom>Description: {dashboardData.description}</Typography>
         <Grid container spacing={2}>
