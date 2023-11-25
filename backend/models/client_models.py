@@ -21,6 +21,13 @@ class TableMetadata(Base):
     create_statement = Column(String)
     description = Column(String)
 
+    def to_dict(self):
+        return {
+            "table_name": self.table_name,
+            "create_statement": self.create_statement,
+            "description": self.description
+        }
+
 class ChatHistory(Base):
     """
     Represents a record of chat history between a user and an LLM.
@@ -102,7 +109,7 @@ class Chart(Base):
     - id (int): Unique identifier for each chart.
     - dashboard_id (int): Foreign key linking the chart to its dashboard.
     - order (int): Integer indicating the chart's position on the dashboard.
-    - config = (JSONB): The configuration of the chart. Specifies attributes such as chart type, data source structure, styling, etc.
+    - config = (JSONB): The configuration of the chart. Specifies attributes such as chart type, data source structure, query, styling, etc.
     - dashboard (relationship): Relationship back to the Dashboard model.
     """
     __tablename__ = 'charts'

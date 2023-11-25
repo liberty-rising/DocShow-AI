@@ -23,7 +23,7 @@ class TableMetadataManager:
         """
         self.db_session = db_session
 
-    def get_metadata(self) -> List[TableMetadata]:
+    def get_all_metadata(self) -> List[TableMetadata]:
         """
         Retrieve all table metadata from the database.
         
@@ -34,6 +34,15 @@ class TableMetadataManager:
             return self.db_session.query(TableMetadata).all()
         except Exception as e:
             # Handle exception
+            print(f"Database error: {str(e)}")
+    
+    def get_metadata(self, table_name: str) -> TableMetadata:
+        """Retrieve metadata for a single table"""
+        try:
+            return self.db_session.query(TableMetadata).filter(
+                TableMetadata.table_name == table_name
+            ).first()
+        except Exception as e:
             print(f"Database error: {str(e)}")
     
     def format_table_metadata_for_llm(self, rows: List[TableMetadata]) -> str:
@@ -52,9 +61,9 @@ class TableMetadataManager:
         )
         return formatted_metadata
 
-    def store_table_desc(self, table_name: str, create_query: str, description: str):
+    def add_table_metadata(self, table_name: str, create_query: str, description: str):
         """
-        Store table metadata description in the database.
+        Store table metadata in the database.
         
         Args:
             table_name (str): Name of the table.

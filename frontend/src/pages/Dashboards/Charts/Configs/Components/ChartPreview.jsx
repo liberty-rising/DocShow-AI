@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
+// import ChartPreviewForm from "./ChartPreviewForm";
 
 function ChartPreview({ chartConfig }) {
     // Render the chart based on chartConfig
@@ -8,6 +9,7 @@ function ChartPreview({ chartConfig }) {
         <Box>
             {/* Chart rendering logic */}
             <Typography>Chart Preview</Typography>
+            {/* <ChartPreview chartConfig={chartConfig} /> */}
         </Box>
     );
 }

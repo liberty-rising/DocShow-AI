@@ -5,8 +5,8 @@ import { API_URL } from "../../../../utils/constants";
 
 function BarConfig({ selectedTable, onBarConfigChange }) {
     const [columns, setColumns] = useState([]);
-    const [selectedXAxis, setSelectedXAxis] = useState('');
-    const [selectedYAxis, setSelectedYAxis] = useState('');
+    const [selectedIndexBy, setSelectedIndexBy] = useState('');  // In a simple bar chart, this will be the x-axis
+    const [selectedKeys, setSelectedKeys] = useState('');  // In a simple bar chart, this will be the y-axis
     const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
     useEffect(() => {
@@ -18,19 +18,19 @@ function BarConfig({ selectedTable, onBarConfigChange }) {
     }, [selectedTable]);
 
     useEffect(() => {
-        // Whenever selectedXAxis or selectedYAxis changes, call onBarConfigChange
+        // Whenever selectedIndexBy or selectedKeys changes, call onBarConfigChange
         onBarConfigChange({
-            xAxis: selectedXAxis,
-            yAxis: selectedYAxis
+            indexBy: selectedIndexBy,
+            keys: selectedKeys
         });
-    }, [selectedXAxis, selectedYAxis, onBarConfigChange]);
+    }, [selectedIndexBy, selectedKeys, onBarConfigChange]);
 
-    const handleXAxisChange = (event) => {
-        setSelectedXAxis(event.target.value);
+    const handleIndexChange = (event) => {
+        setSelectedIndexBy(event.target.value);
     }
-
-    const handleYAxisChange = (event) => {
-        setSelectedYAxis(event.target.value);
+    
+    const handleKeysChange = (event) => {
+        setSelectedKeys(event.target.value);
     }
 
     const handleToggleAdvancedSettings = () => {
@@ -48,9 +48,9 @@ function BarConfig({ selectedTable, onBarConfigChange }) {
     const getFilteredColumnsForAxis = (axisType) => {  
         return columns.filter(column => {
             if (axisType === 'xAxis') {
-                return column !== selectedYAxis;
+                return column !== selectedKeys;
             } else { // yAxis
-                return column !== selectedXAxis;
+                return column !== selectedIndexBy;
             }
         });
     };
@@ -63,12 +63,12 @@ function BarConfig({ selectedTable, onBarConfigChange }) {
                     <Select
                         labelId="x-axis-select-label"
                         id="x-axis-select"
-                        value={selectedXAxis}
+                        value={selectedIndexBy}
                         label="X-Axis: Categories"
-                        onChange={handleXAxisChange}
+                        onChange={handleIndexChange}
                         placeholder="Select column for bar categories/groups"
                     >
-                        <MenuItem value="">None</MenuItem> {/* Option to select nothing */}
+                        <MenuItem value="">---</MenuItem> {/* Option to select nothing */}
                         {getFilteredColumnsForAxis('xAxis').map((column) => (
                             <MenuItem key={column} value={column}>{column}</MenuItem>
                         ))}
@@ -80,12 +80,12 @@ function BarConfig({ selectedTable, onBarConfigChange }) {
                     <Select
                         labelId="y-axis-select-label"
                         id="y-axis-select"
-                        value={selectedYAxis}
+                        value={selectedKeys}
                         label="Y-Axis: Values"
-                        onChange={handleYAxisChange}
+                        onChange={handleKeysChange}
                         // placeholder="Select column for bar values"
                     >
-                        <MenuItem value="">None</MenuItem> {/* Option to select nothing */}
+                        <MenuItem value="">---</MenuItem> {/* Option to select nothing */}
                         {getFilteredColumnsForAxis('yAxis').map((column) => (
                             <MenuItem key={column} value={column}>{column}</MenuItem>
                         ))}

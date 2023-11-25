@@ -7,9 +7,10 @@ from utils.sql_string_manipulator import SQLStringManipulator
 
 import pandas as pd
 
-class TableManager:
+class TableManager:  
     """
-    Manages table operations using a Large Language Model (LLM) and SQLExecutor.
+    Manages table operations.
+    Has functions that integrate a Large Language Model (LLM) and SQLExecutor.
 
     Attributes:
         llm (BaseLLM): Instance of a Large Language Model for SQL operations.
@@ -66,7 +67,7 @@ class TableManager:
             # Store description in separate table
             with ClientDatabaseManager() as session:
                 manager = TableMetadataManager(session)
-                manager.store_table_desc(table_name, create_query, description)
+                manager.add_table_metadata(table_name, create_query, description)
 
         except Exception as e:
             # Log the error message here
@@ -96,6 +97,11 @@ class TableManager:
         with ClientDatabaseManager() as session:
             executor = SQLExecutor(session)
             executor.append_df_to_table(df, table_name)
+    
+    def create_table_from_query(self, query: str):
+        with ClientDatabaseManager() as session:
+            executor = SQLExecutor(session)
+            executor.execute_create_query(query)
 
     def append_to_table(self, processed_df: pd.DataFrame, table_name: str):
         """
@@ -127,7 +133,17 @@ class TableManager:
                 executor.drop_table(table_name)
         except Exception as e:
             print(f"An error occurred: {e}")
-            self.session.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
+    
+    def get_table_columns(self, table_name: str):
+        """Returns a list of all of the columns present within the table."""
+        try:
+            with ClientDatabaseManager() as session:
+                executor = SQLExecutor(session)
+                columns = executor.get_table_columns(table_name)
+            return columns
+        except Exception as e:
+            print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
     def get_table_metadata(self):

@@ -62,6 +62,13 @@ class GPTLLM(BaseLLM):
         """Generate a system message based on the assistant type."""
         messages = {
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
+            "sql_code_for_charts": f"""
+                You are a {self.database_type} SQL statement assistant. 
+                Your query will be used to create a chart using the NIVO library. 
+                You will be given the table name, information about the table, type of chart that will be used, along with what data the user wishes to visualise. 
+                The user may not always use the correct names for the columns, it is your job to decide which column the user is referring to by using the information you have about the table.
+                Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.
+            """,
             "sql_desc": "You are an SQL table description assistant. Generate concise, informative descriptions of SQL tables based on CREATE TABLE queries and sample data. \
                 Your descriptions should help in categorizing new data and provide context for future queries, reports, and analytics.",
             "table_categorization": "You are a table categorization assistant. Your task is to analyze sample data and existing table metadata to identify the most suitable \
@@ -162,6 +169,42 @@ class GPTLLM(BaseLLM):
             """
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
+
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message_content
+    
+    def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str) -> str:
+        """
+        Generate an SQL query for a chart based on a prompt.
+        """
+        self.add_system_message(assistant_type="sql_code_for_charts")
+
+        prompt = f"""
+            Generate an SQL query for the following request:
+
+            Table name: {table_name}
+            Information about the table:
+            {table_metadata}
+            Chart that will be used:
+            {chart_type}
+
+            Request:
+            {msg}
+
+            Make sure to use only the columns specified in the table information (within the create query).
+        """
 
         user_message = self.create_message("user", prompt)
         self.history.append(user_message)

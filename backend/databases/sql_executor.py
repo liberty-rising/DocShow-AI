@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
 import pandas as pd
@@ -16,9 +16,9 @@ class SQLExecutor:
             print(f"An error occurred while appending data to table {table_name}: {str(e)}")
             raise
             
-    def execute_create_query(self, query: str):
+    def execute_create_query(self, create_query: str):
         try:
-            self.session.execute(text(query))
+            self.session.execute(text(create_query))
             self.session.commit()
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -70,6 +70,17 @@ class SQLExecutor:
             # Using the engine from the session to get table names
             table_names = self.session.bind.table_names()
             return table_names
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise
+    
+    def get_table_columns(self, table_name: str) -> list:
+        try:
+            engine = self.session.bind
+            inspector = inspect(engine)
+            columns = inspector.get_columns(table_name)
+            column_names = [column['name'] for column in columns]
+            return column_names
         except Exception as e:
             print(f"An error occurred: {e}")
             raise

@@ -21,8 +21,8 @@ def run_startup_routines():
 
     if APP_ENV == 'development':
         create_admin_user()
-        create_sample_dashboard()
         seed_client_db()
+        create_sample_dashboard()
 
 def check_jwt_secret_key():
     if APP_ENV != 'development' and JWT_SECRET_KEY == 'mysecretkey':
