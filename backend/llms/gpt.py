@@ -11,10 +11,7 @@ import tiktoken
 class GPTLLM(BaseLLM):
     def __init__(self, user_id: int, store_history: bool = False, llm_type: str = "generic", database_type: str = "postgres"):
         """Initialize API key, model, token limit, and chat service."""
-        api_key = OPENAI_API_KEY
-        if api_key is None:
-            raise ValueError("API key not set in environment variables")
-        openai.api_key = api_key
+        openai.api_key = OPENAI_API_KEY
         self.model = "gpt-4"
         self.max_tokens = 8192  # As of Oct 2023
         self.is_system_added = False  # Flag to check if system message is added
@@ -30,9 +27,9 @@ class GPTLLM(BaseLLM):
         else:
             self.history = []
     
-    def api_call(self, payload: dict) -> str:
+    async def api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
-        completion = openai.ChatCompletion.create(
+        completion = await openai.ChatCompletion.acreate(
             model=self.model,
             messages=payload['messages']
         )
@@ -65,9 +62,9 @@ class GPTLLM(BaseLLM):
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
             "nivo_config_for_charts":f"""
                 You are a JSON generator assistant.
-                You will be creating a JSON that will hold the configuration needed for a NIVO chart.
+                You will be creating a JSON that will hold the configuration needed for a nivo chart (react library).
                 You will be given the user's request, the name and metadata of the table to be visualized, the type of chart, the query used on the table, and the current NIVO configuration.
-                Generate the necessary NIVO configuration in the form of a JSON. If the chart does not have any styling, add some, and make it look nice.
+                Generate the necessary nivo configuration in the form of a JSON. If the chart does not have any styling, add some, and make it look nice.
                 Implement any styling the user asks for.
                 Return only the pure JSON.
             """,
@@ -77,6 +74,11 @@ class GPTLLM(BaseLLM):
                 You will be given the table name, information about the table, type of chart that will be used, the existing query (if there is one), along with what data the user wishes to visualise. 
                 The user may not always use the correct names for the columns, it is your job to decide which column the user is referring to by using the information you have about the table.
                 Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.
+            """,
+            "title_for_chart": f"""
+                You are a chart title generator assistant.
+                You will be naming a chart based on the given inputs.
+                Return only the chart name.
             """,
             "sql_desc": "You are an SQL table description assistant. Generate concise, informative descriptions of SQL tables based on CREATE TABLE queries and sample data. \
                 Your descriptions should help in categorizing new data and provide context for future queries, reports, and analytics.",
@@ -111,7 +113,23 @@ class GPTLLM(BaseLLM):
             
             self.is_system_added = True
     
-    def generate_create_statement(self, sample_content: str, header: str, existing_table_names: str, extra_desc: str) -> str:
+    async def send_and_receive_message(self, prompt: str):
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = await self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message_content
+    
+    async def generate_create_statement(self, sample_content: str, header: str, existing_table_names: str, extra_desc: str) -> str:
         """
         Generate an SQL CREATE TABLE statement based on sample data and additional constraints.
         
@@ -133,22 +151,12 @@ class GPTLLM(BaseLLM):
             prompt += f"\n\nDo not use the following table names as they are already in use: \n{existing_table_names}"
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: \n{extra_desc}"
-        user_message = self.create_message("user", prompt)
-        self.history.append(user_message)
+        
+        gpt_response = await self.send_and_receive_message(prompt)
 
-        # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
-
-        # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
-
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
-
-        return assistant_message_content
+        return gpt_response
     
-    def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
+    async def generate_table_desc(self, create_query: str, sample_content: str, extra_desc: str) -> str:
         """
         Generate a concise description for a SQL table based on its CREATE TABLE query and sample data.
     
@@ -179,22 +187,11 @@ class GPTLLM(BaseLLM):
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
 
-        user_message = self.create_message("user", prompt)
-        self.history.append(user_message)
+        gpt_response = await self.send_and_receive_message(prompt)
 
-        # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
-
-        # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
-
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
-
-        return assistant_message_content
+        return gpt_response
     
-    def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str, existing_query: str) -> str:
+    async def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str, existing_query: str) -> str:
         """
         Generate an SQL query for a chart based on a prompt.
         """
@@ -218,31 +215,21 @@ class GPTLLM(BaseLLM):
             {existing_query_info}
         """
 
-        user_message = self.create_message("user", prompt)
-        self.history.append(user_message)
+        gpt_response = await self.send_and_receive_message(prompt)
 
-        # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
-
-        # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
-
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
-
-        return assistant_message_content
+        return gpt_response
     
-    def generate_chart_config(self, msg: str, table_name: str, table_metadata: str, chart_type: str, query: str, nivo_config: dict):
+    async def generate_chart_config(self, msg: str, table_name: str, table_metadata: str, chart_type: str, query: str, nivo_config: dict):
         """
         Generate the nivo chart config for the given inputs.
         """
         self.add_system_message(assistant_type="nivo_config_for_charts")
         
         nivo_assistant = NivoAssistant(chart_type)
-        available_chart_params = nivo_assistant.get_available_params()
+        available_chart_params = nivo_assistant.get_available_params()  # TODO: Decide if it's worth adding this much data for llm context
         prompt = f"""
-            Generate the NIVO config for the following request. Do not change the values in the data key of the nivo config. 
+            Generate the nivo configuration for the following request. Do not change the values in the data key of the nivo config. 
+            Add styling in accordance with what the user requests. If there is no styling, add styling. Ensure the chart looks modern and is optimized for readibility. 
 
             Request:
             {msg}
@@ -256,24 +243,55 @@ class GPTLLM(BaseLLM):
             {query}
             Existing nivo configuration:
             {nivo_config}
-            Nivo parameters available for chart: {chart_type}
-            {available_chart_params}
+
+            Return a JSON represenation of the nivo configuration. Do not add any filler words or introductions. Just the pure code.
         """
 
-        user_message = self.create_message("user", prompt)
-        self.history.append(user_message)
+        updated_nivo_config = await self.send_and_receive_message(prompt)
+        updated_nivo_config = updated_nivo_config.replace("\n", "").replace("\\","")  # Clean up the string
+        print('RAW CONFIG\n', updated_nivo_config)
 
-        # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
+        # Convert the cleaned string to a Python dictionary
+        try:
+            updated_nivo_config = json.loads(updated_nivo_config)
+        except json.JSONDecodeError as e:
+            print("Error decoding JSON:", e)
+        
+        updated_nivo_config["data"] = nivo_config["data"]  # Ensures GPT does not overwrite the data
 
-        # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
+        return updated_nivo_config
+    
+    async def generate_title_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str, query: str, existing_chart_name: str):
+        """
+        Generate a title for a chart.
+        """
+        self.add_system_message(assistant_type="title_for_chart")
 
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
+        existing_title_section = f"Existing title:\n{existing_chart_name}\n" if existing_chart_name else ""
+        existing_title_info = f"If the existing title correctly represents the data, return the existing title.\
+            If the chart configuration request seems to only be a styling request, return the existing title." if existing_chart_name else ""
 
-        return assistant_message_content
+        prompt = f"""
+            Generate a title for the following request:
+
+            Chart configuration request:
+            {msg}
+            Table name:
+            {table_name}
+            Table metadata:
+            {table_metadata}
+            Chart type:
+            {chart_type}
+            Query on table for the chart:
+            {query}
+            {existing_title_section}
+            {existing_title_info}
+        """
+
+        title = await self.send_and_receive_message(prompt)
+        title = title.replace('"','')
+
+        return title
 
     def fetch_table_name_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
         """
@@ -304,20 +322,9 @@ class GPTLLM(BaseLLM):
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
 
-        user_message = self.create_message("user", prompt)
-        self.history.append(user_message)
+        gpt_response = self.send_and_receive_message(prompt)
 
-        # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
-
-        # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
-
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
-
-        return assistant_message_content
+        return gpt_response
 
     def generate_text(self, input_text):
         self.add_system_message(assistant_type="generic")

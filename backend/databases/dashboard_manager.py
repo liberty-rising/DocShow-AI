@@ -43,7 +43,7 @@ class DashboardManager:
             # Handle exception
             print(f"Database error: {str(e)}")
     
-    def create_dashboard(self, dashboard: Dashboard):
+    def save_dashboard(self, dashboard: Dashboard):
         self.db_session.add(dashboard)
         self.db_session.commit()
         self.db_session.refresh(dashboard)

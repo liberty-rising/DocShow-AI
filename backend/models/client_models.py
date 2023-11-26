@@ -132,4 +132,15 @@ class Chart(Base):
 
     def __repr__(self):
         """Provide a readable representation of a Chart object."""
-        return f"<Chart(type='{self.type}', data_source='{self.data_source}', order={self.order})>"
+        return f"<Chart(id={self.id}, dashboard_id={self.dashboard_id}, order={self.order}, config={self.config})>"
+
+class ChartCreate(BaseModel):
+    """
+    Pydantic model representing the data required to create a new chart.
+    
+    Attributes:
+        dashboard_id (int): The id of the associated dashboard.
+        config (dict): The configuration settings for the chart.
+    """
+    dashboard_id: int
+    config: dict

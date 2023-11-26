@@ -24,7 +24,7 @@ async def get_dashboards():
     return dashboards
 
 @dashboard_router.post("/dashboard/")
-async def create_dashboard(dashboard: DashboardCreate):
+async def save_dashboard(dashboard: DashboardCreate):
     db_dashboard = Dashboard(
         name=dashboard.name,
         description=dashboard.description,
@@ -32,4 +32,4 @@ async def create_dashboard(dashboard: DashboardCreate):
     )
     with ClientDatabaseManager() as session:
         manager = DashboardManager(session)
-        manager.create_dashboard(db_dashboard)
+        manager.save_dashboard(db_dashboard)

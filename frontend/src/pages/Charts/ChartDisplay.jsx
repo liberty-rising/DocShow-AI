@@ -6,7 +6,7 @@ import PieChartComponent from './PieChart';
 const ChartDisplay = ({ chartType, config }) => {
   switch(chartType) {
     case 'bar':
-      return <BarChartComponent config={config} />;
+      return <BarChartComponent chartConfig={config} />;
     case 'line':
       return <LineChartComponent config={config} />;
     case 'pie':

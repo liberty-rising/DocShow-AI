@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { useNavigate } from 'react-router-dom';
-import ChartDisplay from './Charts/ChartDisplay';
+import ChartDisplay from '../Charts/ChartDisplay';
 import { API_URL } from '../../utils/constants';
 
 function Dashboard() {
@@ -25,7 +25,7 @@ function Dashboard() {
   }
 
   if (!dashboardData) return <div>Loading...</div>;
-  console.log(dashboardData.charts[2].config)
+  
   return (
     <div>
       <Box>

@@ -71,11 +71,10 @@ def create_sample_bar_chart(sql_executor: SQLExecutor):
     bar_chart_config = {
         "type": "bar",
         "title": "Sales Per Product",
-        "keys": ["sales"],
-        "indexBy": "productline",
-        "data": chart_data,
-        "options": {
-            # Additional options like axis settings, color schemes, etc.
+        "nivoConfig": {
+            "keys": ["sales"],
+            "indexBy": "productline",
+            "data": chart_data, 
         }
     }
 

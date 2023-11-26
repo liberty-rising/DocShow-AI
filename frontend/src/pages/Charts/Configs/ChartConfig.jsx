@@ -4,14 +4,13 @@ import axios from 'axios';
 import TableSelector from "./Components/TableSelector";
 import ChartTypeSelector from "./Components/ChartTypeSelector";
 import ChartPreview from "./Components/ChartPreview";
-import { API_URL } from "../../../../utils/constants";
+import { API_URL } from "../../../utils/constants";
 
-function ChartConfig({ onConfigChange, onRequiredSelected }) {
+function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
     const [tables, setTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState('');
     const [chartTypes, setChartTypes] = useState([]);
     const [selectedChartType, setSelectedChartType] = useState('');
-    const [chartSpecificConfig, setChartSpecificConfig] = useState({});
 
     useEffect(() => {
         // Fetch tables from API
@@ -43,9 +42,8 @@ function ChartConfig({ onConfigChange, onRequiredSelected }) {
     }, [selectedTable, selectedChartType])
 
     const canShowPreview = () => {
-        // Example condition for a bar chart: Check if table and chart type are selected
-        // and specific config for the chart type is set
-        return selectedTable && selectedChartType
+        // Check if chartConfig.nivoConfig exists and is not an empty object
+        return chartConfig.nivoConfig && Object.keys(chartConfig.nivoConfig).length > 0;
     };
 
     const handleTableChange = (event) => {
@@ -63,9 +61,9 @@ function ChartConfig({ onConfigChange, onRequiredSelected }) {
             <TableSelector selectedTable={selectedTable} onTableChange={handleTableChange} tables={tables} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
             {canShowPreview() ? (
-                <ChartPreview chartConfig={chartSpecificConfig} />
+                <ChartPreview chartConfig={chartConfig} />
             ) : (
-                <Typography variant="caption">Select the required options to preview the chart.</Typography>
+                <Typography variant="caption">Configure the chart to preview it here.</Typography>
             )}
             
         </Box>

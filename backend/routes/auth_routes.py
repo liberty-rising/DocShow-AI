@@ -67,6 +67,7 @@ async def refresh_access_token(response: Response, user: User = Depends(verify_r
     Returns:
         dict: The new access token.
     """
+    print("ATTEMPING TOKEN REFRESH")
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

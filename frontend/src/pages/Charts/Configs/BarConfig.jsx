@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Collapse, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import axios from "axios";
-import { API_URL } from "../../../../utils/constants";
+import { API_URL } from "../../../utils/constants";
 
 function BarConfig({ selectedTable, onBarConfigChange }) {
     const [columns, setColumns] = useState([]);

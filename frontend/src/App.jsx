@@ -16,7 +16,7 @@ import AdminPage from './pages/Admin/Admin';
 import AIAssistantPage from './pages/AIAssistant';
 import AnalyticsPage from './pages/Analytics/Analytics';
 import BlogPage from './pages/Blog';
-import CreateChartPage from './pages/Dashboards/Charts/CreateChart';
+import CreateChartPage from './pages/Charts/CreateChart';
 import CreateDashboardPage from './pages/Dashboards/CreateDashboard';
 import DashboardMenuPage from './pages/Dashboards/DashboardsMenuPage';
 import Dashboard from './pages/Dashboards/Dashboard';
