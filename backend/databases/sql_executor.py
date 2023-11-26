@@ -25,14 +25,18 @@ class SQLExecutor:
             self.session.rollback()
             raise
 
-    def execute_select_query(self, query: str):
+    def execute_select_query(self, query: str, format_as_dict: bool = True):
         try:
             result_proxy = self.session.execute(text(query))
             # Fetch all results
             result_set = result_proxy.fetchall()
-            # Convert to a list of dictionaries
-            result = [dict(row) for row in result_set]
-            return result
+
+            if format_as_dict:
+                # Convert to a list of dictionaries
+                result = [dict(row) for row in result_set]
+                return result
+            
+            return result_set
         except Exception as e:
             print(f"An error occurred: {e}")
             raise

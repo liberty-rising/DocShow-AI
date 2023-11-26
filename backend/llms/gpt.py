@@ -2,6 +2,7 @@ from .base import BaseLLM
 from databases.chat_service import ChatHistoryService
 from databases.database_managers import ClientDatabaseManager
 from settings import OPENAI_API_KEY
+from utils.nivo_assistant import NivoAssistant
 
 import json
 import openai
@@ -62,10 +63,18 @@ class GPTLLM(BaseLLM):
         """Generate a system message based on the assistant type."""
         messages = {
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
+            "nivo_config_for_charts":f"""
+                You are a JSON generator assistant.
+                You will be creating a JSON that will hold the configuration needed for a NIVO chart.
+                You will be given the user's request, the name and metadata of the table to be visualized, the type of chart, the query used on the table, and the current NIVO configuration.
+                Generate the necessary NIVO configuration in the form of a JSON. If the chart does not have any styling, add some, and make it look nice.
+                Implement any styling the user asks for.
+                Return only the pure JSON.
+            """,
             "sql_code_for_charts": f"""
                 You are a {self.database_type} SQL statement assistant. 
                 Your query will be used to create a chart using the NIVO library. 
-                You will be given the table name, information about the table, type of chart that will be used, along with what data the user wishes to visualise. 
+                You will be given the table name, information about the table, type of chart that will be used, the existing query (if there is one), along with what data the user wishes to visualise. 
                 The user may not always use the correct names for the columns, it is your job to decide which column the user is referring to by using the information you have about the table.
                 Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.
             """,
@@ -185,12 +194,14 @@ class GPTLLM(BaseLLM):
 
         return assistant_message_content
     
-    def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str) -> str:
+    def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str, existing_query: str) -> str:
         """
         Generate an SQL query for a chart based on a prompt.
         """
         self.add_system_message(assistant_type="sql_code_for_charts")
-
+        existing_query_section = f"Existing query:\n{existing_query}\n" if existing_query else ""
+        existing_query_info = f"The request may be a pure styling request, with no need to change the existing query. \
+            If that is the case, return the existing query." if existing_query else ""
         prompt = f"""
             Generate an SQL query for the following request:
 
@@ -199,11 +210,12 @@ class GPTLLM(BaseLLM):
             {table_metadata}
             Chart that will be used:
             {chart_type}
-
+            {existing_query_section}
             Request:
             {msg}
 
             Make sure to use only the columns specified in the table information (within the create query).
+            {existing_query_info}
         """
 
         user_message = self.create_message("user", prompt)
@@ -221,6 +233,48 @@ class GPTLLM(BaseLLM):
 
         return assistant_message_content
     
+    def generate_chart_config(self, msg: str, table_name: str, table_metadata: str, chart_type: str, query: str, nivo_config: dict):
+        """
+        Generate the nivo chart config for the given inputs.
+        """
+        self.add_system_message(assistant_type="nivo_config_for_charts")
+        
+        nivo_assistant = NivoAssistant(chart_type)
+        available_chart_params = nivo_assistant.get_available_params()
+        prompt = f"""
+            Generate the NIVO config for the following request. Do not change the values in the data key of the nivo config. 
+
+            Request:
+            {msg}
+            Table name:
+            {table_name}
+            Table metadata:
+            {table_metadata}
+            Chart type:
+            {chart_type}
+            Query:
+            {query}
+            Existing nivo configuration:
+            {nivo_config}
+            Nivo parameters available for chart: {chart_type}
+            {available_chart_params}
+        """
+
+        user_message = self.create_message("user", prompt)
+        self.history.append(user_message)
+
+        # Check token limit and truncate history if needed
+        self.truncate_history(self.history)
+
+        # Make API call
+        assistant_message_content = self.api_call({"messages": self.history})
+        assistant_message = self.create_message("assistant", assistant_message_content)
+
+        # Append assistant's reply to history
+        self.history.append(assistant_message)
+
+        return assistant_message_content
+
     def fetch_table_name_from_sample(self, sample_content: str, extra_desc: str, table_metadata: str):
         """
         Determine the most appropriate existing table to which the sample data should be appended.

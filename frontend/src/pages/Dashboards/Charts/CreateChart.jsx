@@ -9,11 +9,11 @@ import { API_URL } from "../../../utils/constants";
 const CreateChartPage = () => {
     const { dashboardId } = useParams(); // Retrieve the dashboardId from the URL parameter
     const navigate = useNavigate();
-    const [chartConfig, setChartConfig] = useState({ table: '', type: '', config: {} });
+    const [chartConfig, setChartConfig] = useState({ table: '', type: '', nivoConfig: {} });
     const [isChatEnabled, setIsChatEnabled] = useState(false);
 
     const handleChartConfigChange = (config) => {
-        setChartConfig(config);
+        setChartConfig(prevConfig => ({ ...prevConfig, ...config }))
         setIsChatEnabled(true);
     };
 
@@ -22,22 +22,28 @@ const CreateChartPage = () => {
         setIsChatEnabled(isChatEnabled);
     }
     
-    
     const handleSendRequest = async (message) => {
         // Message to LLM
         try {
+            // Ensure nivoConfig is set to an empty object if it doesn't exist
+            const configToSend = {
+                ...chartConfig,
+                nivoConfig: chartConfig.nivoConfig || {}
+            };
+
             const response = await axios.post(`${API_URL}chart/config/`, {
                 msg: message,  // message to the llm
-                chart_config: chartConfig
+                chart_config: configToSend
             });
 
-            const updatedChartConfig = response.data;
+            const updatedChartConfig = response.data.json();
             setChartConfig(updatedChartConfig);
         } catch (error) {
             console.error("Error communicating with LLM:", error);
         }
     }
 
+    console.log(chartConfig.nivoConfig)
     const handleSubmit = async () => {
     };
 

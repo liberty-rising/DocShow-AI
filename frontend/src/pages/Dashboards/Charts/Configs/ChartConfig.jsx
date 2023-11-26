@@ -3,7 +3,6 @@ import { Box, Typography } from "@mui/material";
 import axios from 'axios';
 import TableSelector from "./Components/TableSelector";
 import ChartTypeSelector from "./Components/ChartTypeSelector";
-// import ChartConfigForm from "./Components/ChartConfigForm";
 import ChartPreview from "./Components/ChartPreview";
 import { API_URL } from "../../../../utils/constants";
 
@@ -57,26 +56,12 @@ function ChartConfig({ onConfigChange, onRequiredSelected }) {
     const handleChartTypeChange = (event) => {
         const selectedType = event.target.value;
         setSelectedChartType(selectedType);
-        // Reset chart config when chart type changes
-        setChartSpecificConfig({});
     };
-
-    // const handleChartSpecificConfigChange = (config) => {
-    //     setChartSpecificConfig(config);
-    //     // Update the overall configuration
-    //     const overallConfig = {
-    //         type: selectedChartType,
-    //         config: config,
-    //         table: selectedTable
-    //     };
-    //     onConfigChange(overallConfig);
-    // };
 
     return(
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 120, marginBottom: 2, width: '100%' }}>
             <TableSelector selectedTable={selectedTable} onTableChange={handleTableChange} tables={tables} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
-            {/* <ChartConfigForm selectedTable={selectedTable} selectedChartType={selectedChartType} onConfigChange={handleChartSpecificConfigChange} /> */}
             {canShowPreview() ? (
                 <ChartPreview chartConfig={chartSpecificConfig} />
             ) : (
