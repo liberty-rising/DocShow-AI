@@ -11,7 +11,7 @@ axios.interceptors.response.use(response => response, async (error) => {
         try {
             // Attempt to refresh the token
             console.log("Attempting token refresh")
-            await axios.post(`${API_URL}/refresh-token/`);
+            await axios.post(`${API_URL}refresh-token/`);
             // The browser will automatically include the updated cookies
             return axios(originalRequest); // Retry the original request
         } catch (refreshError) {

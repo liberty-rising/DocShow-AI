@@ -78,7 +78,7 @@ class UserManager:
             self.db_session.query(User)
             .with_entities(
                 User.id, User.role, User.email, 
-                User.organization, User.username, User.created_at
+                User.organization_id, User.username, User.created_at
             )
             .offset(skip)
             .limit(limit)
@@ -86,14 +86,14 @@ class UserManager:
         )
         return users
 
-    def update_user(self, user_id: int, email: str = None, organization: str = None, role: str = None, refresh_token: str = None):
+    def update_user(self, user_id: int, email: str = None, organization_id: int = None, role: str = None, refresh_token: str = None):
         """
         Update a user's details in the database.
         
         Args:
             user_id (int): The ID of the user to be updated.
             email (str, optional): The updated email. Defaults to None.
-            organization (str, optional): The updated organization. Defaults to None.
+            organization_id (int, optional): The updated organization id. Defaults to None.
             role (str, optional): The updated role. Defaults to None.
             refresh_token (str, optional): The updated refresh token. Defaults to None.
             
@@ -104,8 +104,8 @@ class UserManager:
         if db_user:
             if email:
                 db_user.email = email
-            if organization:
-                db_user.organization = organization
+            if organization_id:
+                db_user.organization_id = organization_id
             if role:
                 db_user.role = role
             if refresh_token:
@@ -114,10 +114,10 @@ class UserManager:
             self.db_session.refresh(db_user)
         return db_user
     
-    def update_user_by_username(self, username: str, organization: str, role: str) -> User:
+    def update_user_by_username(self, username: str, organization_id: int, role: str) -> User:
         db_user = self.db_session.query(User).filter(User.username == username).first()
         if db_user:
-            db_user.organization = organization
+            db_user.organization_id = organization_id
             db_user.role = role
             self.db_session.commit()
             self.db_session.refresh(db_user)

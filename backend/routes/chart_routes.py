@@ -1,11 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from databases.chart_manager import ChartManager
 from databases.database_managers import ClientDatabaseManager
 from databases.table_metadata_manager import TableMetadataManager
 from llms.gpt import GPTLLM
+from models.app_models import User
 from models.client_models import Chart, ChartCreate
+from security import get_current_user
 from utils.nivo_assistant import NivoAssistant
 from utils.utils import execute_select_query
 
@@ -15,6 +17,7 @@ import os
 chart_router = APIRouter()
 
 class ChartConfigRequest(BaseModel):
+    chat_id: int
     msg: str
     chart_config: dict
 
@@ -42,8 +45,9 @@ async def save_chart(chart: ChartCreate):
         manager.save_chart(db_chart)
 
 @chart_router.post("/chart/config/")
-async def create_chart_config(request: ChartConfigRequest):
+async def create_chart_config(request: ChartConfigRequest, user: User = Depends(get_current_user)):
     """Creates or updates a chart configuration using an LLM."""
+    chat_id = request.chat_id
     msg = request.msg
     chart_config = request.chart_config
     table_name = chart_config.get("table")
@@ -53,7 +57,7 @@ async def create_chart_config(request: ChartConfigRequest):
     table_metadata = get_table_metadata(table_name)
 
     # Generate a query
-    gpt = GPTLLM(user_id=1)  # TODO: make sure user_id is dynamically fetched
+    gpt = GPTLLM(chat_id, user)
     chart_config["query"] = await gpt.generate_query_for_chart(msg, table_name, table_metadata, chart_type, existing_query)
 
     # Execute query

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -11,6 +11,7 @@ const CreateChartPage = () => {
     const navigate = useNavigate();
     const [chartConfig, setChartConfig] = useState({ title: '', table: '', type: '', query: '', nivoConfig: {} });
     const [isChatEnabled, setIsChatEnabled] = useState(false);
+    const [chartChatId, setChartChatId] = useState(null);
 
     const handleChartConfigChange = (config) => {
         setChartConfig(prevConfig => ({ ...prevConfig, ...config }))
@@ -37,6 +38,7 @@ const CreateChartPage = () => {
             };
 
             const response = await axios.post(`${API_URL}chart/config/`, {
+                chat_id: chartChatId,
                 msg: message,  // message to the llm
                 chart_config: configToSend
             }, axiosConfig);

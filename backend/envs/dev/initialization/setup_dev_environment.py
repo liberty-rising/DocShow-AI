@@ -1,13 +1,29 @@
 from databases.database_managers import AppDatabaseManager,ClientDatabaseManager
 from databases.dashboard_manager import DashboardManager
 from databases.sql_executor import SQLExecutor
+from databases.organization_manager import OrganizationManager
 from databases.user_manager import UserManager
-from models.app_models import User
+from models.app_models import Organization, User
 from models.client_models import Chart, Dashboard
 from security import get_password_hash
 from utils.utils import get_app_logger
 
 logger = get_app_logger(__name__)
+
+def create_sample_organization():
+    """Creates a sample organization if it doesn't already exist."""
+    organization = Organization(
+        name = 'DocShow AI'
+    )
+
+    with AppDatabaseManager() as session:
+        org_manager = OrganizationManager(session)
+        existing_org = org_manager.get_organization_by_name(organization.name)
+        if not existing_org:
+            org_manager.create_organization(organization)
+            logger.debug("Sample organization created.")
+        else:
+            logger.debug("Sample organization already exists.")
 
 def create_admin_user():
     """Creates an admin user if it doesn't already exist."""
@@ -15,7 +31,7 @@ def create_admin_user():
         username = 'admin',
         hashed_password = get_password_hash('admin'),
         email = 'admin@docshow.ai',
-        organization = 'DocShow AI',
+        organization_id = 1,
         role = 'admin'
     )
 

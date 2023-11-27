@@ -68,11 +68,6 @@ async def refresh_access_token(response: Response, user: User = Depends(verify_r
         dict: The new access token.
     """
     print("ATTEMPING TOKEN REFRESH")
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token",
-        )
     
     access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     new_refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))

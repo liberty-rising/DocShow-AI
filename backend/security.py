@@ -66,14 +66,11 @@ def verify_refresh_token(token: str = Depends(oauth2_scheme)) -> User:
             manager = UserManager(session)
             user = manager.get_user(username)
 
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        if user is None or user.refresh_token != token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
 
-        # Verify the token matches the user's stored refresh token
-        if user.refresh_token != token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
-        return user.refresh_token
+        return user
+    
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 

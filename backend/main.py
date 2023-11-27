@@ -8,6 +8,7 @@ from routes.chat_routes import chat_router
 from routes.chart_routes import chart_router
 from routes.dashboard_routes import dashboard_router
 from routes.file_routes import file_router
+from routes.organization_routes import organization_router
 from routes.table_routes import table_router
 from routes.user_routes import user_router
 # from session_config import session_manager
@@ -26,6 +27,7 @@ app.include_router(chart_router)
 app.include_router(chat_router)
 app.include_router(dashboard_router)
 app.include_router(file_router)
+app.include_router(organization_router)
 app.include_router(table_router)
 app.include_router(user_router)
 

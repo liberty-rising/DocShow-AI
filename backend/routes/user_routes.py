@@ -32,7 +32,7 @@ async def update_user(user_data: UserUpdate):
         # Update user details
         updated_user = user_manager.update_user_by_username(
             username=user_data.username, 
-            organization=user_data.organization, 
+            organization_id=user_data.organization_id, 
             role=user_data.role
         )
         

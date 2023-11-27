@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -16,20 +17,25 @@ const UserPage = () => {
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [organizationData, setOrganizationData] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}users/me/`);
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-        } else {
-          throw new Error('Failed to fetch user details.');
+        const userResponse = await axios.get(`${API_URL}users/me/`);
+        const userData = userResponse.data;
+        setUserData(userData);
+
+        // Fetch organization data if organization_id is present
+        if (userData.organization_id) {
+          const orgResponse = await axios.get(`${API_URL}organization/`, { 
+            params: { org_id: userData.organization_id } 
+          });
+          setOrganizationData(orgResponse.data);
         }
       } catch (error) {
-        setError(error.message);
+        setError(error.response ? error.response.data.message : error.message);
       } finally {
         setIsLoading(false);
       }
@@ -78,7 +84,7 @@ const UserPage = () => {
               <CardContent>
                 <BusinessIcon />
                 <Typography variant="h6">Organization</Typography>
-                <Typography variant="body1">{userData.organization}</Typography>
+                <Typography variant="body1">{organizationData.name}</Typography>
               </CardContent>
             </Card>
           </Grid>

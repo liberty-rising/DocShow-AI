@@ -7,6 +7,7 @@ function UserManagement() {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [selectedUser, setSelectedUser] = useState({});
+  const [organizations, setOrganizations] = useState([]);
 
   const fetchUsers = async () => {
     try {
@@ -26,15 +27,25 @@ function UserManagement() {
     }
   };
 
+  const fetchOrganizations = async () => {
+    try {
+      const response = await axios.get(`${API_URL}organizations/`);
+      setOrganizations(response.data);
+    } catch (error) {
+      console.error('Error fetching organizations', error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchRoles();
+    fetchOrganizations();
   }, []); // Empty dependency array since these functions don't depend on external variables
 
   const handleUpdateUser = async () => {
     const data = {
       username: selectedUser.username,
-      organization: selectedUser.organization,
+      organization_id: selectedUser.organization_id,
       role: selectedUser.role
     };
 
@@ -50,7 +61,20 @@ function UserManagement() {
 
   const handleSelectUser = username => {
     const user = users.find(u => u.username === username);
+    if (user) {
+      setSelectedUser({
+        ...user,
+        organization_id: user.organization_id, // Set the organization_id from the user
+        role: user.role
+      });
+    } else {
+      setSelectedUser({});
+    }
     setSelectedUser(user || {});
+  };
+
+  const handleSelectOrganization = organizationId => {
+    setSelectedUser({ ...selectedUser, organization_id: organizationId });
   };
 
   return (
@@ -67,13 +91,19 @@ function UserManagement() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.username}>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.organization}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                </TableRow>
-              ))}
+              {users.map((user) => {
+                // Find the organization name using the organization_id
+                const userOrganization = organizations.find(org => org.id === user.organization_id);
+                const organizationName = userOrganization ? userOrganization.name : 'Not Available';
+
+                return (
+                  <TableRow key={user.username}>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{organizationName}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -93,13 +123,22 @@ function UserManagement() {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField
-              label="Organization"
-              value={selectedUser.organization || ''}
-              onChange={e => setSelectedUser({ ...selectedUser, organization: e.target.value })}
-              fullWidth
-              disabled={!selectedUser.username}
-            />
+            <FormControl fullWidth disabled={!selectedUser.username}>
+              <InputLabel id="select-organization-label">Select Organization</InputLabel>
+              <Select
+                labelId="select-organization-label"
+                value={selectedUser.organization_id || ''}
+                onChange={e => handleSelectOrganization(e.target.value)}
+                label="Select Organization"
+              >
+                {organizations.map(organization => <MenuItem 
+                  key={organization.id} 
+                  value={organization.id}
+                >
+                  {organization.name}
+                </MenuItem>)}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth disabled={!selectedUser.username}>

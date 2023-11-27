@@ -1,6 +1,7 @@
 from .base import BaseLLM
-from databases.chat_service import ChatHistoryService
+from databases.chat_history_manager import ChatHistoryManager
 from databases.database_managers import ClientDatabaseManager
+from models.app_models import User
 from settings import OPENAI_API_KEY
 from utils.nivo_assistant import NivoAssistant
 
@@ -9,21 +10,48 @@ import openai
 import tiktoken
 
 class GPTLLM(BaseLLM):
-    def __init__(self, user_id: int, store_history: bool = False, llm_type: str = "generic", database_type: str = "postgres"):
-        """Initialize API key, model, token limit, and chat service."""
+    """
+    A class representing a GPT-based Language Learning Model (LLM) with chat history storage capabilities.
+
+    This class encapsulates the functionality for initializing and managing a GPT model, including configuration for API key, model version, token limits, and optional storage of chat history in a specified database. 
+    It is designed to be flexible for different users, requests, and chat session management.
+    """
+    def __init__(self, chat_id: int = None, user: User = None, store_history: bool = False, llm_type: str = "generic", database_type: str = "postgres"):
+        """
+        Initializes an instance of the GPT-based Language Model (LLM) with optional chat history storage.
+
+        This constructor sets up the GPT model with necessary parameters and configurations, such as API key, model type, token limit, and chat history management. 
+        It also initializes the user and chat identifiers, and determines whether to store chat history based on the provided parameters.
+
+        Parameters:
+        chat_id (int, optional): Unique identifier for the chat session. Defaults to None.
+        user (User, optional): The user object containing user-specific information like user_id and organization_id. Defaults to None.
+        store_history (bool, optional): Flag indicating whether to store chat history in the database. Defaults to False.
+        llm_type (str, optional): Specifies the type of the language model. Defaults to "generic".
+        database_type (str, optional): Specifies the type of database being used, such as "postgres". Defaults to "postgres".
+
+        Note:
+        - The OPENAI_API_KEY is required and used to authenticate with the OpenAI API.
+        - The model is set to "gpt-4" and the maximum token limit is set to 8192 as of October 2023.
+        - If 'chat_id' is provided and 'store_history' is True, the chat history will be fetched from the database.
+        - The history of the chat is maintained in a list, which is empty by default unless fetched from the database.
+        """
         openai.api_key = OPENAI_API_KEY
         self.model = "gpt-4"
         self.max_tokens = 8192  # As of Oct 2023
         self.is_system_added = False  # Flag to check if system message is added
-        self.user_id = user_id
+
+        self.chat_id = chat_id
+        self.user_id = user.user_id
+        self.organization_id = user.organization_id
         self.store_history = store_history
         self.llm_type = llm_type
         self.database_type = database_type
 
-        if self.store_history:
+        if self.chat_id and store_history:
             with ClientDatabaseManager() as session:
-                chat_service = ChatHistoryService(session)
-                self.history = chat_service.get_llm_chat_history_for_user(self.user_id,self.llm_type)
+                chat_manager = ChatHistoryManager(session)
+                self.history = chat_manager.get_history(self.chat_id)
         else:
             self.history = []
     
@@ -60,6 +88,13 @@ class GPTLLM(BaseLLM):
         """Generate a system message based on the assistant type."""
         messages = {
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
+            "nivo_charts":f"""
+                You are a nivo chart generator assistant.
+                Nivo is a visualisation library for React that produces different types of charts.
+                You will be in charge of generating JSON configurations, SQL queries, and titles.
+                Return only the requested information. 
+                Do not add introductory statements, filler words, or extra formatting.
+            """,
             "nivo_config_for_charts":f"""
                 You are a JSON generator assistant.
                 You will be creating a JSON that will hold the configuration needed for a nivo chart (react library).
@@ -112,6 +147,8 @@ class GPTLLM(BaseLLM):
                 self.history.append(system_message)
             
             self.is_system_added = True
+
+        self.llm_type = assistant_type
     
     async def _send_and_receive_message(self, prompt: str):
         user_message = self._create_message("user", prompt)
@@ -127,7 +164,43 @@ class GPTLLM(BaseLLM):
         # Append assistant's reply to history
         self.history.append(assistant_message)
 
+        if self.store_history:
+            self._save_messages()
+
         return assistant_message_content
+    
+    def _save_messages(self, user_message, assistant_message):
+        """
+        Saves the user's message and the assistant's response to the database.
+
+        This method serializes both the user and assistant messages into JSON format
+        and then stores them in the database using the ChatHistoryManager. If a chat_id
+        does not exist for the current session, it generates a new one. This ensures
+        that each message is associated with the correct chat session and user.
+
+        Parameters:
+        user_message (dict): A dictionary representing the user's message.
+        assistant_message (dict): A dictionary representing the assistant's response.
+
+        Note:
+        This method assumes an existing ClientDatabaseManager context for database operations.
+        There's a TODO regarding freezing operations to prevent duplicate chat_id assignment.
+        """
+
+        # Serialize to JSON for storage:
+        json_user_message = json.dumps(user_message)
+        json_assistant_message = json.dumps(assistant_message)
+
+        with ClientDatabaseManager() as session:
+            chat_manager = ChatHistoryManager(session)
+            if not self.chat_id:  # Generate a new chat id
+                # TODO: Freeze operations here (not 100% sure but worried about other users getting the same chat id)
+                self.chat_id = chat_manager.get_new_chat_id()
+
+            chat_manager.save_message(chat_id=self.chat_id, user_id=self.user_id, organization_id=self.organization_id,
+                                      llm_type=self.llm_type, message=json_user_message, is_user=True)  
+            chat_manager.save_message(chat_id=self.chat_id, user_id=self.user_id, organization_id=self.organization_id, 
+                                      llm_type=self.llm_type, message=json_assistant_message, is_user=False)
     
     async def generate_create_statement(self, sample_content: str, header: str, existing_table_names: str, extra_desc: str) -> str:
         """
@@ -349,8 +422,8 @@ class GPTLLM(BaseLLM):
             json_user_message = json.dumps(user_message)
             json_assistant_message = json.dumps(assistant_message)
             with ClientDatabaseManager() as session:
-                chat_service = ChatHistoryService(session)
-                chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)
-                chat_service.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
+                chat_manager = ChatHistoryManager(session)
+                chat_manager.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)  
+                chat_manager.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
 
         return assistant_message_content
