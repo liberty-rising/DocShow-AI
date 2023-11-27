@@ -60,7 +60,7 @@ def create_sample_dashboard():
             charts = create_sample_charts(sql_executor)
 
             dashboard.charts.extend(charts)  # Directly append the list of charts
-            manager.create_dashboard(dashboard)
+            manager.save_dashboard(dashboard)
             logger.debug("Sample dashboard with charts created.")
         else:
             logger.debug("Sample dashboard already exists.")

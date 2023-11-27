@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException, Request, Response, status
+from fastapi import Cookie, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -41,32 +41,28 @@ def verify_password(plain_password, hashed_password):
     """
     return pwd_context.verify(plain_password, hashed_password)
 
-def verify_refresh_token(token: str = Depends(oauth2_scheme)) -> User:
+def verify_refresh_token(refresh_token: str = Cookie(None)) -> User:
     """
-    Verify a refresh token and return the associated user.
-
-    Args:
-        token (str): The refresh token to verify.
-
-    Returns:
-        User: The user associated with the valid refresh token.
-
-    Raises:
-        HTTPException: If the token is invalid or expired.
+    Verify a refresh token from cookies and return the associated user.
     """
+    
+    if refresh_token is None:
+        raise HTTPException(status_code=401, detail="Refresh token missing")
+
     try:
         # Decode the token
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        payload = decode_token(refresh_token)
+        refresh_token = refresh_token.replace("Bearer ", "", 1)  # TODO: Fix because repeated in decode
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
+        
         # Find the user in the database
         with AppDatabaseManager() as session:
             manager = UserManager(session)
             user = manager.get_user(username)
 
-        if user is None or user.refresh_token != token:
+        if user is None or user.refresh_token != refresh_token:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
 
         return user

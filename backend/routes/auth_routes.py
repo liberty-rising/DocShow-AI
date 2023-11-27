@@ -61,13 +61,23 @@ async def refresh_access_token(response: Response, user: User = Depends(verify_r
     """
     Refresh the access token using a valid refresh token.
 
+    This endpoint reads the refresh token from a cookie, verifies it, and then
+    issues a new access token and a new refresh token. The new tokens are set
+    in secure, HttpOnly cookies in the response.
+
     Args:
-        refresh_token (str): The refresh token provided by the user.
+        user (User): The user object obtained from the verified refresh token.
 
     Returns:
-        dict: The new access token.
+        dict: A message indicating successful token refresh. The new tokens are not returned in the response body but are set in secure cookies.
     """
-    print("ATTEMPING TOKEN REFRESH")
+    
+    # Ensure the user is valid
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
     
     access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     new_refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
