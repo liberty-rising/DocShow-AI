@@ -27,7 +27,7 @@ class GPTLLM(BaseLLM):
         else:
             self.history = []
     
-    async def api_call(self, payload: dict) -> str:
+    async def _api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
         completion = await openai.ChatCompletion.acreate(
             model=self.model,
@@ -35,28 +35,28 @@ class GPTLLM(BaseLLM):
         )
         return completion.choices[0].message['content']
 
-    def count_tokens(self, text: str) -> int:
+    def _count_tokens(self, text: str) -> int:
         """Count the number of tokens in the given text."""
         encoding = tiktoken.encoding_for_model(self.model) 
         token_count = len(encoding.encode(text))  # Use the .encode() method to tokenize and count the tokens
         return token_count
     
-    def total_tokens(self, history):
+    def _total_tokens(self, history):
         """Calculate total tokens in the given history."""
-        return sum(self.count_tokens(message["content"]) for message in history)
+        return sum(self._count_tokens(message["content"]) for message in history)
     
-    def truncate_history(self, history):
+    def _truncate_history(self, history):
         """Truncate history to fit within token limits."""
-        tokens = self.total_tokens(history)
+        tokens = self._total_tokens(history)
 
         index_to_start = 1 if self.is_system_added else 0  # Skip the system message if it exists
 
         while tokens > self.max_tokens:
             removed_message = history.pop(index_to_start)
-            tokens -= self.count_tokens(removed_message["content"])
+            tokens -= self._count_tokens(removed_message["content"])
         return history
     
-    def get_system_message_content(self, assistant_type: str = "generic") -> str:
+    def _get_system_message_content(self, assistant_type: str = "generic") -> str:
         """Generate a system message based on the assistant type."""
         messages = {
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
@@ -88,17 +88,17 @@ class GPTLLM(BaseLLM):
         }
         return messages.get(assistant_type, "You are a generic assistant.")
     
-    def create_message(self, role: str, prompt: str):
+    def _create_message(self, role: str, prompt: str):
         """Create either a user, system, or assistant message."""
         return {"role":f"{role}", "content": f"{prompt}"}
     
-    def add_system_message(self, assistant_type: str) -> None:
+    def _add_system_message(self, assistant_type: str) -> None:
         """
         Adds a system message based on the given assistant type.
         Replaces the existing system message if one is present.
         """
-        system_message_content = self.get_system_message_content(assistant_type)
-        system_message  = self.create_message("system", system_message_content)
+        system_message_content = self._get_system_message_content(assistant_type)
+        system_message  = self._create_message("system", system_message_content)
 
         if self.is_system_added:
             # Replace the existing system message
@@ -113,16 +113,16 @@ class GPTLLM(BaseLLM):
             
             self.is_system_added = True
     
-    async def send_and_receive_message(self, prompt: str):
-        user_message = self.create_message("user", prompt)
+    async def _send_and_receive_message(self, prompt: str):
+        user_message = self._create_message("user", prompt)
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
+        self._truncate_history(self.history)
 
         # Make API call
-        assistant_message_content = await self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
+        assistant_message_content = await self._api_call({"messages": self.history})
+        assistant_message = self._create_message("assistant", assistant_message_content)
 
         # Append assistant's reply to history
         self.history.append(assistant_message)
@@ -141,7 +141,7 @@ class GPTLLM(BaseLLM):
         Returns:
             str: The generated SQL CREATE TABLE statement.
         """
-        self.add_system_message(assistant_type="sql_code")
+        self._add_system_message(assistant_type="sql_code")
 
         prompt = f"Generate SQL CREATE TABLE statement for the following sample data:"
         if header:
@@ -152,7 +152,7 @@ class GPTLLM(BaseLLM):
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: \n{extra_desc}"
         
-        gpt_response = await self.send_and_receive_message(prompt)
+        gpt_response = await self._send_and_receive_message(prompt)
 
         return gpt_response
     
@@ -169,7 +169,7 @@ class GPTLLM(BaseLLM):
             str: A brief, focused description of the SQL table without any additional formatting, titles, or filler text.
         """
         
-        self.add_system_message(assistant_type="sql_desc")
+        self._add_system_message(assistant_type="sql_desc")
 
         prompt = f"""
             Generate a brief description for the table that will be created using the SQL CREATE TABLE query below. 
@@ -187,7 +187,7 @@ class GPTLLM(BaseLLM):
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
 
-        gpt_response = await self.send_and_receive_message(prompt)
+        gpt_response = await self._send_and_receive_message(prompt)
 
         return gpt_response
     
@@ -195,7 +195,7 @@ class GPTLLM(BaseLLM):
         """
         Generate an SQL query for a chart based on a prompt.
         """
-        self.add_system_message(assistant_type="sql_code_for_charts")
+        self._add_system_message(assistant_type="sql_code_for_charts")
         existing_query_section = f"Existing query:\n{existing_query}\n" if existing_query else ""
         existing_query_info = f"The request may be a pure styling request, with no need to change the existing query. \
             If that is the case, return the existing query." if existing_query else ""
@@ -215,7 +215,7 @@ class GPTLLM(BaseLLM):
             {existing_query_info}
         """
 
-        gpt_response = await self.send_and_receive_message(prompt)
+        gpt_response = await self._send_and_receive_message(prompt)
 
         return gpt_response
     
@@ -223,7 +223,7 @@ class GPTLLM(BaseLLM):
         """
         Generate the nivo chart config for the given inputs.
         """
-        self.add_system_message(assistant_type="nivo_config_for_charts")
+        self._add_system_message(assistant_type="nivo_config_for_charts")
         
         nivo_assistant = NivoAssistant(chart_type)
         available_chart_params = nivo_assistant.get_available_params()  # TODO: Decide if it's worth adding this much data for llm context
@@ -247,7 +247,7 @@ class GPTLLM(BaseLLM):
             Return a JSON represenation of the nivo configuration. Do not add any filler words or introductions. Just the pure code.
         """
 
-        updated_nivo_config = await self.send_and_receive_message(prompt)
+        updated_nivo_config = await self._send_and_receive_message(prompt)
         updated_nivo_config = updated_nivo_config.replace("\n", "").replace("\\","")  # Clean up the string
         print('RAW CONFIG\n', updated_nivo_config)
 
@@ -265,7 +265,7 @@ class GPTLLM(BaseLLM):
         """
         Generate a title for a chart.
         """
-        self.add_system_message(assistant_type="title_for_chart")
+        self._add_system_message(assistant_type="title_for_chart")
 
         existing_title_section = f"Existing title:\n{existing_chart_name}\n" if existing_chart_name else ""
         existing_title_info = f"If the existing title correctly represents the data, return the existing title.\
@@ -288,7 +288,7 @@ class GPTLLM(BaseLLM):
             {existing_title_info}
         """
 
-        title = await self.send_and_receive_message(prompt)
+        title = await self._send_and_receive_message(prompt)
         title = title.replace('"','')
 
         return title
@@ -306,7 +306,7 @@ class GPTLLM(BaseLLM):
             str: The name of the existing table to which the sample data should be appended.
         """
 
-        self.add_system_message(assistant_type="table_categorization")
+        self._add_system_message(assistant_type="table_categorization")
 
         prompt = f"""
             Based on the sample data and existing table metadata, determine to which table the sample data should be appended. 
@@ -322,24 +322,24 @@ class GPTLLM(BaseLLM):
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
 
-        gpt_response = self.send_and_receive_message(prompt)
+        gpt_response = self._send_and_receive_message(prompt)
 
         return gpt_response
 
     def generate_text(self, input_text):
-        self.add_system_message(assistant_type="generic")
+        self._add_system_message(assistant_type="generic")
 
         prompt = input_text
 
-        user_message = self.create_message("user", prompt)
+        user_message = self._create_message("user", prompt)
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
-        self.truncate_history(self.history)
+        self._truncate_history(self.history)
 
         # Make API call
-        assistant_message_content = self.api_call({"messages": self.history})
-        assistant_message = self.create_message("assistant", assistant_message_content)
+        assistant_message_content = self._api_call({"messages": self.history})
+        assistant_message = self._create_message("assistant", assistant_message_content)
 
         # Append assistant's reply to history
         self.history.append(assistant_message)
