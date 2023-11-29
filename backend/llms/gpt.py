@@ -32,12 +32,13 @@ class GPTLLM(BaseLLM):
 
         Note:
         - The OPENAI_API_KEY is required and used to authenticate with the OpenAI API.
-        - The model is set to "gpt-4" and the maximum token limit is set to 8192 as of October 2023.
+        - The model is set to "gpt-4-1106-preview" and the maximum token limit is set to 8192 as of October 2023.
         - If 'chat_id' is provided and 'store_history' is True, the chat history will be fetched from the database.
         - The history of the chat is maintained in a list, which is empty by default unless fetched from the database.
         """
         openai.api_key = OPENAI_API_KEY
-        self.model = "gpt-4"
+        self.model = "gpt-4-1106-preview"
+        self.response_format = {"type": ""}
         self.max_tokens = 8192  # As of Oct 2023
         self.is_system_added = False  # Flag to check if system message is added
 
@@ -47,13 +48,22 @@ class GPTLLM(BaseLLM):
         self.store_history = store_history
         self.llm_type = llm_type
         self.database_type = database_type
-
-        if self.chat_id and store_history:
+        self.history = self._set_init_history()
+    
+    def _set_init_history(self):
+        """Helper function to set the initial history for the instance."""
+        if self.chat_id and self.store_history:
             with ClientDatabaseManager() as session:
                 chat_manager = ChatHistoryManager(session)
-                self.history = chat_manager.get_history(self.chat_id)
+                return chat_manager.get_history(self.chat_id)
         else:
-            self.history = []
+            return []
+    
+    def _set_response_format(self, is_json: bool):
+        if is_json:
+            self.response_format = {"type": "json_object"}
+        else:
+            self.response_format = {"type": ""}
     
     async def _api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
@@ -69,20 +79,19 @@ class GPTLLM(BaseLLM):
         token_count = len(encoding.encode(text))  # Use the .encode() method to tokenize and count the tokens
         return token_count
     
-    def _total_tokens(self, history):
+    def _total_tokens(self):
         """Calculate total tokens in the given history."""
-        return sum(self._count_tokens(message["content"]) for message in history)
+        return sum(self._count_tokens(message["content"]) for message in self.history)
     
-    def _truncate_history(self, history):
+    def _truncate_history(self):
         """Truncate history to fit within token limits."""
-        tokens = self._total_tokens(history)
+        tokens = self._total_tokens()
 
         index_to_start = 1 if self.is_system_added else 0  # Skip the system message if it exists
 
         while tokens > self.max_tokens:
-            removed_message = history.pop(index_to_start)
+            removed_message = self.history.pop(index_to_start)
             tokens -= self._count_tokens(removed_message["content"])
-        return history
     
     def _get_system_message_content(self, assistant_type: str = "generic") -> str:
         """Generate a system message based on the assistant type."""
@@ -155,7 +164,7 @@ class GPTLLM(BaseLLM):
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
-        self._truncate_history(self.history)
+        self._truncate_history()
 
         # Make API call
         assistant_message_content = await self._api_call({"messages": self.history})
@@ -297,6 +306,7 @@ class GPTLLM(BaseLLM):
         Generate the nivo chart config for the given inputs.
         """
         self._add_system_message(assistant_type="nivo_config_for_charts")
+        self._set_response_format(is_json=True)
         
         nivo_assistant = NivoAssistant(chart_type)
         available_chart_params = nivo_assistant.get_available_params()  # TODO: Decide if it's worth adding this much data for llm context
@@ -404,26 +414,6 @@ class GPTLLM(BaseLLM):
 
         prompt = input_text
 
-        user_message = self._create_message("user", prompt)
-        self.history.append(user_message)
-
-        # Check token limit and truncate history if needed
-        self._truncate_history(self.history)
-
-        # Make API call
-        assistant_message_content = self._api_call({"messages": self.history})
-        assistant_message = self._create_message("assistant", assistant_message_content)
-
-        # Append assistant's reply to history
-        self.history.append(assistant_message)
-
-        if self.store_history:  # Saves in table
-            # Serialize to JSON for storage:
-            json_user_message = json.dumps(user_message)
-            json_assistant_message = json.dumps(assistant_message)
-            with ClientDatabaseManager() as session:
-                chat_manager = ChatHistoryManager(session)
-                chat_manager.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_user_message, is_user=True)  
-                chat_manager.save_message(user_id=self.user_id, llm_type=self.llm_type, message=json_assistant_message, is_user=False)
-
+        assistant_message_content = self._send_and_receive_message(prompt)
+        
         return assistant_message_content
