@@ -8,7 +8,7 @@ Usage:
     >>> from startup import run_startup_routines
     >>> run_startup_routines()
 """
-from envs.dev.initialization.setup_dev_environment import create_admin_user, create_sample_dashboard, create_sample_organization
+from envs.dev.initialization.setup_dev_environment import create_admin_user, create_sample_dashboard, create_sample_organization, create_sample_dataprofile
 from envs.dev.utils import seed_client_db
 from settings import APP_ENV, JWT_SECRET_KEY
 from utils.utils import get_app_logger
@@ -24,6 +24,7 @@ def run_startup_routines():
         create_admin_user()
         seed_client_db()
         create_sample_dashboard()
+        create_sample_dataprofile()
 
 def check_jwt_secret_key():
     if APP_ENV != 'development' and JWT_SECRET_KEY == 'mysecretkey':
