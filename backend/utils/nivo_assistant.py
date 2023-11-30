@@ -4,6 +4,15 @@ class NivoAssistant:
     def __init__(self, chart_type: str):
         self.chart_type = chart_type
 
+    def sample_data_for_llm(self, nivo_config: dict, max_items: int = 5):
+        """Shortens the data in the nivo config."""
+        if not nivo_config:
+            return None
+        
+        new_config = nivo_config
+        new_config["data"] = nivo_config["data"][:max_items]
+
+
     def format_data(self, data: dict):
         if self.chart_type in ['bar', 'line', 'pie']:
             return data

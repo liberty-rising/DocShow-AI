@@ -9,12 +9,12 @@ axios.interceptors.response.use(response => response, async (error) => {
     if (error.response 
         && error.response.status === 401 
         && !originalRequest._retry 
-        && !originalRequest.url.includes('/refresh-token/')) { // Check if the failed request is not for the refresh-token endpoint
+        && !originalRequest.url.includes('refresh-token/')) { // Check if the failed request is not for the refresh-token endpoint
         originalRequest._retry = true;
         try {
             // Attempt to refresh the token
             console.log("Attempting token refresh");
-            await axios.post(`${API_URL}/refresh-token/`);
+            await axios.post(`${API_URL}refresh-token/`);
             // The browser will automatically include the updated cookies
             window.location.reload(); // Reload the page to use the new tokens
             return axios(originalRequest);

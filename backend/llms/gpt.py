@@ -43,7 +43,7 @@ class GPTLLM(BaseLLM):
         self.is_system_added = False  # Flag to check if system message is added
 
         self.chat_id = chat_id
-        self.user_id = user.user_id
+        self.user_id = user.id
         self.organization_id = user.organization_id
         self.store_history = store_history
         self.llm_type = llm_type
@@ -61,17 +61,18 @@ class GPTLLM(BaseLLM):
     
     def _set_response_format(self, is_json: bool):
         if is_json:
-            self.response_format = {"type": "json_object"}
+            self.response_format = { "type": "json_object" }
         else:
-            self.response_format = {"type": ""}
+            self.response_format = { "type": "" }
     
     async def _api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
         completion = await openai.ChatCompletion.acreate(
             model=self.model,
-            messages=payload['messages']
+            messages=payload['messages'],
+            response_format=self.response_format
         )
-        return completion.choices[0].message['content']
+        return completion.choices[0].message.content
 
     def _count_tokens(self, text: str) -> int:
         """Count the number of tokens in the given text."""
@@ -100,8 +101,9 @@ class GPTLLM(BaseLLM):
             "nivo_charts":f"""
                 You are a nivo chart generator assistant.
                 Nivo is a visualisation library for React that produces different types of charts.
-                You will be in charge of generating JSON configurations, SQL queries, and titles.
-                Return only the requested information. 
+                You will only be working with responsive charts. Ex. ResponsiveBar, ResponsiveLine, etc.
+                You will be in charge of generating configurations, SQL queries, and titles.
+                Style the charts clean and modernly.
                 Do not add introductory statements, filler words, or extra formatting.
             """,
             "nivo_config_for_charts":f"""
@@ -273,6 +275,46 @@ class GPTLLM(BaseLLM):
 
         return gpt_response
     
+    async def generate_chart_config_v2(self, msg: str, table_name: str, table_metadata: str, chart_type: str, nivo_config: dict):
+        """Generate the full chart configuration."""  # TODO: Make chart_type dynamic, LLM should pick
+        self._add_system_message(assistant_type="nivo_charts")
+        self._set_response_format(is_json=True)
+
+        assistant = NivoAssistant(chart_type)
+        nivo_config_preview = assistant.sample_data_for_llm(nivo_config)
+
+        prompt = f"""
+            Given all of the context, generate the requested data based on the following request:
+
+            User request:
+            {msg}
+            Table name:
+            {table_name}
+            Table metadata:
+            {table_metadata}
+            Chart type:
+            Responsive {chart_type}
+            Current nivo configuration:
+            {nivo_config_preview}
+
+            Provide output in JSON format as follows:
+            {{
+                "title":"",
+                "query":"",
+                "nivoConfig":{{}}
+            }}
+
+            The data key in nivoConfig shows a preview of the data. Do not update it.
+        """
+
+        updated_config = await self._send_and_receive_message(prompt)  # Returns a JSON string
+
+        # Parse the JSON string
+        parsed_config = json.loads(updated_config)
+
+        return parsed_config
+
+    
     async def generate_query_for_chart(self, msg: str, table_name: str, table_metadata: str, chart_type: str, existing_query: str) -> str:
         """
         Generate an SQL query for a chart based on a prompt.
@@ -297,9 +339,7 @@ class GPTLLM(BaseLLM):
             {existing_query_info}
         """
 
-        gpt_response = await self._send_and_receive_message(prompt)
-
-        return gpt_response
+        return await self._send_and_receive_message(prompt)
     
     async def generate_chart_config(self, msg: str, table_name: str, table_metadata: str, chart_type: str, query: str, nivo_config: dict):
         """

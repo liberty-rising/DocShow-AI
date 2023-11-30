@@ -34,7 +34,7 @@ const CreateChartPage = () => {
 
             // Setting a longer timeout, e.g., 30 seconds (30000 milliseconds)
             const axiosConfig = {
-                timeout: 30000 // 30 seconds
+                timeout: 120000 // TODO: 120 seconds, this is quite long, try to shorten it
             };
 
             const response = await axios.post(`${API_URL}chart/config/`, {
@@ -43,8 +43,13 @@ const CreateChartPage = () => {
                 chart_config: configToSend
             }, axiosConfig);
 
-            const updatedChartConfig = response.data;
+            const updatedChartConfig = response.data[0];
             setChartConfig(updatedChartConfig);
+
+            // Update chatChatId with the new chat_id from the response
+            if (response.data[0] && response.data[1]) {
+                setChartChatId(response.data[1]);
+            }
         } catch (error) {
             console.error("Error communicating with LLM:", error);
             // Enhanced error logging
