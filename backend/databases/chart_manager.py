@@ -1,6 +1,5 @@
-from sqlalchemy.orm import joinedload, Session
-from typing import List
-from models.client_models import Chart
+from sqlalchemy.orm import Session
+from models.client.chart import Chart
 
 class ChartManager:
     """

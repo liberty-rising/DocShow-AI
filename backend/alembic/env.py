@@ -1,8 +1,8 @@
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from models.app_models import Base as app_db_target_metadata
-from models.client_models import Base as client_db_target_metadata 
+from models.app.base import Base as app_db_target_metadata
+from models.client.base import Base as client_db_target_metadata 
 
 
 def run_migrations_online():
