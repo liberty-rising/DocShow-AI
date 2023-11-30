@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
-from models import app_models, client_models
 from models.app.base import Base as AppBase
 from models.client.base import Base as ClientBase
 from routes.auth_routes import auth_router
