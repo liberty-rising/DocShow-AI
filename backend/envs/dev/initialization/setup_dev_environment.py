@@ -7,6 +7,7 @@ from models.app.organization import Organization
 from models.app.user import User
 from models.client.chart import Chart
 from models.client.dashboard import Dashboard
+from models.client.client_models import DataProfile
 from security import get_password_hash
 from utils.utils import get_app_logger
 
@@ -160,3 +161,22 @@ def create_sample_line_chart(sql_executor: SQLExecutor):
         order=3,
         config=line_chart_config
     )
+
+def create_sample_dataprofile():
+    """Creates a sample data profile if it doesn't already exist."""
+    # Create a sample DataProfile instance
+    sample_profile = DataProfile(
+        id=1,  # You can set a specific ID or let it be auto-generated if configured
+        name="Sample Profile",
+        file_type="pdf",
+        organization="Sample Org"
+    )
+    # Using ClientDatabaseManager to manage the database session
+    with ClientDatabaseManager() as session:
+        profile_manager = DataProfileManager(session)
+        existing_profile = profile_manager.get_dataprofile_by_name(sample_profile.name)
+        if not existing_profile:
+            profile_manager.create_dataprofile(sample_profile)
+            logger.debug("Sample data profile created.")
+        else:
+            logger.debug("Sample data profile already exists.")
