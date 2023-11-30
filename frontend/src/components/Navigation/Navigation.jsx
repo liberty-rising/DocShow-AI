@@ -25,6 +25,7 @@ const Navigation = () => {
     { text: 'Dashboards', icon: <DashboardIcon />, path: '/dashboards' },
     { text: 'Data Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Data Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
+    { text: 'Data Profiling', icon: <AnalyticsIcon />, path: '/profiling' },
     { text: 'AI Assistant', icon: <ChatIcon />, path: '/ai-assistant' },
     { text: 'User Panel', icon: <AccountBoxIcon />, path: '/user' },
     { text: 'Admin Panel', icon: <AdminPanelSettingsIcon />, path: '/admin' },
