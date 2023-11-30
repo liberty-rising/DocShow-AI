@@ -11,6 +11,7 @@ from routes.file_routes import file_router
 from routes.organization_routes import organization_router
 from routes.table_routes import table_router
 from routes.user_routes import user_router
+from routes.profiling_routes import profiling_router
 # from session_config import session_manager
 from startup import run_startup_routines
 from utils.utils import get_app_logger
@@ -30,6 +31,7 @@ app.include_router(file_router)
 app.include_router(organization_router)
 app.include_router(table_router)
 app.include_router(user_router)
+app.include_router(profiling_router)
 
 # Initialize database managers
 app_db_manager = AppDatabaseManager()
