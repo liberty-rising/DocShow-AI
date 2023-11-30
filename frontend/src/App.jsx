@@ -27,7 +27,6 @@ import RegisterPage from './pages/Register';
 import UploadPage from './pages/Upload/Upload';
 import UserPage from './pages/User';
 import Logout from './pages/Logout';
-import DataProfilePage from './pages/Profiling/Profiling'
 import ProfilingPage from './pages/Profiling/Profiling';
 
 function AppWrapper() {
