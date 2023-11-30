@@ -21,6 +21,16 @@ logger.info("Logger initialised.")
 
 app = FastAPI()
 
+async def startup_event():
+    run_startup_routines()
+
+async def shutdown_event():
+    pass
+
+# Registering the startup and shutdown events
+app.router.on_startup.append(startup_event)
+app.router.on_shutdown.append(shutdown_event)
+
 # Add routers
 app.include_router(auth_router)
 app.include_router(chart_router)
@@ -38,12 +48,3 @@ client_db_manager = ClientDatabaseManager()
 # Create the tables in the databases
 AppBase.metadata.create_all(bind=app_db_manager.engine) 
 ClientBase.metadata.create_all(bind=client_db_manager.engine)
-
-@app.on_event("startup")
-async def startup_event():
-    run_startup_routines()
-    
-@app.on_event("shutdown")
-async def shutdown_event():
-    # Close all sessions
-    pass
