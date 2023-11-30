@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from databases.database_managers import AppDatabaseManager
 from databases.organization_manager import OrganizationManager
-from models.app_models import Organization
 
 organization_router = APIRouter()
 

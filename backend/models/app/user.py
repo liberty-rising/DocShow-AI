@@ -1,28 +1,10 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from typing import Optional
 
-Base = declarative_base()
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    username: str
-
-class Organization(Base):
-    """
-    Represents an organization that holds users.
-    """
-
-    __tablename__ = 'organizations'
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, unique=True, index=True)
-    created_at = Column(DateTime(timezone=True), default=func.now())
+from .base import Base
 
 class User(Base):
     """

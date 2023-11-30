@@ -3,11 +3,10 @@ from fastapi import Cookie, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from typing import Any, Union
 
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
-from models.app_models import User
+from models.app.user import User
 from settings import JWT_SECRET_KEY
 
 

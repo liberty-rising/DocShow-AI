@@ -4,7 +4,7 @@ from databases.chat_history_manager import ChatHistoryManager
 from databases.database_managers import ClientDatabaseManager
 from llms.base import BaseLLM
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object
-from models.app_models import User
+from models.app.user import User
 from security import get_current_user
 
 chat_router = APIRouter()

@@ -6,8 +6,8 @@ from databases.chart_manager import ChartManager
 from databases.database_managers import ClientDatabaseManager
 from databases.table_metadata_manager import TableMetadataManager
 from llms.gpt import GPTLLM
-from models.app_models import User
-from models.client_models import Chart, ChartCreate
+from models.app.user import User
+from models.client.chart import Chart, ChartCreate
 from security import get_current_user
 from utils.nivo_assistant import NivoAssistant
 from utils.utils import execute_select_query

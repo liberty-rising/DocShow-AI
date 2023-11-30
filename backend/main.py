@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
-from models import app_models, client_models
+from models.app.base import Base as AppBase
+from models.client.base import Base as ClientBase
 from routes.auth_routes import auth_router
 from routes.chat_routes import chat_router
 from routes.chart_routes import chart_router
@@ -46,5 +46,5 @@ app_db_manager = AppDatabaseManager()
 client_db_manager = ClientDatabaseManager()
 
 # Create the tables in the databases
-app_models.Base.metadata.create_all(bind=app_db_manager.engine) 
-client_models.Base.metadata.create_all(bind=client_db_manager.engine)
+AppBase.metadata.create_all(bind=app_db_manager.engine) 
+ClientBase.metadata.create_all(bind=client_db_manager.engine)

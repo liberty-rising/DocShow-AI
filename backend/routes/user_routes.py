@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from security import get_current_user
 
-from models.app_models import User, UserOut, UserRole, UserUpdate
+from models.app.user import User, UserOut, UserRole, UserUpdate
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
 
