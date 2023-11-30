@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from databases.database_managers import AppDatabaseManager
 from databases.user_manager import UserManager
-from models.app_models import Token, User, UserCreate
+from models.app.user import User, UserCreate
 from security import authenticate_user, create_token, get_password_hash, set_tokens_in_cookies, verify_refresh_token, update_user_refresh_token
 from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 

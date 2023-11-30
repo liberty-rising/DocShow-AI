@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from databases.dashboard_manager import DashboardManager
 from databases.database_managers import ClientDatabaseManager
-from models.client_models import Dashboard, DashboardCreate
+from models.client.dashboard import Dashboard, DashboardCreate
 
 dashboard_router = APIRouter()
 

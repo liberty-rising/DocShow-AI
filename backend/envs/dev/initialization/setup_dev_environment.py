@@ -3,8 +3,10 @@ from databases.dashboard_manager import DashboardManager
 from databases.sql_executor import SQLExecutor
 from databases.organization_manager import OrganizationManager
 from databases.user_manager import UserManager
-from models.app_models import Organization, User
-from models.client_models import Chart, Dashboard
+from models.app.organization import Organization
+from models.app.user import User
+from models.client.chart import Chart
+from models.client.dashboard import Dashboard
 from security import get_password_hash
 from utils.utils import get_app_logger
 

@@ -4,7 +4,7 @@ It facilitates CRUD operations and formatting of table metadata information.
 """
 from sqlalchemy.orm import Session
 from typing import List
-from models.client_models import TableMetadata
+from models.client.table_metadata import TableMetadata
 
 
 class TableMetadataManager:
