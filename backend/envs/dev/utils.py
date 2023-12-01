@@ -1,14 +1,14 @@
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import CreateTable
 
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 from databases.table_manager import TableManager
 from databases.table_metadata_manager import TableMetadataManager
 
 import pandas as pd
 
-def seed_client_db():
+def seed_db():
     """
     Asynchronously seed the client database with sample data from CSV files.
     
@@ -17,18 +17,18 @@ def seed_client_db():
     Internal Variables:
     - sample_tables: Dictionary mapping table names to corresponding CSV file names.
     - existing_tables: List of table names that already exist in the database.
-    - session: Database session managed by ClientDatabaseManager.
+    - session: Database session managed by DatabaseManager.
     - executor: Instance of SQLExecutor for executing SQL queries.
     - manager: Instance of TableManager for table operations.
     
     Workflow:
     1. Initialize `sample_tables` dictionary to hold table-to-file mappings.
-    2. Use ClientDatabaseManager to create a session and SQLExecutor to get existing table names.
+    2. Use DatabaseManager to create a session and SQLExecutor to get existing table names.
     3. Loop through `sample_tables` and create tables if they don't exist, using data from CSV files.
     """
 
     # Get existing tables
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         executor = SQLExecutor(session)
         existing_tables = executor.get_all_table_names_as_list()
 
@@ -40,7 +40,7 @@ def seed_client_db():
         table_manager.create_table_from_df(df, "sample_sales")
 
         # Add metadata
-        with ClientDatabaseManager() as session:
+        with DatabaseManager() as session:
             metadata_manager = TableMetadataManager(session)
             metadata_manager.add_table_metadata(
                 table_name="sample_sales", 

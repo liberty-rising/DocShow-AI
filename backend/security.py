@@ -4,9 +4,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
-from databases.database_managers import AppDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
-from models.app.user import User
+from models.user import User
 from settings import JWT_SECRET_KEY
 
 
@@ -20,7 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token/")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def authenticate_user(username: str, password: str) -> User:
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = UserManager(session)
         user = manager.get_user(username)
         if user and verify_password(password, user.hashed_password):
@@ -57,7 +57,7 @@ def verify_refresh_token(refresh_token: str = Cookie(None)) -> User:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         
         # Find the user in the database
-        with AppDatabaseManager() as session:
+        with DatabaseManager() as session:
             manager = UserManager(session)
             user = manager.get_user(username)
 
@@ -144,7 +144,7 @@ def get_current_user(request: Request) -> User:
     except JWTError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         user_manager = UserManager(session)
         user = user_manager.get_user(username=username)
         
@@ -164,6 +164,6 @@ def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: 
     )
 
 def update_user_refresh_token(user_id: int, refresh_token: str):
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = UserManager(session)
         manager.update_user(user_id, refresh_token=refresh_token)

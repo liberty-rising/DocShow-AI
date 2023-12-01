@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from databases.dashboard_manager import DashboardManager
-from databases.database_managers import ClientDatabaseManager
-from models.client.dashboard import Dashboard, DashboardCreate
+from databases.database_manager import DatabaseManager
+from models.dashboard import Dashboard, DashboardCreate
 
 dashboard_router = APIRouter()
 
 @dashboard_router.get("/dashboard/")
 async def get_dashboard(id: int):
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = DashboardManager(session)
         dashboard = manager.get_dashboard(id)
         if dashboard:
@@ -17,7 +17,7 @@ async def get_dashboard(id: int):
 
 @dashboard_router.get("/dashboards/")
 async def get_dashboards():
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = DashboardManager(session)
         dashboards = manager.get_dashboards()
     
@@ -30,6 +30,6 @@ async def save_dashboard(dashboard: DashboardCreate):
         description=dashboard.description,
         organization=dashboard.organization
     )
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = DashboardManager(session)
         manager.save_dashboard(db_dashboard)

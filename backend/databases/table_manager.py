@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 from databases.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
@@ -30,7 +30,7 @@ class TableManager:
         - create_query: str containing the SQL create table query if successful, None otherwise.
         """
         try:
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 sql_executor = SQLExecutor(session)
                 table_names = sql_executor.get_all_table_names_as_str()
                 
@@ -39,7 +39,7 @@ class TableManager:
             create_query = SQLStringManipulator(raw_create_query).extract_sql_query_from_text()  # Just in case
 
             if SQLStringManipulator(create_query).is_valid_create_table_query():  # Checks if the query is valid
-                with ClientDatabaseManager() as session:
+                with DatabaseManager() as session:
                     sql_executor = SQLExecutor(session)
                     sql_executor.execute_create_query(create_query)
                 return create_query
@@ -65,7 +65,7 @@ class TableManager:
             table_name = SQLStringManipulator(create_query).get_table_from_create_query()
             
             # Store description in separate table
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 manager = TableMetadataManager(session)
                 manager.add_table_metadata(table_name, create_query, description)
 
@@ -85,7 +85,7 @@ class TableManager:
         Returns:
         - table_name: str containing the table's name.
         """
-        with ClientDatabaseManager() as session:
+        with DatabaseManager() as session:
             manager = TableMetadataManager(session)
             table_metadata = manager.get_metadata()
             formatted_table_metadata = manager.format_table_metadata_for_llm(table_metadata)
@@ -94,19 +94,19 @@ class TableManager:
         return table_name
     
     def create_table_from_df(self, df: pd.DataFrame, table_name: str):
-        with ClientDatabaseManager() as session:
+        with DatabaseManager() as session:
             executor = SQLExecutor(session)
             executor.append_df_to_table(df, table_name)
     
     def create_table_from_query(self, query: str):
-        with ClientDatabaseManager() as session:
+        with DatabaseManager() as session:
             executor = SQLExecutor(session)
             executor.execute_create_query(query)
 
     def append_to_table(self, processed_df: pd.DataFrame, table_name: str):
         """
         Appends the uploaded file to the given table.
-        Uses ClientDatabaseManager for database connection and SQLExecutor for SQL operations.
+        Uses DatabaseManager for database connection and SQLExecutor for SQL operations.
 
         Parameters:
         - processed_file (UploadFile): The uploaded file to be appended.
@@ -119,7 +119,7 @@ class TableManager:
         """
 
         if table_name:
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 sql_executor = SQLExecutor(session)
                 sql_executor.append_df_to_table(processed_df, table_name)
         else:
@@ -128,7 +128,7 @@ class TableManager:
     def drop_table(self, table_name: str):
         # Logic to drop a table
         try:
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 executor = SQLExecutor(session)
                 executor.drop_table(table_name)
         except Exception as e:
@@ -138,7 +138,7 @@ class TableManager:
     def get_table_columns(self, table_name: str):
         """Returns a list of all of the columns present within the table."""
         try:
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 executor = SQLExecutor(session)
                 columns = executor.get_table_columns(table_name)
             return columns

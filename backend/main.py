@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
-from databases.database_managers import AppDatabaseManager, ClientDatabaseManager
-from models.app.base import Base as AppBase
-from models.client.base import Base as ClientBase
+from databases.database_manager import DatabaseManager
+from models.base import Base
 from routes.auth_routes import auth_router
 from routes.chat_routes import chat_router
 from routes.chart_routes import chart_router
@@ -42,10 +41,8 @@ app.include_router(organization_router)
 app.include_router(table_router)
 app.include_router(user_router)
 
-# Initialize database managers
-app_db_manager = AppDatabaseManager()
-client_db_manager = ClientDatabaseManager()
+# Initialize database manager
+db_manager = DatabaseManager()
 
 # Create the tables in the databases
-AppBase.metadata.create_all(bind=app_db_manager.engine) 
-ClientBase.metadata.create_all(bind=client_db_manager.engine)
+Base.metadata.create_all(bind=db_manager.engine)

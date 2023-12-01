@@ -1,7 +1,7 @@
 from fastapi import Depends
 from pydantic import BaseModel
 
-from models.app.user import User
+from models.user import User
 from llms.gpt import GPTLLM
 from security import get_current_user
 

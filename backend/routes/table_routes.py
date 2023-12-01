@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 from databases.table_manager import TableManager
 from databases.table_metadata_manager import TableMetadataManager
@@ -15,21 +15,21 @@ async def get_table_columns(table_name: str):
 
 @table_router.get("/table/metadata/")
 async def get_table_metadata(table_name: str):
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = TableMetadataManager(session)
         metadata = manager.get_metadata(table_name)
     return metadata
 
 @table_router.get("/tables/")
 async def get_tables():
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         executor = SQLExecutor(session)
         tables = executor.get_all_table_names_as_list()
     return tables
 
 @table_router.get("/tables/metadata/")
 async def get_all_table_metadata():
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = TableMetadataManager(session)
         metadata = manager.get_all_metadata()
     return metadata

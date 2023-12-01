@@ -1,4 +1,4 @@
-from models.client.data_profile import DataProfile
+from models.data_profile import DataProfile
 
 class DataProfileManager:
     def __init__(self, session):

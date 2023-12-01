@@ -8,11 +8,11 @@ import os
 import pandas as pd
 import sys
 
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 
 def execute_select_query(query: str):
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         sql_executor = SQLExecutor(session)
         results = sql_executor.execute_select_query(query)
     return results

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.client.chat_history import ChatHistory  # Replace with your actual import
+from models.chat_history import ChatHistory  # Replace with your actual import
 
 import json
 

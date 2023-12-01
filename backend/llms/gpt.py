@@ -1,7 +1,7 @@
 from .base import BaseLLM
 from databases.chat_history_manager import ChatHistoryManager
-from databases.database_managers import ClientDatabaseManager
-from models.app.user import User
+from databases.database_manager import DatabaseManager
+from models.user import User
 from settings import OPENAI_API_KEY
 from utils.nivo_assistant import NivoAssistant
 
@@ -53,7 +53,7 @@ class GPTLLM(BaseLLM):
     def _set_init_history(self):
         """Helper function to set the initial history for the instance."""
         if self.chat_id and self.store_history:
-            with ClientDatabaseManager() as session:
+            with DatabaseManager() as session:
                 chat_manager = ChatHistoryManager(session)
                 return chat_manager.get_history(self.chat_id)
         else:
@@ -194,7 +194,7 @@ class GPTLLM(BaseLLM):
         assistant_message (dict): A dictionary representing the assistant's response.
 
         Note:
-        This method assumes an existing ClientDatabaseManager context for database operations.
+        This method assumes an existing DatabaseManager context for database operations.
         There's a TODO regarding freezing operations to prevent duplicate chat_id assignment.
         """
 
@@ -202,7 +202,7 @@ class GPTLLM(BaseLLM):
         json_user_message = json.dumps(user_message)
         json_assistant_message = json.dumps(assistant_message)
 
-        with ClientDatabaseManager() as session:
+        with DatabaseManager() as session:
             chat_manager = ChatHistoryManager(session)
             if not self.chat_id:  # Generate a new chat id
                 # TODO: Freeze operations here (not 100% sure but worried about other users getting the same chat id)
