@@ -7,7 +7,7 @@ from models.app.organization import Organization
 from models.app.user import User
 from models.client.chart import Chart
 from models.client.dashboard import Dashboard
-from models.client.client_models import DataProfile
+from models.client.data_profile import DataProfile
 from security import get_password_hash
 from utils.utils import get_app_logger
 
@@ -169,7 +169,7 @@ def create_sample_dataprofile():
         id=1,  # You can set a specific ID or let it be auto-generated if configured
         name="Sample Profile",
         file_type="pdf",
-        organization="Sample Org"
+        organization_id = 1
     )
     # Using ClientDatabaseManager to manage the database session
     with ClientDatabaseManager() as session:

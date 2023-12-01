@@ -18,19 +18,14 @@ class DataProfile(Base):
     - file_type: The type of file associated with the data profile.
     - organization: The organization associated with the data profile.
 
-    The class also includes methods for initialization and converting the model instance into a dictionary.
+    The class also is converting the model instance into a dictionary.
     """
 
     __tablename__ = "dataprofile"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     file_type = Column(String)
-    organization = Column(String)
-
-    def __init__(self, id, name, file_type, organization):
-        self.name = name
-        self.file_type = file_type
-        self.organization = organization
+    organization_id = Column(String)
     
     
     def to_dict(self):
@@ -41,5 +36,5 @@ class DataProfile(Base):
             "id": self.id,
             "name": self.name,
             "file_type": self.file_type,
-            "organization": self.organization
+            "organization_id": self.organization_id
         }
