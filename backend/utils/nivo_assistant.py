@@ -11,7 +11,19 @@ class NivoAssistant:
         
         new_config = nivo_config
         new_config["data"] = nivo_config["data"][:max_items]
+    
+    def format_config(self, nivo_config: dict):
+        if self.chart_type == 'bar':
+            return self._format_bar_config(nivo_config)
 
+    def _format_bar_config(self, nivo_config):
+        # Define keys that are valid for bar configuration
+        valid_keys = ['indexBy', 'keys', 'layout', 'margin', 'enableGridX', 'enableGridY', 'legends']
+
+        # Filter nivo_config to only include valid keys
+        filtered_config = {k: nivo_config[k] for k in valid_keys if k in nivo_config}
+
+        return filtered_config
 
     def format_data(self, data: dict):
         if self.chart_type in ['bar', 'line', 'pie']:

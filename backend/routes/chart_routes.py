@@ -56,37 +56,24 @@ async def create_chart_config(request: ChartConfigRequest, user: User = Depends(
     nivo_config = chart_config.get("nivoConfig")
     table_metadata = get_table_metadata(table_name)
 
-    # # Generate a query
-    # gpt = GPTLLM(chat_id, user)
-    # chart_config["query"] = await gpt.generate_query_for_chart(msg, table_name, table_metadata, chart_type, existing_query)
-
-    # # Execute query
-    # results = execute_select_query(chart_config["query"])
-
-    # # Transform query data to specific chart
-    # formatter = NivoAssistant(chart_type)
-    # chart_config["nivoConfig"]["data"] = formatter.format_data(results)
-
-    # # Generate a title for the chart
-    # chart_config["title"] = await gpt.generate_title_for_chart(msg, table_name, table_metadata, chart_type, chart_config["query"], existing_title)
-
-    # # Have GPT determine the settings and styling, ex. which column is the key, and which is the index
-    # chart_config["nivoConfig"] = await gpt.generate_chart_config(msg, table_name, table_metadata, chart_type, chart_config["query"], \
-    #                                                      chart_config["nivoConfig"])
-
-    # return chart_config, gpt.chat_id
-
     gpt = GPTLLM(chat_id, user)
-    updated_config = await gpt.generate_chart_config_v2(msg, table_name, table_metadata, chart_type, nivo_config)
+    updated_chart_config = await gpt.generate_chart_config_v2(msg, table_metadata, chart_type, nivo_config)
+
+    # Make sure configuration holds data needed for specific chart type
+    formatter = NivoAssistant(chart_type)
+    updated_nivo_config = updated_chart_config.get("nivoConfig")
+    formatted_nivo_config = formatter.format_config(updated_nivo_config)
+    updated_chart_config["nivoConfig"] = formatted_nivo_config
 
     # Execute query
-    results = execute_select_query(updated_config["query"])
+    results = execute_select_query(updated_chart_config["query"])
 
-    # Transform query data to specific chart
-    formatter = NivoAssistant(chart_type)
-    updated_config["nivoConfig"]["data"] = formatter.format_data(results)
+    # Transform query data to specific chart and add to configuration
+    nivo_data = formatter.format_data(results)
+    updated_chart_config["nivoConfig"]["data"] = nivo_data
+    print(updated_chart_config)
 
-    return updated_config, gpt.chat_id
+    return updated_chart_config, gpt.chat_id
 
 def get_table_metadata(table_name: str):
     """Get table metadata"""
