@@ -99,17 +99,17 @@ class GPTLLM(BaseLLM):
         messages = {
             "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
             "nivo_charts":f"""
-                You are a nivo chart generator assistant.
-                Nivo is a visualisation library for React that produces different types of charts.
-                You will only be working with responsive charts. Ex. ResponsiveBar, ResponsiveLine, etc.
-                You will be in charge of generating configurations, SQL queries, and titles.
-                Style the charts clean and modernly.
-                Do not add introductory statements, filler words, or extra formatting.
+                You are a Nivo chart generator assistant, specializing in creating configurations for responsive chart components in Nivo, a visualization library for React. 
+                Your role is to generate configurations, SQL queries, and titles for charts like ResponsiveBar, ResponsiveLine, etc. 
+                Focus on ensuring that the charts are highly responsive, adapting seamlessly to different screen sizes without the need for fixed dimensions like width or height. 
+                Style the charts in a clean and modern way. 
+                Avoid introductory statements, filler words, or extra formatting in your outputs. 
+                Remember, the key is to prioritize responsiveness and clarity in the visualization design.
             """,
             "nivo_config_for_charts":f"""
                 You are a JSON generator assistant.
                 You will be creating a JSON that will hold the configuration needed for a nivo chart (react library).
-                You will be given the user's request, the name and metadata of the table to be visualized, the type of chart, the query used on the table, and the current NIVO configuration.
+                You will be given the user's request, the name and metadata of the table to be visualized, the type of chart, the query used on the table, and the current nivo configuration.
                 Generate the necessary nivo configuration in the form of a JSON. If the chart does not have any styling, add some, and make it look nice.
                 Implement any styling the user asks for.
                 Return only the pure JSON.
@@ -275,7 +275,7 @@ class GPTLLM(BaseLLM):
 
         return gpt_response
     
-    async def generate_chart_config_v2(self, msg: str, table_name: str, table_metadata: str, chart_type: str, nivo_config: dict):
+    async def generate_chart_config_v2(self, msg: str, table_metadata: str, chart_type: str, nivo_config: dict):
         """Generate the full chart configuration."""  # TODO: Make chart_type dynamic, LLM should pick
         self._add_system_message(assistant_type="nivo_charts")
         self._set_response_format(is_json=True)
@@ -283,14 +283,16 @@ class GPTLLM(BaseLLM):
         assistant = NivoAssistant(chart_type)
         nivo_config_preview = assistant.sample_data_for_llm(nivo_config)
 
+        # TODO: minValue and maxValue should always be set to auto
+        # TODO: should never set width and height
+
         prompt = f"""
-            Given all of the context, generate the requested data based on the following request:
+            Generate a responsive chart configuration based on the following request. 
+            Focus on optimizing the configuration for responsiveness, ensuring the chart is clearly visible and legible on a variety of screen sizes.
 
             User request:
             {msg}
-            Table name:
-            {table_name}
-            Table metadata:
+            Metadata about the table:
             {table_metadata}
             Chart type:
             Responsive {chart_type}
@@ -304,13 +306,18 @@ class GPTLLM(BaseLLM):
                 "nivoConfig":{{}}
             }}
 
-            The data key in nivoConfig shows a preview of the data. Do not update it.
+            The 'nivoConfig' should be complete or updated based on the user's requests. 
+            The 'data' key in 'nivoConfig' shows a preview of the data; do not update it. 
+            The 'keys' key in 'nivoConfig' should be updated based on the names of the query columns.
+            Prioritize responsive design to ensure the chart adapts well to different screen sizes.
         """
 
         updated_config = await self._send_and_receive_message(prompt)  # Returns a JSON string
 
         # Parse the JSON string
         parsed_config = json.loads(updated_config)
+
+        print("raw data", parsed_config)
 
         return parsed_config
 
