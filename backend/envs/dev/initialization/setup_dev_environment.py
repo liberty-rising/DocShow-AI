@@ -1,3 +1,4 @@
+from databases.data_profile_manager import DataProfileManager
 from databases.database_managers import AppDatabaseManager,ClientDatabaseManager
 from databases.dashboard_manager import DashboardManager
 from databases.sql_executor import SQLExecutor
