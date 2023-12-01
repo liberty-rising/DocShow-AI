@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from security import get_current_user
 
-from models.app.user import User, UserOut, UserRole, UserUpdate
-from databases.database_managers import AppDatabaseManager
+from models.user import User, UserOut, UserRole, UserUpdate
+from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
 
 user_router = APIRouter()
@@ -10,7 +10,7 @@ user_router = APIRouter()
 @user_router.get("/users/")
 async def get_users():
     # Open a database session and fetch all users
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         user_manager = UserManager(session)
         users = user_manager.get_users_without_password()
     
@@ -26,7 +26,7 @@ async def get_user_roles():
 
 @user_router.put("/users/update/")
 async def update_user(user_data: UserUpdate):
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         user_manager = UserManager(session)
         
         # Update user details

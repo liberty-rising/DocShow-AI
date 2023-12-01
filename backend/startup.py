@@ -9,7 +9,7 @@ Usage:
     >>> run_startup_routines()
 """
 from envs.dev.initialization.setup_dev_environment import create_admin_user, create_sample_dashboard, create_sample_organization, create_sample_dataprofile
-from envs.dev.utils import seed_client_db
+from envs.dev.utils import seed_db
 from settings import APP_ENV, JWT_SECRET_KEY
 from utils.utils import get_app_logger
 
@@ -22,7 +22,7 @@ def run_startup_routines():
     if APP_ENV == 'development':
         create_sample_organization()
         create_admin_user()
-        seed_client_db()
+        seed_db()
         create_sample_dashboard()
         create_sample_dataprofile()
 

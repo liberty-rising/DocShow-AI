@@ -3,11 +3,11 @@ from pydantic import BaseModel
 from typing import Optional
 
 from databases.chart_manager import ChartManager
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.table_metadata_manager import TableMetadataManager
 from llms.gpt import GPTLLM
-from models.app.user import User
-from models.client.chart import Chart, ChartCreate
+from models.user import User
+from models.chart import Chart, ChartCreate
 from security import get_current_user
 from utils.nivo_assistant import NivoAssistant
 from utils.utils import execute_select_query
@@ -32,7 +32,7 @@ async def get_chart_types():
 @chart_router.post("/chart/")
 async def save_chart(chart: ChartCreate):
 
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = ChartManager(session)
         highest_order = manager.get_highest_order()
         order = highest_order + 1
@@ -77,7 +77,7 @@ async def create_chart_config(request: ChartConfigRequest, user: User = Depends(
 
 def get_table_metadata(table_name: str):
     """Get table metadata"""
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         metadata_manager = TableMetadataManager(session)
         table_metadata_obj = metadata_manager.get_metadata(table_name)
         table_metadata = table_metadata_obj.to_dict() # Transforms Table_Metadata object to dict

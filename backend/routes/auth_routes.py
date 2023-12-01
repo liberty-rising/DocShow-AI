@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-from databases.database_managers import AppDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
-from models.app.user import User, UserCreate
+from models.user import User, UserCreate
 from security import authenticate_user, create_token, get_password_hash, set_tokens_in_cookies, verify_refresh_token, update_user_refresh_token
 from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
@@ -99,7 +99,7 @@ async def register(response: Response, user: UserCreate):
     Returns:
         dict: A success message indicating successful registration. The JWT token is not returned in the response body but is set in a secure cookie.
     """
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         user_manager = UserManager(session)
         
         # Ensure unique username and email

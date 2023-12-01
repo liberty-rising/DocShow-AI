@@ -3,7 +3,7 @@ This module provides a UserManager class that handles database operations relate
 It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user data.
 """
 from sqlalchemy.orm import Session
-from models.app.user import User
+from models.user import User
 
 class UserManager:
     """

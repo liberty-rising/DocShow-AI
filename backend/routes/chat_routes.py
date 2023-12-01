@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 
 from databases.chat_history_manager import ChatHistoryManager
-from databases.database_managers import ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from llms.base import BaseLLM
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object
-from models.app.user import User
+from models.user import User
 from security import get_current_user
 
 chat_router = APIRouter()
@@ -19,7 +19,7 @@ async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_cha
 @chat_router.delete("/chat_history/")
 async def delete_chat_history(current_user: User = Depends(get_current_user)):
     user_id = current_user.id
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         chat_service = ChatHistoryManager(session)
         chat_service.delete_chat_history(user_id)
 

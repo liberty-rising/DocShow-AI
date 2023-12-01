@@ -1,14 +1,14 @@
 from databases.data_profile_manager import DataProfileManager
-from databases.database_managers import AppDatabaseManager,ClientDatabaseManager
+from databases.database_manager import DatabaseManager
 from databases.dashboard_manager import DashboardManager
 from databases.sql_executor import SQLExecutor
 from databases.organization_manager import OrganizationManager
 from databases.user_manager import UserManager
-from models.app.organization import Organization
-from models.app.user import User
-from models.client.chart import Chart
-from models.client.dashboard import Dashboard
-from models.client.data_profile import DataProfile
+from models.organization import Organization
+from models.user import User
+from models.chart import Chart
+from models.dashboard import Dashboard
+from models.data_profile import DataProfile
 from security import get_password_hash
 from utils.utils import get_app_logger
 
@@ -20,7 +20,7 @@ def create_sample_organization():
         name = 'DocShow AI'
     )
 
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
         existing_org = org_manager.get_organization_by_name(organization.name)
         if not existing_org:
@@ -39,7 +39,7 @@ def create_admin_user():
         role = 'admin'
     )
 
-    with AppDatabaseManager() as session:
+    with DatabaseManager() as session:
         user_manager = UserManager(session)
         existing_user = user_manager.get_user(admin_user.username)
         if not existing_user:
@@ -55,7 +55,7 @@ def create_sample_dashboard():
         organization="DocShow AI"
     )
 
-    with ClientDatabaseManager() as session:
+    with DatabaseManager() as session:
         manager = DashboardManager(session)
         existing_dashboard = manager.get_dashboard_by_name(dashboard.name, dashboard.organization)
         if not existing_dashboard:
@@ -172,8 +172,8 @@ def create_sample_dataprofile():
         file_type="pdf",
         organization_id = 1
     )
-    # Using ClientDatabaseManager to manage the database session
-    with ClientDatabaseManager() as session:
+    # Using DatabaseManager to manage the database session
+    with DatabaseManager() as session:
         profile_manager = DataProfileManager(session)
         existing_profile = profile_manager.get_dataprofile_by_name(sample_profile.name)
         if not existing_profile:
