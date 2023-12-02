@@ -8,19 +8,20 @@ from databases.table_metadata_manager import TableMetadataManager
 
 import pandas as pd
 
+
 def seed_db():
     """
     Asynchronously seed the client database with sample data from CSV files.
-    
+
     The function only creates tables that don't already exist in the database.
-    
+
     Internal Variables:
     - sample_tables: Dictionary mapping table names to corresponding CSV file names.
     - existing_tables: List of table names that already exist in the database.
     - session: Database session managed by DatabaseManager.
     - executor: Instance of SQLExecutor for executing SQL queries.
     - manager: Instance of TableManager for table operations.
-    
+
     Workflow:
     1. Initialize `sample_tables` dictionary to hold table-to-file mappings.
     2. Use DatabaseManager to create a session and SQLExecutor to get existing table names.
@@ -43,7 +44,7 @@ def seed_db():
         with DatabaseManager() as session:
             metadata_manager = TableMetadataManager(session)
             metadata_manager.add_table_metadata(
-                table_name="sample_sales", 
+                table_name="sample_sales",
                 create_query="""
                     CREATE TABLE sample_sales (
                         ordernumber BIGINT, 
@@ -71,7 +72,7 @@ def seed_db():
                         contactlastname TEXT, 
                         contactfirstname TEXT, 
                         dealsize TEXT)
-                """, 
+                """,
                 description="""
                     The sample_sales table is designed for storing detailed sales transaction records. 
                     It includes fields for order details (order number, quantity ordered, price per item, line number, total sales), date and status of the order, and temporal identifiers (quarter, month, and year). 
@@ -79,12 +80,5 @@ def seed_db():
                     Customer information is comprehensive, encompassing name, contact details, and address (with provisions for a second address line), along with geographical data like city, state, postal code, country, and sales territory. 
                     Additional fields for contact person's name and the size of the deal are also included. 
                     This table is suitable for categorizing detailed sales transactions and can support queries for sales analytics, customer segmentation, geographical sales trends, and time-based sales performance.
-                """
+                """,
             )
-
-    
-    
-
-
-
-

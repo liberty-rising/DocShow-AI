@@ -7,7 +7,8 @@ from utils.sql_string_manipulator import SQLStringManipulator
 
 import pandas as pd
 
-class TableManager:  
+
+class TableManager:
     """
     Manages table operations.
     Has functions that integrate a Large Language Model (LLM) and SQLExecutor.
@@ -15,6 +16,7 @@ class TableManager:
     Attributes:
         llm (BaseLLM): Instance of a Large Language Model for SQL operations.
     """
+
     def __init__(self, llm: BaseLLM = None):
         self.llm = llm
 
@@ -33,12 +35,18 @@ class TableManager:
             with DatabaseManager() as session:
                 sql_executor = SQLExecutor(session)
                 table_names = sql_executor.get_all_table_names_as_str()
-                
-            raw_create_query = self.llm.generate_create_statement(sample_content, header, table_names, extra_desc)
 
-            create_query = SQLStringManipulator(raw_create_query).extract_sql_query_from_text()  # Just in case
+            raw_create_query = self.llm.generate_create_statement(
+                sample_content, header, table_names, extra_desc
+            )
 
-            if SQLStringManipulator(create_query).is_valid_create_table_query():  # Checks if the query is valid
+            create_query = SQLStringManipulator(
+                raw_create_query
+            ).extract_sql_query_from_text()  # Just in case
+
+            if SQLStringManipulator(
+                create_query
+            ).is_valid_create_table_query():  # Checks if the query is valid
                 with DatabaseManager() as session:
                     sql_executor = SQLExecutor(session)
                     sql_executor.execute_create_query(create_query)
@@ -47,8 +55,10 @@ class TableManager:
             # Log the error message here
             print(f"An error occurred while creating the table: {str(e)}")
             return None
-    
-    def create_table_desc_with_llm(self, create_query: str, sample_content: str, extra_desc: str):
+
+    def create_table_desc_with_llm(
+        self, create_query: str, sample_content: str, extra_desc: str
+    ):
         """
         Fetches and stores the description of a table created in LLM based on the CREATE TABLE query,
         sample file content, and a message.
@@ -60,10 +70,14 @@ class TableManager:
         """
         try:
             # API call to generate and fetch table description
-            description = self.llm.generate_table_desc(create_query, sample_content, extra_desc)
-            
-            table_name = SQLStringManipulator(create_query).get_table_from_create_query()
-            
+            description = self.llm.generate_table_desc(
+                create_query, sample_content, extra_desc
+            )
+
+            table_name = SQLStringManipulator(
+                create_query
+            ).get_table_from_create_query()
+
             # Store description in separate table
             with DatabaseManager() as session:
                 manager = TableMetadataManager(session)
@@ -73,11 +87,11 @@ class TableManager:
             # Log the error message here
             print(f"An error occurred while fetching table description: {str(e)}")
             return None
-        
+
     def determine_table(self, sample_content: str, extra_desc: str) -> str:
         """
         Determines the appropriate table based on sample data and a message, returns that table's name.
-        
+
         Parameters:
         - sample_content (str): The sample content for table determination.
         - extra_desc (str): Additional metadata or instructions.
@@ -88,16 +102,20 @@ class TableManager:
         with DatabaseManager() as session:
             manager = TableMetadataManager(session)
             table_metadata = manager.get_metadata()
-            formatted_table_metadata = manager.format_table_metadata_for_llm(table_metadata)
+            formatted_table_metadata = manager.format_table_metadata_for_llm(
+                table_metadata
+            )
 
-        table_name = self.llm.fetch_table_name_from_sample(sample_content, extra_desc, formatted_table_metadata)
+        table_name = self.llm.fetch_table_name_from_sample(
+            sample_content, extra_desc, formatted_table_metadata
+        )
         return table_name
-    
+
     def create_table_from_df(self, df: pd.DataFrame, table_name: str):
         with DatabaseManager() as session:
             executor = SQLExecutor(session)
             executor.append_df_to_table(df, table_name)
-    
+
     def create_table_from_query(self, query: str):
         with DatabaseManager() as session:
             executor = SQLExecutor(session)
@@ -123,7 +141,9 @@ class TableManager:
                 sql_executor = SQLExecutor(session)
                 sql_executor.append_df_to_table(processed_df, table_name)
         else:
-            raise HTTPException(status_code=400, detail="Could not determine table name")
+            raise HTTPException(
+                status_code=400, detail="Could not determine table name"
+            )
 
     def drop_table(self, table_name: str):
         # Logic to drop a table
@@ -134,7 +154,7 @@ class TableManager:
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
-    
+
     def get_table_columns(self, table_name: str):
         """Returns a list of all of the columns present within the table."""
         try:

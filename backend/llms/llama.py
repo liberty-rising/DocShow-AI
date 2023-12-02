@@ -1,5 +1,6 @@
 from .base import BaseLLM
 
+
 class LlamaLLM(BaseLLM):
     def __init__(self):
         self.api_key = "LLAMA_API_KEY"

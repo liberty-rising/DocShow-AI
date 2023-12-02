@@ -11,28 +11,41 @@ from pydantic import BaseModel
 from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
 from models.user import User, UserCreate
-from security import authenticate_user, create_token, get_password_hash, set_tokens_in_cookies, verify_refresh_token, update_user_refresh_token
+from security import (
+    authenticate_user,
+    create_token,
+    get_password_hash,
+    set_tokens_in_cookies,
+    verify_refresh_token,
+    update_user_refresh_token,
+)
 from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 class LoginResponse(BaseModel):
-    message:str
+    message: str
+
 
 class RegistrationResponse(BaseModel):
-    message:str
+    message: str
+
 
 class LogoutResponse(BaseModel):
-    message:str
+    message: str
+
 
 @auth_router.post("/token/", response_model=LoginResponse)
-async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(
+    response: Response, form_data: OAuth2PasswordRequestForm = Depends()
+):
     """
-    Authenticate a user and set a JWT token in a cookie upon successful authentication. 
-    
-    This endpoint verifies the provided username and password. If the credentials are valid, 
+    Authenticate a user and set a JWT token in a cookie upon successful authentication.
+
+    This endpoint verifies the provided username and password. If the credentials are valid,
     it creates a JWT token and sets it in a secure, HttpOnly cookie in the response.
 
     Args:
@@ -48,16 +61,23 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+
+    access_token = create_token(
+        {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    refresh_token = create_token(
+        {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    )
     update_user_refresh_token(user.id, refresh_token)
 
     set_tokens_in_cookies(response, access_token, refresh_token)
     return {"message": "Login successful"}
 
+
 @auth_router.post("/refresh-token/")
-async def refresh_access_token(response: Response, user: User = Depends(verify_refresh_token)):
+async def refresh_access_token(
+    response: Response, user: User = Depends(verify_refresh_token)
+):
     """
     Refresh the access token using a valid refresh token.
 
@@ -71,20 +91,25 @@ async def refresh_access_token(response: Response, user: User = Depends(verify_r
     Returns:
         dict: A message indicating successful token refresh. The new tokens are not returned in the response body but are set in secure cookies.
     """
-    
+
     # Ensure the user is valid
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
         )
-    
-    access_token = create_token({"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    new_refresh_token = create_token({"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+
+    access_token = create_token(
+        {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    new_refresh_token = create_token(
+        {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    )
 
     update_user_refresh_token(user.id, new_refresh_token)
 
     set_tokens_in_cookies(response, access_token, new_refresh_token)
+
 
 @auth_router.post("/register/", response_model=RegistrationResponse)
 async def register(response: Response, user: UserCreate):
@@ -101,7 +126,7 @@ async def register(response: Response, user: UserCreate):
     """
     with DatabaseManager() as session:
         user_manager = UserManager(session)
-        
+
         # Ensure unique username and email
         existing_user = user_manager.get_user(username=user.username)
         if existing_user:
@@ -109,18 +134,16 @@ async def register(response: Response, user: UserCreate):
         existing_email = user_manager.get_email(email=user.email)
         if existing_email:
             raise HTTPException(status_code=400, detail="Email already registered")
-        
+
         # Hash the user's password
         hashed_password = get_password_hash(user.password)
-        
+
         # Add user to the database
         db_user = User(
-            username=user.username,
-            email=user.email,
-            hashed_password=hashed_password
+            username=user.username, email=user.email, hashed_password=hashed_password
         )
         user_manager.create_user(db_user)
-        
+
         # Generate access token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
@@ -128,9 +151,17 @@ async def register(response: Response, user: UserCreate):
         )
 
         # Set cookie
-        response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=1800, secure=True, samesite='Lax')
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {access_token}",
+            httponly=True,
+            max_age=1800,
+            secure=True,
+            samesite="Lax",
+        )
 
         return {"message": "Registration successful"}
+
 
 @auth_router.post("/logout/", response_model=LogoutResponse)
 async def logout(response: Response):

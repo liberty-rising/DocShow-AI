@@ -6,6 +6,7 @@ from typing import Optional
 
 from .base import Base
 
+
 class User(Base):
     """
     Represents a user interacting with the app.
@@ -18,15 +19,17 @@ class User(Base):
         created_at (datetime): The timestamp when the user was created.
         refresh_token (str, optional): The refresh token for the user.
     """
-    __tablename__ = 'users'
+
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True)
     hashed_password = Column(String)
-    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
     role = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
     refresh_token = Column(Text, nullable=True)
+
 
 class UserCreate(BaseModel):
     """
@@ -39,11 +42,13 @@ class UserCreate(BaseModel):
         organization_id (Optional[int]): The id of the organization the user belongs to, if any.
         role (Optional[str]): The role or position of the user within the organization, if specified.
     """
+
     username: str
     email: EmailStr
     password: str
     organization_id: Optional[int] = None
     role: Optional[str] = None
+
 
 class UserOut(BaseModel):
     """
@@ -60,17 +65,20 @@ class UserOut(BaseModel):
         organization_id (Optional[int]): The id of the organization the user belongs to. Can be None.
         role (Optional[str]): The role or designation of the user. Can be None.
     """
+
     id: int
     username: str
     email: EmailStr
     organization_id: Optional[int]
     role: Optional[str]
 
+
 class UserRole(str, Enum):
     NONE = None
     GUEST = "guest"
     USER = "user"
     ADMIN = "admin"
+
 
 class UserUpdate(BaseModel):
     """
@@ -83,6 +91,7 @@ class UserUpdate(BaseModel):
 
     This model is used when making requests to update user details.
     """
+
     username: str
     organization_id: Optional[int]
     role: Optional[UserRole]

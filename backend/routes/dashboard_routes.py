@@ -5,6 +5,7 @@ from models.dashboard import Dashboard, DashboardCreate
 
 dashboard_router = APIRouter()
 
+
 @dashboard_router.get("/dashboard/")
 async def get_dashboard(id: int):
     with DatabaseManager() as session:
@@ -15,20 +16,22 @@ async def get_dashboard(id: int):
         else:
             raise HTTPException(status_code=404, detail="Dashboard not found")
 
+
 @dashboard_router.get("/dashboards/")
 async def get_dashboards():
     with DatabaseManager() as session:
         manager = DashboardManager(session)
         dashboards = manager.get_dashboards()
-    
+
     return dashboards
+
 
 @dashboard_router.post("/dashboard/")
 async def save_dashboard(dashboard: DashboardCreate):
     db_dashboard = Dashboard(
         name=dashboard.name,
         description=dashboard.description,
-        organization=dashboard.organization
+        organization=dashboard.organization,
     )
     with DatabaseManager() as session:
         manager = DashboardManager(session)

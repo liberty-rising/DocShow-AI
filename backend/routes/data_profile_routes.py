@@ -6,6 +6,7 @@ from databases.data_profile_manager import DataProfileManager
 
 data_profile_router = APIRouter()
 
+
 @data_profile_router.get("/data-profiles/")
 async def get_data_profiles():
     with DatabaseManager() as session:

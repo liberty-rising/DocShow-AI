@@ -19,6 +19,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token/")
 # Context for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def authenticate_user(username: str, password: str) -> User:
     with DatabaseManager() as session:
         manager = UserManager(session)
@@ -27,68 +28,81 @@ def authenticate_user(username: str, password: str) -> User:
             return user
         return None
 
+
 def verify_password(plain_password, hashed_password):
     """
     Verify a password using its hashed version.
-    
+
     Args:
         plain_password: The plain text password.
         hashed_password: The hashed version of the password.
-    
+
     Returns:
         bool: True if password matches, False otherwise.
     """
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def verify_refresh_token(refresh_token: str = Cookie(None)) -> User:
     """
     Verify a refresh token from cookies and return the associated user.
     """
-    
+
     if refresh_token is None:
         raise HTTPException(status_code=401, detail="Refresh token missing")
 
     try:
         # Decode the token
         payload = decode_token(refresh_token)
-        refresh_token = refresh_token.replace("Bearer ", "", 1)  # TODO: Fix because repeated in decode
+        refresh_token = refresh_token.replace(
+            "Bearer ", "", 1
+        )  # TODO: Fix because repeated in decode
         username: str = payload.get("sub")
         if username is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-        
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
+
         # Find the user in the database
         with DatabaseManager() as session:
             manager = UserManager(session)
             user = manager.get_user(username)
 
         if user is None or user.refresh_token != refresh_token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token",
+            )
 
         return user
-    
+
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
+
 
 def get_password_hash(password):
     """
     Generate a hashed version of the provided password.
-    
+
     Args:
         password: The plain text password.
-    
+
     Returns:
         str: The hashed password.
     """
     return pwd_context.hash(password)
 
+
 def create_token(data: dict, expires_delta: timedelta) -> str:
     """
     Create an  JWT token.
-    
+
     Args:
         data: Data to encode into the token.
         expires_delta: Time duration for the token to remain valid.
-    
+
     Returns:
         str: The generated JWT token.
     """
@@ -98,13 +112,14 @@ def create_token(data: dict, expires_delta: timedelta) -> str:
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 def decode_token(token: str):
     """
     Decode a JWT token.
-    
+
     Args:
         token: The JWT token to decode.
-    
+
     Returns:
         dict: The decoded payload if successful.
         None: If decoding fails.
@@ -116,52 +131,66 @@ def decode_token(token: str):
     except JWTError:
         return None
 
+
 def get_current_user(request: Request) -> User:
     """
     Retrieve the current user based on the JWT token stored in the cookie.
-    
+
     Args:
         request (Request): The request object.
-    
+
     Returns:
         User: The user object associated with the token.
-    
+
     Raises:
         HTTPException: If token is invalid or user is not found.
     """
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Not authenticated"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
 
     try:
         payload = decode_token(token)
         username: str = payload.get("sub")
         if username is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
     except JWTError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     with DatabaseManager() as session:
         user_manager = UserManager(session)
         user = user_manager.get_user(username=username)
-        
+
         if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+            )
 
     return user
 
+
 def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: str):
     response.set_cookie(
-        key="access_token", value=f"Bearer {access_token}", 
-        httponly=True, max_age=1800, secure=True, samesite='Lax'
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        max_age=1800,
+        secure=True,
+        samesite="Lax",
     )
     response.set_cookie(
-        key="refresh_token", value=f"Bearer {refresh_token}", 
-        httponly=True, max_age=60*60*24*7, secure=True, samesite='Lax'
+        key="refresh_token",
+        value=f"Bearer {refresh_token}",
+        httponly=True,
+        max_age=60 * 60 * 24 * 7,
+        secure=True,
+        samesite="Lax",
     )
+
 
 def update_user_refresh_token(user_id: int, refresh_token: str):
     with DatabaseManager() as session:

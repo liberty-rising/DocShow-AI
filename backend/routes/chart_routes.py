@@ -17,36 +17,39 @@ import os
 
 chart_router = APIRouter()
 
+
 class ChartConfigRequest(BaseModel):
     chat_id: Optional[int]
     msg: str
     chart_config: dict
 
+
 @chart_router.get("/charts/types/")
 async def get_chart_types():
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'chart_types.json')
-    with open(config_path, 'r') as file:
+    config_path = os.path.join(
+        os.path.dirname(__file__), "..", "config", "chart_types.json"
+    )
+    with open(config_path, "r") as file:
         chart_types = json.load(file)
     return chart_types
 
+
 @chart_router.post("/chart/")
 async def save_chart(chart: ChartCreate):
-
     with DatabaseManager() as session:
         manager = ChartManager(session)
         highest_order = manager.get_highest_order()
         order = highest_order + 1
 
-        db_chart = Chart(
-            dashboard_id = chart.dashboardId,
-            order = order,
-            config = chart.conf
-        )
+        db_chart = Chart(dashboard_id=chart.dashboardId, order=order, config=chart.conf)
 
         manager.save_chart(db_chart)
 
+
 @chart_router.post("/chart/config/")
-async def create_chart_config(request: ChartConfigRequest, user: User = Depends(get_current_user)):
+async def create_chart_config(
+    request: ChartConfigRequest, user: User = Depends(get_current_user)
+):
     """Creates or updates a chart configuration using an LLM."""
     chat_id = request.chat_id
     msg = request.msg
@@ -57,7 +60,9 @@ async def create_chart_config(request: ChartConfigRequest, user: User = Depends(
     table_metadata = get_table_metadata(table_name)
 
     gpt = GPTLLM(chat_id, user)
-    updated_chart_config = await gpt.generate_chart_config_v2(msg, table_metadata, chart_type, nivo_config)
+    updated_chart_config = await gpt.generate_chart_config_v2(
+        msg, table_metadata, chart_type, nivo_config
+    )
 
     # Make sure configuration holds data needed for specific chart type
     formatter = NivoAssistant(chart_type)
@@ -75,10 +80,13 @@ async def create_chart_config(request: ChartConfigRequest, user: User = Depends(
 
     return updated_chart_config, gpt.chat_id
 
+
 def get_table_metadata(table_name: str):
     """Get table metadata"""
     with DatabaseManager() as session:
         metadata_manager = TableMetadataManager(session)
         table_metadata_obj = metadata_manager.get_metadata(table_name)
-        table_metadata = table_metadata_obj.to_dict() # Transforms Table_Metadata object to dict
+        table_metadata = (
+            table_metadata_obj.to_dict()
+        )  # Transforms Table_Metadata object to dict
     return table_metadata

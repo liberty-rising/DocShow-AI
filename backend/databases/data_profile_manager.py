@@ -1,5 +1,6 @@
 from models.data_profile import DataProfile
 
+
 class DataProfileManager:
     def __init__(self, session):
         self.session = session
@@ -12,7 +13,7 @@ class DataProfileManager:
         """Create a new DataProfile."""
         self.session.add(data_profile)
         self.session.commit()
-    
+
     def get_all_data_profiles(self):
         """Retrieve all DataProfiles."""
         return self.session.query(DataProfile).all()

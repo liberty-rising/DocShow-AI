@@ -9,12 +9,16 @@ from security import get_current_user
 
 chat_router = APIRouter()
 
+
 @chat_router.post("/chat/")
-async def chat_endpoint(request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)):
+async def chat_endpoint(
+    request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)
+):
     user_input = request.user_input
     # Assume llm_chat is a function that sends user_input to your LLM and gets a response
     llm_output = llm.generate_text(user_input)
     return ChatResponse(llm_output=llm_output)
+
 
 @chat_router.delete("/chat_history/")
 async def delete_chat_history(current_user: User = Depends(get_current_user)):

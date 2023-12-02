@@ -11,11 +11,13 @@ import sys
 from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 
+
 def execute_select_query(query: str):
     with DatabaseManager() as session:
         sql_executor = SQLExecutor(session)
         results = sql_executor.execute_select_query(query)
     return results
+
 
 def process_file(file: UploadFile, encoding: str) -> Any:
     """
@@ -33,7 +35,7 @@ def process_file(file: UploadFile, encoding: str) -> Any:
 
     files = {"processed_df": None, "sample_file_content": None}
 
-    if file_type == 'csv':
+    if file_type == "csv":
         # Sniff the first 1024 bytes to check for a header
         sample = file.file.read(4096).decode(encoding)
         has_header = Sniffer().has_header(sample)
@@ -61,26 +63,28 @@ def process_file(file: UploadFile, encoding: str) -> Any:
         files["sample_file_content_str"] = buffer.getvalue()
         files["header_str"] = header_str
 
-    elif file_type == 'pdf':
+    elif file_type == "pdf":
         # PDF processing logic here
         pass
-    elif file_type in ['img','jpg','jpeg','png']:
+    elif file_type in ["img", "jpg", "jpeg", "png"]:
         # Image processing logic here
         pass
     else:
         raise ValueError("Unsupported file type")
-    
+
     return files["processed_df"], files["sample_file_content"], files["header_str"]
+
 
 def save_to_data_lake(file: UploadFile = File(...)):
     pass
 
+
 def get_app_logger(name):
     logger = logging.getLogger(name)
-    
+
     # Set log level based on the environment
-    log_level = logging.DEBUG if os.getenv('APP_ENV') == 'development' else logging.INFO
-    
+    log_level = logging.DEBUG if os.getenv("APP_ENV") == "development" else logging.INFO
+
     logger.setLevel(log_level)
 
     # You can add handlers, formatters here if needed
