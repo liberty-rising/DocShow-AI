@@ -1,6 +1,7 @@
 import { Typography, Grid } from '@mui/material';
 import TableManagement from './TableManagement.jsx';
 import UserManagement from './UserManagement';
+import OrganizationManagement from './OrganizationManagement'; // Import the new component
 
 function AdminPage() {
   return (
@@ -13,6 +14,9 @@ function AdminPage() {
       </Grid>
       <Grid item xs={12}>
         <UserManagement />
+      </Grid>
+      <Grid item xs={12}>
+        <OrganizationManagement /> {/* Add the new component here */}
       </Grid>
     </Grid>
   );
