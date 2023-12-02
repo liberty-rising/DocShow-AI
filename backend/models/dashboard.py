@@ -20,6 +20,7 @@ class Dashboard(Base):
     The 'charts' attribute represents a one-to-many relationship to the 'Chart' model,
     indicating that each dashboard can contain multiple charts.
     """
+
     __tablename__ = "dashboards"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -40,21 +41,23 @@ class Dashboard(Base):
             "organization": self.organization,
             "create_at": self.created_at,
             "updated_at": self.updated_at,
-            "charts": [chart.to_dict() for chart in self.charts]
+            "charts": [chart.to_dict() for chart in self.charts],
         }
 
     def __repr__(self):
         return f"<Dashboard(name='{self.name}', description='{self.description}')>"
 
+
 class DashboardCreate(BaseModel):
     """
     Pydantic model representing the data required to create a new dashboard.
-    
+
     Attributes:
         name (str): The desired name of the dashboard.
         description (str): The desired description for the dashboard.
         organization (str): The desired organization associated with the dashboard.
     """
+
     name: str
     description: str
     organization: str

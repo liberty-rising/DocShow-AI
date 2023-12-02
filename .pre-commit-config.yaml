@@ -1,0 +1,7 @@
+repos:
+-   repo: https://github.com/psf/black
+    rev: 23.11.0  # Use a specific version or 'stable' for the latest stable release
+    hooks:
+    -   id: black
+        language_version: python3  # Ensure black uses the correct version of Python
+        files: ^backend/  # Run black only on files in the backend/ directory

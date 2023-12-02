@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 class DatabaseManager:
     def __init__(self):
-        self.engine = create_engine(f'{DB_SERVER_URL}db')
+        self.engine = create_engine(f"{DB_SERVER_URL}db")
 
     def __enter__(self):
         Session = sessionmaker(bind=self.engine)
@@ -15,6 +15,6 @@ class DatabaseManager:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.session.close()
-    
+
     def get_uri_str(self):
         return str(self.engine.url)

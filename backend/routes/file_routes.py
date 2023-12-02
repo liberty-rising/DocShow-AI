@@ -9,25 +9,25 @@ from utils.utils import process_file, save_to_data_lake
 
 file_router = APIRouter()
 
+
 @file_router.get("/encodings/")
 async def get_encodings(file_type: str = ""):
-    encodings = {
-        "csv":["utf_8","ascii","latin_1","utf_16","ANSI"],
-        "pdf":[]
-    }
-    return encodings.get("csv",None)
+    encodings = {"csv": ["utf_8", "ascii", "latin_1", "utf_16", "ANSI"], "pdf": []}
+    return encodings.get("csv", None)
+
 
 @file_router.get("/file_types/")
 async def get_file_types():
     return ["csv", "pdf"]
 
+
 @file_router.post("/upload/")
 async def upload_file(
-    file: UploadFile = File(...), 
-    extra_desc: str = Form(default=""), 
-    is_new_table: bool = Form(default=False), 
-    encoding: str = Form(default=""), 
-    llm: BaseLLM = Depends(get_llm_sql_object)
+    file: UploadFile = File(...),
+    extra_desc: str = Form(default=""),
+    is_new_table: bool = Form(default=False),
+    encoding: str = Form(default=""),
+    llm: BaseLLM = Depends(get_llm_sql_object),
 ):
     """
     Upload a file and optionally include a message to clarify user data for the LLM.
@@ -51,22 +51,33 @@ async def upload_file(
 
         # Create new table if necessary
         if is_new_table:
-            create_table_query = table_manager.create_table_with_llm(sample_content, header, extra_desc)
-            table_manager.create_table_desc_with_llm(create_table_query, sample_content, extra_desc)
-        
+            create_table_query = table_manager.create_table_with_llm(
+                sample_content, header, extra_desc
+            )
+            table_manager.create_table_desc_with_llm(
+                create_table_query, sample_content, extra_desc
+            )
+
         # Append file to table
         table_name = table_manager.determine_table(sample_content, extra_desc)
         table_manager.append_to_table(processed_df, table_name)
 
         # Optionally, save the file to a data lake
         save_to_data_lake(file)
-    
-        return JSONResponse(content={"message": "File processed successfully"}, status_code=200)
-        
+
+        return JSONResponse(
+            content={"message": "File processed successfully"}, status_code=200
+        )
+
     except HTTPException as e:
         # Specific error handling for HTTP exceptions
-        return JSONResponse(content={"message": f"HTTP Exception: {e.detail}"}, status_code=e.status_code)
-    
+        return JSONResponse(
+            content={"message": f"HTTP Exception: {e.detail}"},
+            status_code=e.status_code,
+        )
+
     except Exception as e:
         # General error handling
-        return JSONResponse(content={"message": f"An error occured: {str(e)}"}, status_code=500)
+        return JSONResponse(
+            content={"message": f"An error occured: {str(e)}"}, status_code=500
+        )

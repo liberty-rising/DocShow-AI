@@ -2,6 +2,7 @@ from sqlalchemy import Column, String
 
 from .base import Base
 
+
 class TableMetadata(Base):
     """
     Represents metadata for a table in the database.
@@ -11,7 +12,8 @@ class TableMetadata(Base):
         create_statement (str): The SQL statement used to create the table.
         description (str): A description of the table.
     """
-    __tablename__ = 'table_metadata'
+
+    __tablename__ = "table_metadata"
     table_name = Column(String, primary_key=True, index=True)
     create_statement = Column(String)
     description = Column(String)
@@ -20,5 +22,5 @@ class TableMetadata(Base):
         return {
             "table_name": self.table_name,
             "create_statement": self.create_statement,
-            "description": self.description
+            "description": self.description,
         }

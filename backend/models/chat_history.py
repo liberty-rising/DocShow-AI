@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 
 from .base import Base
 
+
 class ChatHistory(Base):
     """
     Represents a record of chat history between a user and an LLM.
@@ -17,7 +18,8 @@ class ChatHistory(Base):
         is_user (bool): Indicates if the message is from the user (True) or LLM (False).
         timestamp (datetime): The timestamp when the message was created.
     """
-    __tablename__ = 'chat_history'
+
+    __tablename__ = "chat_history"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     chat_id = Column(Integer, index=True)
     llm_type = Column(String, index=True)

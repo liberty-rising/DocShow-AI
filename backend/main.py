@@ -20,11 +20,14 @@ logger.info("Logger initialised.")
 
 app = FastAPI()
 
+
 async def startup_event():
     run_startup_routines()
 
+
 async def shutdown_event():
     pass
+
 
 # Registering the startup and shutdown events
 app.router.on_startup.append(startup_event)

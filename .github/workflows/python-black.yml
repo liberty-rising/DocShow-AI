@@ -1,0 +1,24 @@
+name: Python Black Formatting Check
+
+on: 
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  black-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # Specify the Python version
+
+    - name: Install Black
+      run: pip install black
+
+    - name: Check Python code formatting with Black
+      run: black --check backend/

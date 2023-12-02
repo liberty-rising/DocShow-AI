@@ -1,16 +1,18 @@
 import httpx
 
+
 class SessionManager:
     """
     Manages and maintains individual HTTP sessions for users using the httpx Client.
-    
-    The class provides a centralized way to handle sessions for different users 
-    to ensure that only one session is active for a user at any given time. 
+
+    The class provides a centralized way to handle sessions for different users
+    to ensure that only one session is active for a user at any given time.
     It allows easy retrieval, creation, and closing of sessions.
 
     Attributes:
         sessions (dict): A dictionary mapping user_ids to their respective httpx Client sessions.
     """
+
     def __init__(self):
         """
         Initializes a new instance of SessionManager with an empty sessions dictionary.
@@ -19,7 +21,7 @@ class SessionManager:
 
     def get_session(self, user_id):
         """
-        Retrieves the httpx Client session for the given user_id. 
+        Retrieves the httpx Client session for the given user_id.
         If a session does not exist for the user, it creates a new one.
 
         Args:

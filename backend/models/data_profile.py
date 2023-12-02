@@ -10,7 +10,7 @@ class DataProfile(Base):
     """
     DataProfile Model
     -----------------
-    This class represents the 'dataprofile' table in the database. 
+    This class represents the 'dataprofile' table in the database.
 
     Attributes:
     - id: A unique identifier for each data profile.
@@ -25,9 +25,8 @@ class DataProfile(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     file_type = Column(String)
-    organization_id = Column(Integer, ForeignKey('organizations.id'))
-    
-    
+    organization_id = Column(Integer, ForeignKey("organizations.id"))
+
     def to_dict(self):
         """
         Converts the DataProfile instance into a dictionary.
@@ -36,5 +35,5 @@ class DataProfile(Base):
             "id": self.id,
             "name": self.name,
             "file_type": self.file_type,
-            "organization_id": self.organization_id
+            "organization_id": self.organization_id,
         }
