@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Box, Divider, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@mui/material';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
-import ChatIcon from '@mui/icons-material/Chat';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -26,7 +25,6 @@ const Navigation = () => {
     { text: 'Data Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Data Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
     { text: 'Data Profiling', icon: <AnalyticsIcon />, path: '/profiling' },
-    { text: 'AI Assistant', icon: <ChatIcon />, path: '/ai-assistant' },
     { text: 'User Panel', icon: <AccountBoxIcon />, path: '/user' },
     { text: 'Admin Panel', icon: <AdminPanelSettingsIcon />, path: '/admin' },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }

@@ -13,7 +13,6 @@ import LandingLayout from './components/Layouts/LandingLayout';
 import RequireAuth from './components/Auth/RequireAuth';
 import AboutPage from './pages/About';
 import AdminPage from './pages/Admin/Admin';
-import AIAssistantPage from './pages/AIAssistant';
 import AnalyticsPage from './pages/Analytics/Analytics';
 import BlogPage from './pages/Blog';
 import CreateChartPage from './pages/Charts/CreateChart';
@@ -63,7 +62,6 @@ function App() {
       <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
       <Route path="/blog" element={<LandingLayout><BlogPage /></LandingLayout>} />
       <Route path="/about" element={<LandingLayout><AboutPage /></LandingLayout>} />
-
       <Route path="/dashboards" element={<RequireAuth><AppLayout><DashboardMenuPage /></AppLayout></RequireAuth>} />
       <Route path="/dashboards/create" element={<RequireAuth><AppLayout><CreateDashboardPage /></AppLayout></RequireAuth>} />
       <Route path="/dashboards/:dashboardId" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
@@ -71,7 +69,6 @@ function App() {
       <Route path="/upload" element={<RequireAuth><AppLayout><UploadPage /></AppLayout></RequireAuth>} />
       <Route path="/analytics" element={<RequireAuth><AppLayout><AnalyticsPage /></AppLayout></RequireAuth>} />
       <Route path="/profiling" element={<RequireAuth><AppLayout><ProfilingPage /></AppLayout></RequireAuth>} />
-      <Route path="/ai-assistant" element={<RequireAuth><AppLayout><AIAssistantPage /></AppLayout></RequireAuth>} />
       <Route path="/user" element={<RequireAuth><AppLayout><UserPage /></AppLayout></RequireAuth>} />
       <Route path="/admin" element={<RequireAuth><AppLayout><AdminPage /></AppLayout></RequireAuth>} />
       <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />
