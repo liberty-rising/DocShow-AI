@@ -19,7 +19,9 @@ axios.interceptors.response.use(response => response, async (error) => {
             window.location.reload(); // Reload the page to use the new tokens
             return axios(originalRequest);
         } catch (refreshError) {
-            navigate('/login'); // Redirect to login
+            if (window.location.pathname !== '/'){
+                navigate('/login'); // Redirect to login
+            }
             return Promise.reject(refreshError);
         }
     }

@@ -1,5 +1,6 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import { API_URL } from '../utils/constants';
 
 //Contexts in React are used for passing data deeply through the component tree without having to pass props down manually at every level
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
+        // Replace '/api/verifyToken' with your actual API endpoint
+        const response = await axios.get(`${API_URL}verify-token/`);
         // Update based on the response message
         if (response.data.message === "User is authenticated") {
           setIsAuthenticated(true);
@@ -31,7 +34,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     };
 
-    verifyToken();
+    if (window.location.pathname !== '/') {
+      verifyToken();
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   // Function for updating the authenticated state. 
