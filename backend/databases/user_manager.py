@@ -129,6 +129,14 @@ class UserManager:
             self.db_session.refresh(db_user)
         return db_user
 
+    def update_refresh_token(self, user_id: int, refresh_token: str):
+        db_user = self.db_session.query(User).filter(User.id == user_id).first()
+        if db_user:
+            db_user.refresh_token = refresh_token
+        self.db_session.commit()
+        self.db_session.refresh(db_user)
+        return db_user
+
     def update_user_by_username(
         self, username: str, organization_id: int, role: str
     ) -> User:

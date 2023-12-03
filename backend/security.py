@@ -3,6 +3,7 @@ from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from typing import Optional
 
 from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
@@ -203,7 +204,10 @@ def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: 
     )
 
 
-def update_user_refresh_token(user_id: int, refresh_token: str):
+def update_user_refresh_token(
+    user_id: int,
+    refresh_token: Optional[str],
+):
     with DatabaseManager() as session:
         manager = UserManager(session)
-        manager.update_user(user_id, refresh_token=refresh_token)
+        manager.update_refresh_token(user_id, refresh_token)

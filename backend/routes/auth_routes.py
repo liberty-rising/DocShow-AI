@@ -68,7 +68,10 @@ async def login_for_access_token(
     refresh_token = create_token(
         {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     )
-    update_user_refresh_token(user.id, refresh_token)
+    update_user_refresh_token(
+        user_id=user.id,
+        refresh_token=refresh_token,
+    )
 
     set_tokens_in_cookies(response, access_token, refresh_token)
     return {"message": "Login successful"}
@@ -106,7 +109,10 @@ async def refresh_access_token(
         {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     )
 
-    update_user_refresh_token(user.id, new_refresh_token)
+    update_user_refresh_token(
+        user_id=user.id,
+        refresh_token=new_refresh_token,
+    )
 
     set_tokens_in_cookies(response, access_token, new_refresh_token)
 
@@ -177,7 +183,7 @@ async def register(response: Response, user: UserCreate):
             httponly=True,
             max_age=1800,
             secure=True,
-            samesite="Lax",
+            samesite="lax",
         )
 
         return {"message": "Registration successful"}
