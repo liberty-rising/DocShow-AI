@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from databases.database_manager import DatabaseManager
 from databases.data_profile_manager import DataProfileManager
@@ -9,15 +9,14 @@ from models.data_profile import (
 )
 
 
-
 data_profile_router = APIRouter()
 
 
 @data_profile_router.get("/data-profiles/")
-async def get_data_profiles(current_user: User = Depends(get_current_user)):
+async def get_data_profiles():
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
-        data_profile = data_profile_manager.get_all_data_profiles(organization_id)
+        data_profile = data_profile_manager.get_all_data_profiles()
     return data_profile
 
 
