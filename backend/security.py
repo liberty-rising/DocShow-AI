@@ -3,7 +3,6 @@ from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from typing import Annotated
 
 from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager

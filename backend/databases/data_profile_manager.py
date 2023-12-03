@@ -1,4 +1,3 @@
-from sqlalchemy.orm import Session
 from models.data_profile import DataProfile
 
 

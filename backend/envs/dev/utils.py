@@ -1,6 +1,3 @@
-from sqlalchemy import MetaData, Table
-from sqlalchemy.schema import CreateTable
-
 from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 from databases.table_manager import TableManager
@@ -36,7 +33,7 @@ def seed_db():
     # Create sample table if it doesn't exist
     table_manager = TableManager()
     if "sample_sales" not in existing_tables:
-        df = pd.read_csv(f"envs/dev/sample_data/sample_sales_data.csv")
+        df = pd.read_csv("envs/dev/sample_data/sample_sales_data.csv")
         df.columns = map(str.lower, df.columns)
         table_manager.create_table_from_df(df, "sample_sales")
 
@@ -47,38 +44,41 @@ def seed_db():
                 table_name="sample_sales",
                 create_query="""
                     CREATE TABLE sample_sales (
-                        ordernumber BIGINT, 
-                        quantityordered BIGINT, 
-                        priceeach DOUBLE PRECISION, 
-                        orderlinenumber BIGINT, 
-                        sales DOUBLE PRECISION, 
-                        orderdate TEXT, 
-                        status TEXT, 
-                        qtr_id BIGINT, 
-                        month_id BIGINT, 
-                        year_id BIGINT, 
-                        productline TEXT, 
-                        msrp BIGINT, 
-                        productcode TEXT, 
-                        customername TEXT, 
-                        phone TEXT, 
-                        addressline1 TEXT, 
-                        addressline2 TEXT, 
-                        city TEXT, 
-                        state TEXT, 
-                        postalcode TEXT, 
-                        country TEXT, 
-                        territory TEXT, 
-                        contactlastname TEXT, 
-                        contactfirstname TEXT, 
+                        ordernumber BIGINT,
+                        quantityordered BIGINT,
+                        priceeach DOUBLE PRECISION,
+                        orderlinenumber BIGINT,
+                        sales DOUBLE PRECISION,
+                        orderdate TEXT,
+                        status TEXT,
+                        qtr_id BIGINT,
+                        month_id BIGINT,
+                        year_id BIGINT,
+                        productline TEXT,
+                        msrp BIGINT,
+                        productcode TEXT,
+                        customername TEXT,
+                        phone TEXT,
+                        addressline1 TEXT,
+                        addressline2 TEXT,
+                        city TEXT,
+                        state TEXT,
+                        postalcode TEXT,
+                        country TEXT,
+                        territory TEXT,
+                        contactlastname TEXT,
+                        contactfirstname TEXT,
                         dealsize TEXT)
                 """,
                 description="""
-                    The sample_sales table is designed for storing detailed sales transaction records. 
-                    It includes fields for order details (order number, quantity ordered, price per item, line number, total sales), date and status of the order, and temporal identifiers (quarter, month, and year). 
-                    Product information is detailed through product line, manufacturer's suggested retail price (MSRP), and product code. 
-                    Customer information is comprehensive, encompassing name, contact details, and address (with provisions for a second address line), along with geographical data like city, state, postal code, country, and sales territory. 
-                    Additional fields for contact person's name and the size of the deal are also included. 
-                    This table is suitable for categorizing detailed sales transactions and can support queries for sales analytics, customer segmentation, geographical sales trends, and time-based sales performance.
+                    The sample_sales table is designed for storing detailed sales transaction records.
+                    It includes fields for order details (order number, quantity ordered, price per item, line number, total sales), date and status of the order, and temporal identifiers
+                    (quarter, month, and year).
+                    Product information is detailed through product line, manufacturer's suggested retail price (MSRP), and product code.
+                    Customer information is comprehensive, encompassing name, contact details, and address (with provisions for a second address line),
+                    along with geographical data like city, state, postal code, country, and sales territory.
+                    Additional fields for contact person's name and the size of the deal are also included.
+                    This table is suitable for categorizing detailed sales transactions and can support queries for sales analytics, customer segmentation, geographical sales trends,
+                    and time-based sales performance.
                 """,
             )

@@ -98,7 +98,8 @@ class NivoAssistant:
                 "string | (value: number) => string | number optional",
                 "Optional formatter for values.",
                 "The formatted value can then be used for labels & tooltips.",
-                "Under the hood, nivo uses d3-format, please have a look at it for available formats, you can also pass a function which will receive the raw value and should return the formatted one.",
+                "Under the hood, nivo uses d3-format, please have a look at it for available formats, you can also pass a function which will receive the raw value and should return the \
+                 formatted one.",
             ],
             "padding": [
                 "number optional default:0.1",
@@ -159,14 +160,17 @@ class NivoAssistant:
                 "Defines the order of layers.",
                 "support svg canvas",
                 "Defines the order of layers, available layers are: grid, axes, bars, markers, legends, annotations. The markers layer is not available in the canvas flavor.",
-                "You can also use this to insert extra layers to the chart, this extra layer must be a function which will receive the chart computed data and must return a valid SVG element.",
+                "You can also use this to insert extra layers to the chart, this extra layer must be a function which will receive the chart computed data and must return a valid SVG \
+                 element.",
             ],
             "enableLabel": ["boolean optional default:true", "Enable/disable labels."],
             "label": [
                 "string | Function optional default:'formattedValue'",
                 "Define how bar labels are computed.",
                 "By default it will use the bar's value. It accepts a string which will be used to access a specific bar data property, such as 'value' or 'id'.",
-                "You can also use a funtion if you want to add more logic, this function will receive the current bar's data and must return the computed label which, depending on the context, should return a string or an svg element (Bar) or a string (BarCanvas). For example let's say you want to use a label with both the id and the value, you can achieve this with: label={d => `${d.id}: ${d.value}`}",
+                "You can also use a funtion if you want to add more logic, this function will receive the current bar's data and must return the computed label which, depending on the \
+                 context, should return a string or an svg element (Bar) or a string (BarCanvas). For example let's say you want to use a label with both the id and the value, you can \
+                 achieve this with: label={d => `${d.id}: ${d.value}`}",
             ],
             "labelSkipWidth": [
                 "number optional default:0",
@@ -200,7 +204,8 @@ class NivoAssistant:
                 "Function optional",
                 "Tooltip custom component",
                 "support svg canvas",
-                "A function allowing complete tooltip customisation, it must return a valid HTML element and will receive the following data: {bar: {id:             string | number,value:          number,formattedValue: string,index:          number,indexValue:     string | number,// datum associated to the current index (raw data)data:           object},color: string,label: string}",
+                "A function allowing complete tooltip customisation, it must return a valid HTML element and will receive the following data: {bar: {id: string | number,value: number,\
+                 formattedValue: string,index: number,indexValue: string | number,// datum associated to the current index (raw data)data: object},color: string,label: string}",
             ],
             "legends": ["object[] optional", "Optional chart's legends."],
         }
