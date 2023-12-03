@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, CircularProgress, TextField, Button, Typography, Paper } from '@mui/material';
 import axios from 'axios';
-import { API_URL } from '../utils/constants';
+import { API_URL } from '../../utils/constants';
 
 const AIAssistant = () => {
   const [userInput, setUserInput] = useState('');
