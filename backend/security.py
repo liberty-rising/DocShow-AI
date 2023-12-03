@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from fastapi import Cookie, HTTPException, Request, Response, status
+from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from typing import Annotated
 
 from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
@@ -171,6 +172,17 @@ def get_current_user(request: Request) -> User:
             )
 
     return user
+
+
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access forbidden: Requires admin role",
+        )
+    return current_user
 
 
 def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: str):

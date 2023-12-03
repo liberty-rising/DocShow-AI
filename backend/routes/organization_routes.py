@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from databases.database_manager import DatabaseManager
 from databases.organization_manager import OrganizationManager
@@ -7,12 +7,14 @@ from models.organization import (
     OrganizationCreateRequest,
     OrganizationCreateResponse,
 )
+from models.user import User
+from security import get_current_admin_user, get_current_user
 
 organization_router = APIRouter()
 
 
 @organization_router.get("/organization/")
-async def get_organization(org_id: int):
+async def get_organization(org_id: int, current_user: User = Depends(get_current_user)):
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
         org = org_manager.get_organization(org_id)
@@ -20,7 +22,7 @@ async def get_organization(org_id: int):
 
 
 @organization_router.get("/organizations/")
-async def get_organizations():
+async def get_organizations(current_admin: User = Depends(get_current_admin_user)):
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
         orgs = org_manager.get_organizations()
@@ -29,7 +31,7 @@ async def get_organizations():
 
 @organization_router.post("/organization/")
 async def save_organization(
-    org: OrganizationCreateRequest,
+    org: OrganizationCreateRequest, current_user: User = Depends(get_current_user)
 ) -> OrganizationCreateResponse:
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)

@@ -5,7 +5,7 @@ the security module for creating JWT tokens and password hashing/verification.
 """
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
 from databases.database_manager import DatabaseManager
@@ -24,7 +24,6 @@ from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 auth_router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class LoginResponse(BaseModel):
