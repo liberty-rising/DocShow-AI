@@ -1,9 +1,8 @@
 // AnalyticsPage.js
 import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
-// import ChartAdder from './ChartAdder';
-// import ChartDataSelector from './ChartDataSelector';
-// import ChartDisplay from './ChartDisplay';
+import { Box, Typography, Grid } from '@mui/material';
+import AIAssistant from './AIAssistant';
+// import other components as needed
 
 function AnalyticsPage() {
   const [chartType, setChartType] = useState('');
@@ -11,7 +10,6 @@ function AnalyticsPage() {
 
   // Mock data fetching
   const fetchData = (columns) => {
-    // Mock dataset
     const mockData = [
       { product: "Product A", sales: 200, expenses: 150, profit: 50 },
       { product: "Product B", sales: 300, expenses: 200, profit: 100 },
@@ -19,12 +17,10 @@ function AnalyticsPage() {
       // ... add more data as needed
     ];
 
-    // If no columns are selected, return an empty array
     if (!columns || columns.length === 0) {
       return [];
     }
 
-    // Filter the data based on selected columns
     return mockData.map(row => {
       const filteredRow = { product: row.product };
       columns.forEach(column => {
@@ -36,12 +32,10 @@ function AnalyticsPage() {
 
   const handleAddChart = (type) => {
     setChartType(type);
-    // Reset data selection
     setSelectedData([]);
   };
 
   const handleDataSelect = (e) => {
-    // Add or remove data based on selection
     const column = e.target.value;
     if (e.target.checked) {
       setSelectedData([...selectedData, column]);
@@ -53,8 +47,12 @@ function AnalyticsPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
-      {/* <ChartAdder onAddChart={handleAddChart} />
-      {chartType && <ChartDataSelector chartType={chartType} onDataSelect={handleDataSelect} />} */}
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          {/* AI Assistant occupying the full width */}
+          <AIAssistant />
+        </Grid>
+      </Grid>
     </Box>
   );
 }
