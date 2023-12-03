@@ -37,3 +37,11 @@ class DataProfile(Base):
             "file_type": self.file_type,
             "organization_id": self.organization_id,
         }
+
+
+class DataProfileCreateRequest(BaseModel):
+    name: str
+
+
+class DataProfileCreateResponse(BaseModel):
+    name: str
