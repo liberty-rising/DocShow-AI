@@ -9,5 +9,4 @@ repos:
     rev: 6.1.0
     hooks:
     -   id: flake8
-        additional_dependencies: [flake8-fastapi]
         files: ^backend/  # Run flake8 only on files in the backend/ directory
