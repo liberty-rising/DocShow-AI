@@ -73,7 +73,7 @@ const CreateChartPage = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        axios.post(`${API_URL}chart/`, { dashboardId, chartConfig })
+        axios.post(`${API_URL}chart/`, { dashboard_id: dashboardId, config: chartConfig })
         .then(response => {
             // Handle successful dashboard creation
             console.log('Chart created:', response.data);
