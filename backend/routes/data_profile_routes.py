@@ -13,11 +13,10 @@ data_profile_router = APIRouter()
 
 
 @data_profile_router.get("/data-profiles/")
-async def get_data_profiles():
+async def get_data_profiles(current_user: User = Depends(get_current_user)):
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
-        data_profile = data_profile_manager.get_all_data_profiles()
-    return data_profile
+        return data_profile_manager
 
 
 @data_profile_router.post("/data-profile/")
