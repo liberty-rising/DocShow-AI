@@ -29,14 +29,14 @@ async def get_organizations():
 
 @organization_router.post("/organization/")
 async def save_organization(
-    request: OrganizationCreateRequest,
+    org: OrganizationCreateRequest,
 ) -> OrganizationCreateResponse:
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
-        if org_manager.get_organization_by_name(request.name):
+        if org_manager.get_organization_by_name(org.name):
             raise HTTPException(status_code=400, detail="Organization already exists")
 
-        new_organization = Organization(name=request.name)
+        new_organization = Organization(name=org.name)
         created_organization = org_manager.create_organization(new_organization)
         response = OrganizationCreateResponse(created_organization.name)
         return response
