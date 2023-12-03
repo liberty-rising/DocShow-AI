@@ -10,3 +10,10 @@ repos:
     hooks:
     -   id: flake8
         files: ^backend/  # Run flake8 only on files in the backend/ directory
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.7.1'  # Use the latest version
+    hooks:
+    -   id: mypy
+        files: ^backend/
+

@@ -1,7 +1,9 @@
-from sqlalchemy.orm import Session
-from models.chat_history import ChatHistory  # Replace with your actual import
+from typing import Optional
 
 import json
+
+from sqlalchemy.orm import Session
+from models.chat_history import ChatHistory  # Replace with your actual import
 
 
 class ChatHistoryManager:
@@ -41,14 +43,16 @@ class ChatHistoryManager:
         """
         Get a new chat id. Used for storing a new chat.
         """
-        latest_chat = (
+        latest_chat: Optional[ChatHistory] = (
             self.session.query(ChatHistory).order_by(ChatHistory.chat_id.desc()).first()
         )
 
         if not latest_chat:  # If there are no chats in database
             return 0
 
-        return latest_chat.chat_id + 1
+        new_chat_id: int = latest_chat.chat_id + 1
+
+        return new_chat_id
 
     def get_llm_chat_history_for_user(self, user_id: int, llm_type: str):
         """

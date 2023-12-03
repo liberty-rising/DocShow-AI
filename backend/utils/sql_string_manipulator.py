@@ -70,5 +70,6 @@ class SQLStringManipulator:
         match = re.findall(r"CREATE TABLE [^;]+;", self.sql_string)
         if match:
             # Extract only the last "CREATE TABLE" statement and add a space after "CREATE TABLE"
-            last_statement = match[-1]
+            last_statement: str = match[-1]
             return "CREATE TABLE " + last_statement.split("CREATE TABLE")[-1].strip()
+        return None

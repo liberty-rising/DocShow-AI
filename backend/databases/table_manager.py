@@ -106,7 +106,7 @@ class TableManager:
                 table_metadata
             )
 
-        table_name = self.llm.fetch_table_name_from_sample(
+        table_name: str = self.llm.fetch_table_name_from_sample(
             sample_content, extra_desc, formatted_table_metadata
         )
         return table_name

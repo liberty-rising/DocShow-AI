@@ -1,13 +1,16 @@
+from openai import ChatCompletion
+from typing import Optional
+
+import json
+import openai
+import tiktoken
+
 from .base import BaseLLM
 from databases.chat_history_manager import ChatHistoryManager
 from databases.database_manager import DatabaseManager
 from models.user import User
 from settings import OPENAI_API_KEY
 from utils.nivo_assistant import NivoAssistant
-
-import json
-import openai
-import tiktoken
 
 
 class GPTLLM(BaseLLM):
@@ -21,7 +24,7 @@ class GPTLLM(BaseLLM):
 
     def __init__(
         self,
-        chat_id: int = None,
+        chat_id: Optional[int],
         user: User = None,
         store_history: bool = False,
         llm_type: str = "generic",
@@ -77,12 +80,14 @@ class GPTLLM(BaseLLM):
 
     async def _api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
-        completion = await openai.ChatCompletion.acreate(
+        completion: ChatCompletion = await openai.ChatCompletion.acreate(
             model=self.model,
             messages=payload["messages"],
             response_format=self.response_format,
         )
-        return completion.choices[0].message.content
+        return str(
+            completion.choices[0].message.content
+        )  # TODO: Typecasting is not recommended for mypy
 
     def _count_tokens(self, text: str) -> int:
         """Count the number of tokens in the given text."""
@@ -181,7 +186,7 @@ class GPTLLM(BaseLLM):
 
         self.llm_type = assistant_type
 
-    async def _send_and_receive_message(self, prompt: str):
+    async def _send_and_receive_message(self, prompt: str) -> str:
         user_message = self._create_message("user", prompt)
         self.history.append(user_message)
 
@@ -196,7 +201,7 @@ class GPTLLM(BaseLLM):
         self.history.append(assistant_message)
 
         if self.store_history:
-            self._save_messages()
+            self._save_messages(user_message, assistant_message)
 
         return assistant_message_content
 
@@ -276,7 +281,7 @@ class GPTLLM(BaseLLM):
                 f"\n\nAdditional information about the sample data: \n{extra_desc}"
             )
 
-        gpt_response = await self._send_and_receive_message(prompt)
+        gpt_response: str = await self._send_and_receive_message(prompt)
 
         return gpt_response
 

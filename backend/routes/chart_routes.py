@@ -8,6 +8,7 @@ from databases.table_metadata_manager import TableMetadataManager
 from llms.gpt import GPTLLM
 from models.user import User
 from models.chart import Chart, ChartCreate
+from models.table_metadata import TableMetadata
 from security import get_current_user
 from utils.nivo_assistant import NivoAssistant
 from utils.utils import execute_select_query
@@ -58,7 +59,7 @@ async def create_chart_config(
     chat_id = request.chat_id
     msg = request.msg
     chart_config = request.chart_config
-    table_name = chart_config.get("table")
+    table_name = chart_config.get("table", "")
     chart_type = chart_config.get("type")
     nivo_config = chart_config.get("nivoConfig")
     table_metadata = get_table_metadata(table_name)
@@ -85,7 +86,9 @@ async def create_chart_config(
     return updated_chart_config, gpt.chat_id
 
 
-def get_table_metadata(table_name: str, current_user: User = Depends(get_current_user)):
+def get_table_metadata(
+    table_name: str, current_user: User = Depends(get_current_user)
+) -> TableMetadata:
     """Get table metadata"""
     with DatabaseManager() as session:
         metadata_manager = TableMetadataManager(session)

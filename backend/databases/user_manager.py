@@ -2,6 +2,8 @@
 This module provides a UserManager class that handles database operations related to the User model.
 It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user data.
 """
+from typing import Optional
+
 from sqlalchemy.orm import Session
 from models.user import User
 
@@ -95,10 +97,10 @@ class UserManager:
     def update_user(
         self,
         user_id: int,
-        email: str = None,
-        organization_id: int = None,
-        role: str = None,
-        refresh_token: str = None,
+        email: Optional[str],
+        organization_id: Optional[int],
+        role: Optional[str],
+        refresh_token: Optional[str],
     ):
         """
         Update a user's details in the database.
