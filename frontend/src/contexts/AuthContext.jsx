@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { API_URL } from '../utils/constants';
 
-// Create a new Context for authentication. 
 //Contexts in React are used for passing data deeply through the component tree without having to pass props down manually at every level
 export const AuthContext = createContext();
 
@@ -9,23 +9,34 @@ export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 // Component that provides authentication state to its children. 
-//This component will wrap our app so that any child component can access the authentication state
+// This component will wrap our app so that any child component can access the authentication state
 export const AuthProvider = ({ children }) => {
   // State for keeping track of whether the user is authenticated. 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
 
   useEffect(() => {
-    // Check if the user is authenticated when the app loads
-    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-    setIsAuthenticated(isAuth);
-    setIsLoading(false); // Set loading to false after checking auth state
+    const verifyToken = async () => {
+      try {
+        // Update based on the response message
+        if (response.data.message === "User is authenticated") {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
+        console.error('Token verification failed', error);
+      }
+      setIsLoading(false);
+    };
+
+    verifyToken();
   }, []);
 
   // Function for updating the authenticated state. 
   // This is used to change the authentication status (logged in or logged out) from anywhere in the app
   const updateAuth = (newAuthState) => {
-    localStorage.setItem('isAuthenticated', newAuthState);
     setIsAuthenticated(newAuthState);
   };
 

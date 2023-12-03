@@ -1,6 +1,6 @@
 """
-This module provides routes for token-based user authentication and registration using FastAPI. 
-It integrates with a database manager to perform CRUD operations on the User model and leverages 
+This module provides routes for token-based user authentication and registration using FastAPI.
+It integrates with a database manager to perform CRUD operations on the User model and leverages
 the security module for creating JWT tokens and password hashing/verification.
 """
 from datetime import timedelta
@@ -14,6 +14,7 @@ from models.user import User, UserCreate
 from security import (
     authenticate_user,
     create_token,
+    get_current_user,
     get_password_hash,
     set_tokens_in_cookies,
     verify_refresh_token,
@@ -109,6 +110,25 @@ async def refresh_access_token(
     update_user_refresh_token(user.id, new_refresh_token)
 
     set_tokens_in_cookies(response, access_token, new_refresh_token)
+
+
+@auth_router.get("/verify-token/", response_model=dict)
+async def verify_token(current_user: User = Depends(get_current_user)):
+    """
+    Verify the JWT token and confirm the user is logged in.
+
+    Returns:
+        dict: A confirmation message if the user is authenticated.
+    """
+    # Assuming current_user is valid, return confirmation
+    if current_user:
+        return {"message": "User is authenticated"}
+    else:
+        # If for any reason current_user is None or invalid
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User authentication failed",
+        )
 
 
 @auth_router.post("/register/", response_model=RegistrationResponse)
