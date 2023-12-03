@@ -6,18 +6,22 @@ from databases.table_manager import TableManager
 from llms.base import BaseLLM
 from llms.utils import get_llm_sql_object
 from utils.utils import process_file, save_to_data_lake
+from models.user import User
+from security import get_current_user
 
 file_router = APIRouter()
 
 
 @file_router.get("/encodings/")
-async def get_encodings(file_type: str = ""):
+async def get_encodings(
+    file_type: str = "", current_user: User = Depends(get_current_user)
+):
     encodings = {"csv": ["utf_8", "ascii", "latin_1", "utf_16", "ANSI"], "pdf": []}
     return encodings.get("csv", None)
 
 
 @file_router.get("/file_types/")
-async def get_file_types():
+async def get_file_types(current_user: User = Depends(get_current_user)):
     return ["csv", "pdf"]
 
 
@@ -28,6 +32,7 @@ async def upload_file(
     is_new_table: bool = Form(default=False),
     encoding: str = Form(default=""),
     llm: BaseLLM = Depends(get_llm_sql_object),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Upload a file and optionally include a message to clarify user data for the LLM.

@@ -12,7 +12,9 @@ chat_router = APIRouter()
 
 @chat_router.post("/chat/")
 async def chat_endpoint(
-    request: ChatRequest, llm: BaseLLM = Depends(get_llm_chat_object)
+    request: ChatRequest,
+    llm: BaseLLM = Depends(get_llm_chat_object),
+    current_user: User = Depends(get_current_user),
 ):
     user_input = request.user_input
     # Assume llm_chat is a function that sends user_input to your LLM and gets a response

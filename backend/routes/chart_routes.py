@@ -25,7 +25,7 @@ class ChartConfigRequest(BaseModel):
 
 
 @chart_router.get("/charts/types/")
-async def get_chart_types():
+async def get_chart_types(current_user: User = Depends(get_current_user)):
     config_path = os.path.join(
         os.path.dirname(__file__), "..", "config", "chart_types.json"
     )
@@ -35,20 +35,24 @@ async def get_chart_types():
 
 
 @chart_router.post("/chart/")
-async def save_chart(chart: ChartCreate):
+async def save_chart(
+    chart: ChartCreate, current_user: User = Depends(get_current_user)
+):
     with DatabaseManager() as session:
         manager = ChartManager(session)
         highest_order = manager.get_highest_order()
         order = highest_order + 1
 
-        db_chart = Chart(dashboard_id=chart.dashboardId, order=order, config=chart.conf)
+        db_chart = Chart(
+            dashboard_id=chart.dashboard_id, order=order, config=chart.config
+        )
 
         manager.save_chart(db_chart)
 
 
 @chart_router.post("/chart/config/")
 async def create_chart_config(
-    request: ChartConfigRequest, user: User = Depends(get_current_user)
+    request: ChartConfigRequest, current_user: User = Depends(get_current_user)
 ):
     """Creates or updates a chart configuration using an LLM."""
     chat_id = request.chat_id
@@ -59,8 +63,8 @@ async def create_chart_config(
     nivo_config = chart_config.get("nivoConfig")
     table_metadata = get_table_metadata(table_name)
 
-    gpt = GPTLLM(chat_id, user)
-    updated_chart_config = await gpt.generate_chart_config_v2(
+    gpt = GPTLLM(chat_id, current_user)
+    updated_chart_config = await gpt.generate_chart_config(
         msg, table_metadata, chart_type, nivo_config
     )
 
@@ -81,7 +85,7 @@ async def create_chart_config(
     return updated_chart_config, gpt.chat_id
 
 
-def get_table_metadata(table_name: str):
+def get_table_metadata(table_name: str, current_user: User = Depends(get_current_user)):
     """Get table metadata"""
     with DatabaseManager() as session:
         metadata_manager = TableMetadataManager(session)

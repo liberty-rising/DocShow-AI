@@ -51,7 +51,7 @@ class OrganizationManager:
         """Get a list of all of the organizations."""
         return self.db_session.query(Organization).all()
 
-    def create_organization(self, organization: str):
+    def create_organization(self, organization: Organization):
         """
         Add a new organization to the database.
 
