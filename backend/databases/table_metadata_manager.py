@@ -32,10 +32,14 @@ class TableMetadataManager:
             List[TableMetadata]: List of TableMetadata objects.
         """
         try:
-            return self.db_session.query(TableMetadata).all()
+            table_metadatas: List[TableMetadata] = self.db_session.query(
+                TableMetadata
+            ).all()
+            return table_metadatas
         except Exception as e:
             # Handle exception
             print(f"Database error: {str(e)}")
+            return []
 
     def get_metadata(self, table_name: str) -> TableMetadata:
         """Retrieve metadata for a single table"""

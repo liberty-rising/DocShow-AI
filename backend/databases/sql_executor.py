@@ -1,5 +1,6 @@
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
+from typing import List
 
 import pandas as pd
 
@@ -71,16 +72,16 @@ class SQLExecutor:
             print(f"An error occurred: {e}")
             raise
 
-    def get_all_table_names_as_list(self) -> list:
+    def get_all_table_names_as_list(self) -> List:
         try:
             # Using the engine from the session to get table names
-            table_names = self.session.bind.table_names()
+            table_names: List = self.session.bind.table_names()
             return table_names
         except Exception as e:
             print(f"An error occurred: {e}")
             raise
 
-    def get_table_columns(self, table_name: str) -> list:
+    def get_table_columns(self, table_name: str) -> List:
         try:
             engine = self.session.bind
             inspector = inspect(engine)

@@ -43,10 +43,12 @@ class DashboardManager:
             List[Dashboard]: List of Dashboard objects.
         """
         try:
-            return self.db_session.query(Dashboard).all()
+            dashboards: List[Dashboard] = self.db_session.query(Dashboard).all()
+            return dashboards
         except Exception as e:
             # Handle exception
             print(f"Database error: {str(e)}")
+            return []
 
     def save_dashboard(self, dashboard: Dashboard):
         self.db_session.add(dashboard)

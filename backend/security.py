@@ -109,7 +109,7 @@ def create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt: str = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -191,7 +191,7 @@ def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: 
         httponly=True,
         max_age=1800,
         secure=True,
-        samesite="Lax",
+        samesite="lax",
     )
     response.set_cookie(
         key="refresh_token",
@@ -199,7 +199,7 @@ def set_tokens_in_cookies(response: Response, access_token: str, refresh_token: 
         httponly=True,
         max_age=60 * 60 * 24 * 7,
         secure=True,
-        samesite="Lax",
+        samesite="lax",
     )
 
 

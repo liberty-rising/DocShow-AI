@@ -1,7 +1,7 @@
 from csv import Sniffer
 from fastapi import File, UploadFile
 from io import StringIO
-from typing import Any
+from typing import Any, Dict, Optional
 
 import logging
 import os
@@ -30,10 +30,18 @@ def process_file(file: UploadFile, encoding: str) -> Any:
     Returns:
         Any: Processed content of the file.
     """
+    if file.filename is None:
+        raise ValueError("File must have a filename")
+
     # Find file type by file extension
     file_type = file.filename.split(".")[-1].lower()
 
-    files = {"processed_df": None, "sample_file_content": None}
+    # Define the dictionary with types for values
+    files: Dict[str, Optional[str]] = {
+        "processed_df": None,
+        "sample_file_content_str": None,
+        "header_str": None,
+    }
 
     if file_type == "csv":
         # Sniff the first 1024 bytes to check for a header
