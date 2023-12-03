@@ -6,7 +6,7 @@ on:
       - 'backend/**'
 
 jobs:
-  black-check:
+  python-check:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
@@ -18,10 +18,13 @@ jobs:
         python-version: '3.8'
 
     - name: Install dependencies
-      run: pip install black flake8
+      run: pip install black flake8 mypy
 
     - name: Check Python code formatting with Black
       run: black --check backend/
 
     - name: Check Python code style with Flake8
       run: flake8 backend/
+
+    - name: Run Mypy Type Checking
+      run: mypy backend/
