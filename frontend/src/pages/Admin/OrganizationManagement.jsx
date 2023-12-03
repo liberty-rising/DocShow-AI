@@ -11,7 +11,7 @@ function OrganizationManagement() {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'error' or 'success'
 
   const handleAddOrganization = () => {
-    axios.post(`${API_URL}organizations/add`, { name: organizationName })
+    axios.post(`${API_URL}organization/`, { name: organizationName })
       .then(response => {
         // Handle successful addition
         console.log('Organization added:', response.data);
