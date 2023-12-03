@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 from models.data_profile import DataProfile
 
 
@@ -9,11 +10,11 @@ class DataProfileManager:
         """Retrieve a DataProfile by its name."""
         return self.session.query(DataProfile).filter(DataProfile.name == name).first()
 
+    def get_all_data_profiles(self):
+        """Retrieve all DataProfiles."""
+        return self.session.query(DataProfile).all()
+
     def create_dataprofile(self, data_profile):
         """Create a new DataProfile."""
         self.session.add(data_profile)
         self.session.commit()
-
-    def get_all_data_profiles(self):
-        """Retrieve all DataProfiles."""
-        return self.session.query(DataProfile).all()
