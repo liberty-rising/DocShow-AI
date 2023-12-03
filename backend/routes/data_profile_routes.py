@@ -19,7 +19,7 @@ async def get_data_profiles(organization_id: int):
     return data_profile
 
 
-@data_profile_router.post("/data-profiles/")
+@data_profile_router.post("/data-profile/")
 async def save_data_profiles(
     request: DataProfileCreateRequest,
 ) -> DataProfileCreateResponse:
