@@ -7,6 +7,8 @@ from models.data_profile import (
     DataProfileCreateRequest,
     DataProfileCreateResponse,
 )
+from models.user import User
+from security import get_current_user
 
 
 data_profile_router = APIRouter()
@@ -21,7 +23,7 @@ async def get_data_profiles(current_user: User = Depends(get_current_user)):
 
 @data_profile_router.post("/data-profile/")
 async def save_data_profiles(
-    request: DataProfileCreateRequest,
+    request: DataProfileCreateRequest, current_user: Depends(get_current_user)
 ) -> DataProfileCreateResponse:
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
