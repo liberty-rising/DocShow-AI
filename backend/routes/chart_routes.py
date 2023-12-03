@@ -41,7 +41,9 @@ async def save_chart(chart: ChartCreate):
         highest_order = manager.get_highest_order()
         order = highest_order + 1
 
-        db_chart = Chart(dashboard_id=chart.dashboardId, order=order, config=chart.conf)
+        db_chart = Chart(
+            dashboard_id=chart.dashboard_id, order=order, config=chart.config
+        )
 
         manager.save_chart(db_chart)
 
@@ -60,7 +62,7 @@ async def create_chart_config(
     table_metadata = get_table_metadata(table_name)
 
     gpt = GPTLLM(chat_id, user)
-    updated_chart_config = await gpt.generate_chart_config_v2(
+    updated_chart_config = await gpt.generate_chart_config(
         msg, table_metadata, chart_type, nivo_config
     )
 
