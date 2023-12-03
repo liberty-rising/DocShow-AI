@@ -1,9 +1,12 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from databases.database_manager import DatabaseManager
 from databases.organization_manager import OrganizationManager
-from models.organization import Organization
+from models.organization import (
+    Organization,
+    OrganizationCreateRequest,
+    OrganizationCreateResponse,
+)
 
 organization_router = APIRouter()
 
@@ -24,19 +27,16 @@ async def get_organizations():
     return orgs
 
 
-class OrganizationCreateRequest(BaseModel):
-    name: str
-
-
-@organization_router.post("/organizations/add")
-async def add_organization(request: OrganizationCreateRequest):
+@organization_router.post("/organization/")
+async def save_organization(
+    request: OrganizationCreateRequest,
+) -> OrganizationCreateResponse:
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
         if org_manager.get_organization_by_name(request.name):
             raise HTTPException(status_code=400, detail="Organization already exists")
+
         new_organization = Organization(name=request.name)
         created_organization = org_manager.create_organization(new_organization)
-        return {
-            "message": "Organization created successfully",
-            "organization": created_organization.name,
-        }
+        response = OrganizationCreateResponse(created_organization.name)
+        return response
