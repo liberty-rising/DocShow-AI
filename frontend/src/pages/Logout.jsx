@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 function Logout() {
   const navigate = useNavigate();
-  const { updateAuth, isAuthenticated } = useAuth();
+  const { updateAuth } = useAuth();
 
   useEffect(() => {
     // Clear the authentication cookie
@@ -18,8 +18,6 @@ function Logout() {
     // Redirect to the login page
     navigate('/');
   }, [navigate, updateAuth]);
-
-  console.log(isAuthenticated)
 
   // Optionally, you can render a message or a spinner here
   return <div>Logging out...</div>;
