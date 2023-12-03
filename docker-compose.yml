@@ -1,19 +1,5 @@
 version: '3'
 services:
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #     args:
-  #       APP_ENV: development
-  #   env_file:
-  #     - ./frontend/.env
-  #   environment:
-  #     - WATCHPACK_POLLING=true
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
 
   backend:
     build:

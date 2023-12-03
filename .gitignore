@@ -14,3 +14,6 @@ backend/.env
 frontend/.env
 superset/.env
 env/
+
+# Virtual environment
+venv/
