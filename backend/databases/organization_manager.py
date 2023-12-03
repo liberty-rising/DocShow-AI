@@ -2,6 +2,7 @@
 This module provides a OrganizationManager class that handles database operations related to the Organization model.
 It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user data.
 """
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from models.organization import Organization
 
@@ -65,3 +66,15 @@ class OrganizationManager:
         self.db_session.commit()
         self.db_session.refresh(organization)
         return organization
+
+    def delete_organization(self, org_id: int):
+        organization = (
+            self.db_session.query(Organization)
+            .filter(Organization.id == org_id)
+            .first()
+        )
+        if organization:
+            self.db_session.delete(organization)
+            self.db_session.commit()
+        else:
+            raise HTTPException(status_code=404, detail="Organization not found")
