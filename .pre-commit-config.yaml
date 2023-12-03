@@ -1,7 +1,13 @@
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.11.0  # Use a specific version or 'stable' for the latest stable release
+    rev: 23.11.0  
     hooks:
     -   id: black
         language_version: python3  # Ensure black uses the correct version of Python
         files: ^backend/  # Run black only on files in the backend/ directory
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+    -   id: flake8
+        additional_dependencies: [flake8-fastapi]
+        files: ^backend/  # Run flake8 only on files in the backend/ directory
