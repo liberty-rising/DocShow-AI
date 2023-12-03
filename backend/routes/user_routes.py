@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from security import get_current_user
+from security import get_current_admin_user, get_current_user, oauth2_scheme
+from typing import Annotated
 
 from models.user import User, UserOut, UserRole, UserUpdate
 from databases.database_manager import DatabaseManager
@@ -9,7 +10,7 @@ user_router = APIRouter()
 
 
 @user_router.get("/users/")
-async def get_users():
+async def get_users(current_admin_user: User = Depends(get_current_admin_user)):
     # Open a database session and fetch all users
     with DatabaseManager() as session:
         user_manager = UserManager(session)
@@ -20,16 +21,19 @@ async def get_users():
 
 @user_router.get("/users/me/", response_model=UserOut)
 async def read_users_me(current_user: User = Depends(get_current_user)):
+    current_user = get_current_user()
     return current_user
 
 
 @user_router.get("/users/roles/")
-async def get_user_roles():
+async def get_user_roles(current_user: User = Depends(get_current_user)):
     return list(UserRole)
 
 
 @user_router.put("/users/update/")
-async def update_user(user_data: UserUpdate):
+async def update_user(
+    user_data: UserUpdate, current_admin_user: User = Depends(get_current_admin_user)
+):
     with DatabaseManager() as session:
         user_manager = UserManager(session)
 
