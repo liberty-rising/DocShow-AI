@@ -21,7 +21,6 @@ async def get_users(current_admin_user: User = Depends(get_current_admin_user)):
 
 @user_router.get("/users/me/", response_model=UserOut)
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    current_user = get_current_user()
     return current_user
 
 
