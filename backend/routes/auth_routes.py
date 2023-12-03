@@ -135,7 +135,8 @@ async def register(response: Response, user: UserCreate):
     """
     Register a new user and set a JWT token in a cookie upon successful registration.
 
-    This endpoint registers a new user with the provided details. It checks for the uniqueness of the username and email. If the registration is successful, it creates a JWT token, sets it in a secure, HttpOnly cookie in the response, and returns a success message.
+    This endpoint registers a new user with the provided details. It checks for the uniqueness of the username and email. If the registration is successful, it creates a JWT token,
+    sets it in a secure, HttpOnly cookie in the response, and returns a success message.
 
     Args:
         user (UserCreate): Pydantic model containing the user's registration details, such as username, email, and password.
@@ -165,7 +166,7 @@ async def register(response: Response, user: UserCreate):
 
         # Generate access token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
+        access_token = create_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
 

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from security import get_current_user
-from typing import Annotated
 
 from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor

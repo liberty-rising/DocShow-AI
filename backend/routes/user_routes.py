@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from security import get_current_admin_user, get_current_user, oauth2_scheme
-from typing import Annotated
+from security import get_current_admin_user, get_current_user
 
 from models.user import User, UserOut, UserRole, UserUpdate
 from databases.database_manager import DatabaseManager
