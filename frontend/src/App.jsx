@@ -26,7 +26,7 @@ import RegisterPage from './pages/Register';
 import UploadPage from './pages/Upload/Upload';
 import UserPage from './pages/User';
 import Logout from './pages/Logout';
-import ProfilingPage from './pages/Profiling/Profiling';
+import DataProfilingPage from './pages/DataProfiling/DataProfiling';
 
 function AppWrapper() {
   return (
@@ -68,7 +68,7 @@ function App() {
       <Route path="/dashboards/:dashboardId/charts/create" element={<RequireAuth><AppLayout><CreateChartPage /></AppLayout></RequireAuth>} />
       <Route path="/upload" element={<RequireAuth><AppLayout><UploadPage /></AppLayout></RequireAuth>} />
       <Route path="/analytics" element={<RequireAuth><AppLayout><AnalyticsPage /></AppLayout></RequireAuth>} />
-      <Route path="/profiling" element={<RequireAuth><AppLayout><ProfilingPage /></AppLayout></RequireAuth>} />
+      <Route path="/data-profiling" element={<RequireAuth><AppLayout><DataProfilingPage /></AppLayout></RequireAuth>} />
       <Route path="/user" element={<RequireAuth><AppLayout><UserPage /></AppLayout></RequireAuth>} />
       <Route path="/admin" element={<RequireAuth><AppLayout><AdminPage /></AppLayout></RequireAuth>} />
       <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />

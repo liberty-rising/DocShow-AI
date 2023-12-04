@@ -24,7 +24,7 @@ const Navigation = () => {
     { text: 'Dashboards', icon: <DashboardIcon />, path: '/dashboards' },
     { text: 'Data Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Data Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
-    { text: 'Data Profiling', icon: <AnalyticsIcon />, path: '/profiling' },
+    { text: 'Data Profiling', icon: <AnalyticsIcon />, path: '/data-profiling' },
     { text: 'User Panel', icon: <AccountBoxIcon />, path: '/user' },
     { text: 'Admin Panel', icon: <AdminPanelSettingsIcon />, path: '/admin' },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }
