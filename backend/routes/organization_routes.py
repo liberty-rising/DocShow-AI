@@ -42,3 +42,13 @@ async def save_organization(
         created_organization = org_manager.create_organization(new_organization)
         response = OrganizationCreateResponse(created_organization.name)
         return response
+
+
+@organization_router.delete("/organization/{org_id}")
+async def delete_organization(
+    org_id: int, current_admin: User = Depends(get_current_admin_user)
+):
+    with DatabaseManager() as session:
+        org_manager = OrganizationManager(session)
+        org_manager.delete_organization(org_id)
+    return {"detail": "Organization deleted successfully"}
