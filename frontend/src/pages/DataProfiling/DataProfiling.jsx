@@ -1,39 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Button } from '@mui/material';
+import { API_URL } from '../../utils/constants';
 
 function DataProfilingPage() {
   const [dataProfiles, setDataProfiles] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState('');
 
   useEffect(() => {
-    axios.get('https://127.0.0.1/data-profiling') // Replace with your actual backend URL
+    axios.get(`${API_URL}data-profiles/`)
       .then(response => {
-        setDataProfiles(response.data);
+        // Check if the response is an array before updating state
+        if (Array.isArray(response.data)) {
+          setDataProfiles(response.data);
+        } else {
+          console.error('Received data is not an array:', response.data);
+          // Optionally set an empty array or handle this scenario appropriately
+          setDataProfiles([]);
+        }
       })
-      .catch(error => console.error('Error fetching data profiles:', error));
+      .catch(error => {
+        console.error('Error fetching data profiles:', error);
+        setDataProfiles([]); // Reset to empty array on error
+      });
   }, []);
 
   const handleChange = (event) => {
     setSelectedProfile(event.target.value);
   };
 
-  const handleExtractData = () => {
-    axios.post('https://127.0.0.1/data-profiling', { profileId: selectedProfile }) // Replace with your actual backend URL
-      .then(response => {
-        // Handle the response
-        console.log('Data extracted:', response.data);
-      })
-      .catch(error => {
-        console.error('Error extracting data:', error);
-      });
-  };
-
   return (
     <Box>
       <Typography variant="h4" gutterBottom>🔍 Data Profiling</Typography>
       <FormControl fullWidth>
-        <InputLabel id="data-profile-select-label">Select all the elements to extract</InputLabel>
+        <InputLabel id="data-profile-select-label">Data Profile</InputLabel>
         <Select
           labelId="data-profile-select-label"
           id="data-profile-select"
@@ -41,22 +41,13 @@ function DataProfilingPage() {
           label="Data Profile"
           onChange={handleChange}
         >
-          {dataProfiles.map(profile => (
-            <MenuItem key={profile.id} value={profile.id}>
+          {dataProfiles.map((profile, index) => (
+            <MenuItem key={index} value={profile.id}>
               {profile.name}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleExtractData}
-        sx={{ mt: 2 }}
-      >
-        Extract Data
-      </Button>
-      {/* Other content */}
     </Box>
   );
 }
