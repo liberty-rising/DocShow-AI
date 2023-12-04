@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Typography, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Button } from '@mui/material';
+import { API_URL } from '../../utils/constants';
 
 function DataProfilingPage() {
   const [dataProfiles, setDataProfiles] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState('');
 
   useEffect(() => {
-    axios.get('https://127.0.0.1/data-profiling')
+    axios.get(`${API_URL}data-profiles/`)
       .then(response => {
-        setDataProfiles(response.data);
+        // Check if the response is an array before updating state
+        if (Array.isArray(response.data)) {
+          setDataProfiles(response.data);
+        } else {
+          console.error('Received data is not an array:', response.data);
+          // Optionally set an empty array or handle this scenario appropriately
+          setDataProfiles([]);
+        }
       })
-      .catch(error => console.error('Error fetching data profiles:', error));
+      .catch(error => {
+        console.error('Error fetching data profiles:', error);
+        setDataProfiles([]); // Reset to empty array on error
+      });
   }, []);
 
   const handleChange = (event) => {
@@ -30,14 +41,13 @@ function DataProfilingPage() {
           label="Data Profile"
           onChange={handleChange}
         >
-          {dataProfiles.map(profile => (
-            <MenuItem key={profile.id} value={profile.id}>
+          {dataProfiles.map((profile, index) => (
+            <MenuItem key={index} value={profile.id}>
               {profile.name}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
-      {/* Other content */}
     </Box>
   );
 }
