@@ -3,7 +3,13 @@ kind: Deployment
 metadata:
   name: backend-deployment
 spec:
+  selector:
+    matchLabels:
+      app: backend
   template:
+    metadata:
+      labels:
+        app: backend
     spec:
       containers:
       - name: backend
