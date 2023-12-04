@@ -19,8 +19,6 @@ async def get_data_profiles(current_user: User = Depends(get_current_user)):
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
         data_profiles = data_profile_manager.get_all_data_profiles()
-        print("test")
-        print(data_profiles)
         return data_profiles
 
 
