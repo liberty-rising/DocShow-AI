@@ -19,5 +19,4 @@ JWT_SECRET_KEY = config("JWT_SECRET_KEY", default="mysecretkey")
 
 DB_SERVER_URL = config("DB_SERVER_URL")
 
-IS_HTTPS = config("IS_HTTPS").lower() == "true"
 OPENAI_API_KEY = config("OPENAI_API_KEY")
