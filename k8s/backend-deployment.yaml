@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: registry.digitalocean.com/docshow-ai/backend-prod:latest
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-url
+              key: DB_URL
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-secret
+              key: OPENAI_API_KEY
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: JWT_SECRET_KEY
