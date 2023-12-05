@@ -4,4 +4,3 @@ metadata:
   name: backend-config
 data:
   APP_ENV: "prod"
-  DB_URL: "postgresql://admin:admin@postgres_db:5432/db"

@@ -18,6 +18,11 @@ spec:
         - configMapRef:
             name: backend-config
         env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-url
+              key: DB_URL
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
