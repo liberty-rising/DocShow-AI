@@ -41,15 +41,3 @@ services:
       retries: 3
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d  # Added line for initialization script
-  
-  alembic:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres_db
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend:/app/backend
-    command: /app/backend/migrate.sh
