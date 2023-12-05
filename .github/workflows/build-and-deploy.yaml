@@ -1,0 +1,39 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build and Push Frontend Docker Image
+      run: |
+        docker build -t registry.digitalocean.com/docshow-ai/frontend-prod:latest -f frontend/Dockerfile.prod .
+        echo ${{ secrets.REGISTRY_PASSWORD }} | docker login your-registry -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+        docker push registry.digitalocean.com/docshow-ai/frontend-prod:latest
+
+    - name: Build and Push Backend Docker Image
+      run: |
+        docker build -t registry.digitalocean.com/docshow-ai/backend-prod:latest -f backend/Dockerfile.prod .
+        echo ${{ secrets.REGISTRY_PASSWORD }} | docker login your-registry -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+        docker push registry.digitalocean.com/docshow-ai/backend-prod:latest
+
+    - name: Set up Kubectl
+      run: |
+        echo "${{ secrets.KUBECONFIG_SECRET }}" | base64 --decode > kubeconfig.yml
+        export KUBECONFIG=$PWD/kubeconfig.yml
+
+    - name: Update Kubernetes Deployment for Frontend
+      run: |
+        kubectl set image deployment/frontend-deployment frontend-container=registry.digitalocean.com/docshow-ai/frontend-prod:latest
+
+    - name: Update Kubernetes Deployment for Backend
+      run: |
+        kubectl set image deployment/backend-deployment backend-container=registry.digitalocean.com/docshow-ai/backend-prod:latest
