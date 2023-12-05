@@ -25,15 +25,8 @@ jobs:
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
         docker push registry.digitalocean.com/docshow-ai/backend-prod:latest
 
-    - name: Set up Kubectl
+    - name: Set up Kubectl and Update Deployment
       run: |
         echo "${{ secrets.KUBECONFIG_SECRET }}" | base64 --decode > kubeconfig.yml
-        export KUBECONFIG=$PWD/kubeconfig.yml
-
-    - name: Update Kubernetes Deployment for Frontend
-      run: |
-        kubectl set image deployment/frontend-deployment frontend-container=registry.digitalocean.com/docshow-ai/frontend-prod:latest
-
-    - name: Update Kubernetes Deployment for Backend
-      run: |
-        kubectl set image deployment/backend-deployment backend-container=registry.digitalocean.com/docshow-ai/backend-prod:latest
+        kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend-container=registry.digitalocean.com/docshow-ai/frontend-prod:latest
+        kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend-container=registry.digitalocean.com/docshow-ai/backend-prod:latest
