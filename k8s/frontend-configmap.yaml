@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: frontend-config
 data:
-  VITE_API_URL: "http://docshow.ai/api/"
+  VITE_API_URL: "https://docshow.ai/api/"
   VITE_APP_ENV: "prod"
