@@ -35,3 +35,15 @@ async def save_data_profiles(
         created_data_profile = data_profile_manager.create_dataprofile(new_data_profile)
         response = DataProfileCreateResponse(created_data_profile.name)
         return response
+
+
+@data_profile_router.get("/data-profiles/{data_profile_id}")
+async def get_data_profile(
+    data_profile_id: int, current_user: User = Depends(get_current_user)
+):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile = data_profile_manager.get_dataprofile_by_id(data_profile_id)
+        if data_profile is None:
+            raise HTTPException(status_code=404, detail="Data Profile not found")
+        return data_profile
