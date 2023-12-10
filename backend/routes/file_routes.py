@@ -54,7 +54,7 @@ async def upload_file(
 
         # Instantiate TableManager
         with DatabaseManager() as session:
-            table_manager = TableManager(llm, session)
+            table_manager = TableManager(session, llm)
 
             # Create new table if necessary
             if is_new_table:
