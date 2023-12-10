@@ -10,12 +10,21 @@ from models.user import User
 table_router = APIRouter()
 
 
+@table_router.get("/organization/{org_id}/tables/")
+async def get_org_tables(org_id: int, current_user: User = Depends(get_current_user)):
+    with DatabaseManager() as session:
+        manager = TableManager(session)
+        tables = manager.get_org_tables(org_id)
+    return tables
+
+
 @table_router.get("/table/columns/")
 async def get_table_columns(
     table_name: str, current_user: User = Depends(get_current_user)
 ):
-    manager = TableManager()
-    columns = manager.get_table_columns(table_name)
+    with DatabaseManager() as session:
+        manager = TableManager(session)
+        columns = manager.get_table_columns(table_name)
     return columns
 
 
@@ -47,6 +56,7 @@ async def get_all_table_metadata(current_user: User = Depends(get_current_user))
 
 @table_router.delete("/table/")
 async def drop_table(table_name: str, current_user: User = Depends(get_current_user)):
-    manager = TableManager()
-    manager.drop_table(table_name)
+    with DatabaseManager() as session:
+        manager = TableManager(session)
+        manager.drop_table(table_name)
     return {"message": f"Dropped table {table_name}"}

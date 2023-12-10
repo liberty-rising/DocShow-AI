@@ -1,11 +1,14 @@
+from sqlalchemy.orm import Session
+from typing import List, Optional
+
+import pandas as pd
+
 from fastapi import HTTPException
-from databases.database_manager import DatabaseManager
 from databases.sql_executor import SQLExecutor
 from databases.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
+from models.organization_table_map import OrganizationTableMap
 from utils.sql_string_manipulator import SQLStringManipulator
-
-import pandas as pd
 
 
 class TableManager:
@@ -14,11 +17,33 @@ class TableManager:
     Has functions that integrate a Large Language Model (LLM) and SQLExecutor.
 
     Attributes:
+        session (Optional[str]): The session used for database operations.
         llm (BaseLLM): Instance of a Large Language Model for SQL operations.
     """
 
-    def __init__(self, llm: BaseLLM = None):
+    def __init__(self, session: Optional[Session] = None, llm: BaseLLM = None):
+        self.session = session
         self.llm = llm
+
+    def _map_table_to_org(
+        self, org_id: int, table_name: str, alias: Optional[str] = None
+    ):
+        """Maps a table to an organization."""
+        try:
+            print(f"Mapping table {table_name} to organization {org_id}")
+            if self.session:
+                print(f"Session: {self.session}")
+                alias = table_name if not alias else alias
+                self.session.add(
+                    OrganizationTableMap(
+                        organization_id=org_id, table_name=table_name, table_alias=alias
+                    )
+                )
+                self.session.commit()
+        except Exception as e:
+            self.session.rollback() if self.session else None
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
         """
@@ -32,9 +57,8 @@ class TableManager:
         - create_query: str containing the SQL create table query if successful, None otherwise.
         """
         try:
-            with DatabaseManager() as session:
-                sql_executor = SQLExecutor(session)
-                table_names = sql_executor.get_all_table_names_as_str()
+            sql_executor = SQLExecutor(self.session)
+            table_names = sql_executor.get_all_table_names_as_str()
 
             raw_create_query = self.llm.generate_create_statement(
                 sample_content, header, table_names, extra_desc
@@ -47,9 +71,8 @@ class TableManager:
             if SQLStringManipulator(
                 create_query
             ).is_valid_create_table_query():  # Checks if the query is valid
-                with DatabaseManager() as session:
-                    sql_executor = SQLExecutor(session)
-                    sql_executor.execute_create_query(create_query)
+                sql_executor = SQLExecutor(self.session)
+                sql_executor.execute_create_query(create_query)
                 return create_query
         except Exception as e:
             # Log the error message here
@@ -79,9 +102,8 @@ class TableManager:
             ).get_table_from_create_query()
 
             # Store description in separate table
-            with DatabaseManager() as session:
-                manager = TableMetadataManager(session)
-                manager.add_table_metadata(table_name, create_query, description)
+            manager = TableMetadataManager(self.session)
+            manager.add_table_metadata(table_name, create_query, description)
 
         except Exception as e:
             # Log the error message here
@@ -99,27 +121,27 @@ class TableManager:
         Returns:
         - table_name: str containing the table's name.
         """
-        with DatabaseManager() as session:
-            manager = TableMetadataManager(session)
-            table_metadata = manager.get_metadata()
-            formatted_table_metadata = manager.format_table_metadata_for_llm(
-                table_metadata
-            )
+        manager = TableMetadataManager(self.session)
+        table_metadata = manager.get_metadata()
+        formatted_table_metadata = manager.format_table_metadata_for_llm(table_metadata)
 
         table_name: str = self.llm.fetch_table_name_from_sample(
             sample_content, extra_desc, formatted_table_metadata
         )
         return table_name
 
-    def create_table_from_df(self, df: pd.DataFrame, table_name: str):
-        with DatabaseManager() as session:
-            executor = SQLExecutor(session)
+    def create_table_from_df(self, df: pd.DataFrame, org_id: int, table_name: str):
+        try:
+            executor = SQLExecutor(self.session)
             executor.append_df_to_table(df, table_name)
+            self._map_table_to_org(org_id, table_name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     def create_table_from_query(self, query: str):
-        with DatabaseManager() as session:
-            executor = SQLExecutor(session)
-            executor.execute_create_query(query)
+        executor = SQLExecutor(self.session)
+        executor.execute_create_query(query)
 
     def append_to_table(self, processed_df: pd.DataFrame, table_name: str):
         """
@@ -137,9 +159,8 @@ class TableManager:
         """
 
         if table_name:
-            with DatabaseManager() as session:
-                sql_executor = SQLExecutor(session)
-                sql_executor.append_df_to_table(processed_df, table_name)
+            sql_executor = SQLExecutor(self.session)
+            sql_executor.append_df_to_table(processed_df, table_name)
         else:
             raise HTTPException(
                 status_code=400, detail="Could not determine table name"
@@ -148,19 +169,35 @@ class TableManager:
     def drop_table(self, table_name: str):
         # Logic to drop a table
         try:
-            with DatabaseManager() as session:
-                executor = SQLExecutor(session)
-                executor.drop_table(table_name)
+            executor = SQLExecutor(self.session)
+            executor.drop_table(table_name)
         except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
+    def get_org_tables(self, org_id: int) -> List:
+        """Returns a list of names of all of the tables associated with an organization."""
+        try:
+            if self.session:
+                table_names = (
+                    self.session.query(OrganizationTableMap.table_name)
+                    .filter(OrganizationTableMap.organization_id == org_id)
+                    .all()
+                )
+                return [
+                    name[0] for name in table_names
+                ]  # Extracting table_name from each tuple
+            return []
+        except Exception as e:
+            self.session.rollback() if self.session else None
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
     def get_table_columns(self, table_name: str):
         """Returns a list of all of the columns present within the table."""
         try:
-            with DatabaseManager() as session:
-                executor = SQLExecutor(session)
-                columns = executor.get_table_columns(table_name)
+            executor = SQLExecutor(self.session)
+            columns = executor.get_table_columns(table_name)
             return columns
         except Exception as e:
             print(f"An error occurred: {e}")
