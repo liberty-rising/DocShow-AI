@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 from typing import Optional
 
 import pandas as pd
@@ -6,8 +7,7 @@ from fastapi import HTTPException
 from databases.sql_executor import SQLExecutor
 from databases.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
-
-# from models.organization_table_map import OrganizationTableMap  # TODO: Implement this
+from models.organization_table_map import OrganizationTableMap
 from utils.sql_string_manipulator import SQLStringManipulator
 
 
@@ -21,9 +21,24 @@ class TableManager:
         session (Optional[str]): The session used for database operations.
     """
 
-    def __init__(self, llm: BaseLLM = None, session: Optional[str] = None):
+    def __init__(self, llm: BaseLLM = None, session: Optional[Session] = None):
         self.llm = llm
         self.session = session
+
+    def _map_table_to_org(
+        self, org_id: int, table_name: str, alias: Optional[str] = None
+    ):
+        """Maps a table to an organization."""
+        try:
+            if self.session:
+                self.session.add(
+                    OrganizationTableMap(table_name=table_name, organization_id=org_id)
+                )
+                self.session.commit()
+        except Exception as e:
+            self.session.rollback() if self.session else None
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
         """
@@ -114,6 +129,7 @@ class TableManager:
         try:
             executor = SQLExecutor(self.session)
             executor.append_df_to_table(df, org_id, table_name)
+            self._map_table_to_org(org_id, table_name)
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
@@ -170,17 +186,6 @@ class TableManager:
             executor = SQLExecutor(self.session)
             columns = executor.get_table_columns(table_name)
             return columns
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
-
-    def map_table_to_org(
-        self, org_id: int, table_name: str, alias: Optional[str] = None
-    ):
-        """Maps a table to an organization."""
-        try:
-            executor = SQLExecutor(self.session)
-            executor.map_table_to_org(org_id, table_name, alias)
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
