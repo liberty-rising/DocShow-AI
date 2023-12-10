@@ -82,9 +82,6 @@ class SQLExecutor:
             print(f"An error occurred: {e}")
             raise
 
-    def get_org_tables(self):
-        pass
-
     def get_table_columns(self, table_name: str) -> List:
         try:
             engine = self.session.bind

@@ -18,5 +18,5 @@ class OrganizationTableMap(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     organization_id = Column(Integer)
-    table_name = Column(String)
+    table_name = Column(String, unique=True)
     table_alias = Column(String)

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import List, Optional
 
 import pandas as pd
 
@@ -17,22 +17,27 @@ class TableManager:
     Has functions that integrate a Large Language Model (LLM) and SQLExecutor.
 
     Attributes:
-        llm (BaseLLM): Instance of a Large Language Model for SQL operations.
         session (Optional[str]): The session used for database operations.
+        llm (BaseLLM): Instance of a Large Language Model for SQL operations.
     """
 
-    def __init__(self, llm: BaseLLM = None, session: Optional[Session] = None):
-        self.llm = llm
+    def __init__(self, session: Optional[Session] = None, llm: BaseLLM = None):
         self.session = session
+        self.llm = llm
 
     def _map_table_to_org(
         self, org_id: int, table_name: str, alias: Optional[str] = None
     ):
         """Maps a table to an organization."""
         try:
+            print(f"Mapping table {table_name} to organization {org_id}")
             if self.session:
+                print(f"Session: {self.session}")
+                alias = table_name if not alias else alias
                 self.session.add(
-                    OrganizationTableMap(table_name=table_name, organization_id=org_id)
+                    OrganizationTableMap(
+                        organization_id=org_id, table_name=table_name, table_alias=alias
+                    )
                 )
                 self.session.commit()
         except Exception as e:
@@ -170,13 +175,21 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
-    def get_org_tables(self, org_id: int):
-        """Returns a list of all of the tables present within the organization."""
+    def get_org_tables(self, org_id: int) -> List:
+        """Returns a list of names of all of the tables associated with an organization."""
         try:
-            executor = SQLExecutor(self.session)
-            tables = executor.get_org_tables(org_id)
-            return tables
+            if self.session:
+                table_names = (
+                    self.session.query(OrganizationTableMap.table_name)
+                    .filter(OrganizationTableMap.organization_id == org_id)
+                    .all()
+                )
+                return [
+                    name[0] for name in table_names
+                ]  # Extracting table_name from each tuple
+            return []
         except Exception as e:
+            self.session.rollback() if self.session else None
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
