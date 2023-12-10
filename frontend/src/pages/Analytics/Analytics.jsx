@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import { Box, Typography, Grid } from '@mui/material';
 import AIAssistant from './AIAssistant';
+import TableSelectDropdown from './TableSelectDropdown';
 // import other components as needed
 
 function AnalyticsPage() {
   const [chartType, setChartType] = useState('');
   const [selectedData, setSelectedData] = useState([]);
+  const [selectedTable, setSelectedTable] = useState('');
 
   // Mock data fetching
   const fetchData = (columns) => {
@@ -44,14 +46,23 @@ function AnalyticsPage() {
     }
   };
 
+  const handleTableSelect = (table) => {
+    setSelectedTable(table);
+    // You can also fetch table data here if needed
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          {/* AI Assistant occupying the full width */}
+          <TableSelectDropdown onTableSelect={handleTableSelect} />
+        </Grid>
+        <Grid item xs={12}>
+          {/* AI Assistant */}
           <AIAssistant />
         </Grid>
+        {/* Other components */}
       </Grid>
     </Box>
   );
