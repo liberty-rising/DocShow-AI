@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
+from databases.database_manager import DatabaseManager
 from databases.table_manager import TableManager
 from llms.base import BaseLLM
 from llms.utils import get_llm_sql_object
@@ -52,23 +53,24 @@ async def upload_file(
         processed_df, sample_content, header = process_file(file, encoding)
 
         # Instantiate TableManager
-        table_manager = TableManager(llm)
+        with DatabaseManager() as session:
+            table_manager = TableManager(llm, session)
 
-        # Create new table if necessary
-        if is_new_table:
-            create_table_query = table_manager.create_table_with_llm(
-                sample_content, header, extra_desc
-            )
-            table_manager.create_table_desc_with_llm(
-                create_table_query, sample_content, extra_desc
-            )
+            # Create new table if necessary
+            if is_new_table:
+                create_table_query = table_manager.create_table_with_llm(
+                    sample_content, header, extra_desc
+                )
+                table_manager.create_table_desc_with_llm(
+                    create_table_query, sample_content, extra_desc
+                )
 
-        # Append file to table
-        table_name = table_manager.determine_table(sample_content, extra_desc)
-        table_manager.append_to_table(processed_df, table_name)
+            # Append file to table
+            table_name = table_manager.determine_table(sample_content, extra_desc)
+            table_manager.append_to_table(processed_df, table_name)
 
-        # Optionally, save the file to a data lake
-        save_to_data_lake(file)
+            # Optionally, save the file to a data lake
+            save_to_data_lake(file)
 
         return JSONResponse(
             content={"message": "File processed successfully"}, status_code=200

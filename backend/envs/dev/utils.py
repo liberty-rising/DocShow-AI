@@ -30,15 +30,14 @@ def seed_db():
         executor = SQLExecutor(session)
         existing_tables = executor.get_all_table_names_as_list()
 
-    # Create sample table if it doesn't exist
-    table_manager = TableManager()
-    if "sample_sales" not in existing_tables:
-        df = pd.read_csv("envs/dev/sample_data/sample_sales_data.csv")
-        df.columns = map(str.lower, df.columns)
-        table_manager.create_table_from_df(df, "sample_sales")
+        # Create sample table if it doesn't exist
+        table_manager = TableManager(session)
+        if "sample_sales" not in existing_tables:
+            df = pd.read_csv("envs/dev/sample_data/sample_sales_data.csv")
+            df.columns = map(str.lower, df.columns)
+            table_manager.create_table_from_df(df, 1, "sample_sales")
 
-        # Add metadata
-        with DatabaseManager() as session:
+            # Add metadata
             metadata_manager = TableMetadataManager(session)
             metadata_manager.add_table_metadata(
                 table_name="sample_sales",
