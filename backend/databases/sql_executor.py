@@ -14,6 +14,7 @@ class SQLExecutor:
         try:
             df.to_sql(table_name, self.session.bind, if_exists="append", index=False)
         except Exception as e:
+            self.session.rollback()
             print(
                 f"An error occurred while appending data to table {table_name}: {str(e)}"
             )
@@ -80,6 +81,9 @@ class SQLExecutor:
         except Exception as e:
             print(f"An error occurred: {e}")
             raise
+
+    def get_org_tables(self):
+        pass
 
     def get_table_columns(self, table_name: str) -> List:
         try:

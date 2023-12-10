@@ -128,7 +128,7 @@ class TableManager:
     def create_table_from_df(self, df: pd.DataFrame, org_id: int, table_name: str):
         try:
             executor = SQLExecutor(self.session)
-            executor.append_df_to_table(df, org_id, table_name)
+            executor.append_df_to_table(df, table_name)
             self._map_table_to_org(org_id, table_name)
         except Exception as e:
             print(f"An error occurred: {e}")
