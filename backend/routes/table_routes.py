@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from security import get_current_user
 
 from databases.database_manager import DatabaseManager
-from databases.sql_executor import SQLExecutor
 from databases.table_manager import TableManager
 from databases.table_metadata_manager import TableMetadataManager
 from models.user import User
@@ -41,8 +40,8 @@ async def get_table_metadata(
 @table_router.get("/tables/")
 async def get_tables(current_user: User = Depends(get_current_user)):
     with DatabaseManager() as session:
-        executor = SQLExecutor(session)
-        tables = executor.get_all_table_names_as_list()
+        table_manager = TableManager(session)
+        tables = table_manager.list_all_tables()
     return tables
 
 

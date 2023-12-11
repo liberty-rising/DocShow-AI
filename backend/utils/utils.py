@@ -9,13 +9,13 @@ import pandas as pd
 import sys
 
 from databases.database_manager import DatabaseManager
-from databases.sql_executor import SQLExecutor
+from databases.table_manager import TableManager
 
 
 def execute_select_query(query: str):
     with DatabaseManager() as session:
-        sql_executor = SQLExecutor(session)
-        results = sql_executor.execute_select_query(query)
+        table_manager = TableManager(session)
+        results = table_manager.execute_select_query(query)
     return results
 
 

@@ -175,6 +175,15 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
+    def execute_select_query(self, query: str, format_as_dict: bool = True):
+        try:
+            executor = SQLExecutor(self.session)
+            result = executor.execute_select_query(query, format_as_dict)
+            return result
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     def get_org_tables(self, org_id: int) -> List:
         """Returns a list of names of all of the tables associated with an organization."""
         try:
@@ -208,8 +217,14 @@ class TableManager:
         pass
 
     def list_all_tables(self):
-        # Logic to list all tables
-        pass
+        """Returns a list of all of the names of tables present within the database."""
+        try:
+            executor = SQLExecutor(self.session)
+            table_names = executor.get_all_table_names_as_list()
+            return table_names
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     def validate_table_exists(self, table_name: str):
         # Logic to validate if a table exists
