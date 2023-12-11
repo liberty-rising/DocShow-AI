@@ -14,6 +14,7 @@ class DataProfile(Base):
     - name: The name of the data profile.
     - file_type: The type of file associated with the data profile.
     - organization_id: The organization associated with the data profile.
+    - description: The description of the data profile.
     The class also is converting the model instance into a dictionary.
     """
 
