@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from pydantic import BaseModel
 from .base import Base
+from sqlalchemy import UniqueConstraint
 
 
 class DataProfile(Base):
-
     """
     DataProfile Model
     -----------------
@@ -20,10 +20,14 @@ class DataProfile(Base):
 
     __tablename__ = "data_profiles"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, unique=True)
     file_type = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"))
     description = Column(String)  # New description column
+
+    __table_args__ = (
+        UniqueConstraint("name", "organization_id", name="uq_name_organization_id"),
+    )
 
     def to_dict(self):
         """
