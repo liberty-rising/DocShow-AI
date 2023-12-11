@@ -172,6 +172,7 @@ def create_sample_dataprofile():
         name="Sample Profile",
         file_type="pdf",
         organization_id=1,
+        description="Sample Description",
     )
     # Using DatabaseManager to manage the database session
     with DatabaseManager() as session:

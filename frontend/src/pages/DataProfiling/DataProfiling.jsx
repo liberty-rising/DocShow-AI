@@ -1,53 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Button } from '@mui/material';
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Link, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../utils/constants';
 
 function DataProfilingPage() {
   const [dataProfiles, setDataProfiles] = useState([]);
-  const [selectedProfile, setSelectedProfile] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`${API_URL}data-profiles/`)
       .then(response => {
-        // Check if the response is an array before updating state
         if (Array.isArray(response.data)) {
           setDataProfiles(response.data);
         } else {
           console.error('Received data is not an array:', response.data);
-          // Optionally set an empty array or handle this scenario appropriately
           setDataProfiles([]);
         }
       })
-      .catch(error => {
-        console.error('Error fetching data profiles:', error);
-        setDataProfiles([]); // Reset to empty array on error
-      });
+      .catch(error => console.error('Error fetching data profiles:', error));
   }, []);
 
-  const handleChange = (event) => {
-    setSelectedProfile(event.target.value);
+  const handleProfileClick = (dataProfileId) => {
+    navigate(`/data-profiling/${dataProfileId}`);
+  };
+
+  const handleCreateNewProfile = () => {
+    navigate('/data-profiling/create');
   };
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>🔍 Data Profiling</Typography>
-      <FormControl fullWidth>
-        <InputLabel id="data-profile-select-label">Data Profile</InputLabel>
-        <Select
-          labelId="data-profile-select-label"
-          id="data-profile-select"
-          value={selectedProfile}
-          label="Data Profile"
-          onChange={handleChange}
-        >
-          {dataProfiles.map((profile, index) => (
-            <MenuItem key={index} value={profile.id}>
-              {profile.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={handleCreateNewProfile} 
+        sx={{ mb: 2 }}
+      >
+        Create New Data Profile
+      </Button>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Description</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {dataProfiles.map((profile) => (
+              <TableRow key={profile.id}>
+                <TableCell>
+                  <Link component="button" variant="body2" onClick={() => handleProfileClick(profile.id)}>
+                    {profile.name}
+                  </Link>
+                </TableCell>
+                <TableCell>{profile.description}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 }
