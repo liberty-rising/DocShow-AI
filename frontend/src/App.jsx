@@ -19,6 +19,9 @@ import CreateChartPage from './pages/Charts/CreateChart';
 import CreateDashboardPage from './pages/Dashboards/CreateDashboard';
 import DashboardMenuPage from './pages/Dashboards/DashboardsMenuPage';
 import Dashboard from './pages/Dashboards/Dashboard';
+import DataProfilingPage from './pages/DataProfiling/DataProfiling';
+import CreateDataProfile from './pages/DataProfiling/CreateDataProfile';
+import SpecificDataProfilePage from './pages/DataProfiling/SpecificDataProfilePage';
 import LandingPage from './pages/Landing'; 
 import LoginPage from './pages/Login';
 import PricingPage from './pages/Pricing';
@@ -26,7 +29,6 @@ import RegisterPage from './pages/Register';
 import UploadPage from './pages/Upload/Upload';
 import UserPage from './pages/User';
 import Logout from './pages/Logout';
-import DataProfilingPage from './pages/DataProfiling/DataProfiling';
 
 function AppWrapper() {
   return (
@@ -69,6 +71,8 @@ function App() {
       <Route path="/upload" element={<RequireAuth><AppLayout><UploadPage /></AppLayout></RequireAuth>} />
       <Route path="/analytics" element={<RequireAuth><AppLayout><AnalyticsPage /></AppLayout></RequireAuth>} />
       <Route path="/data-profiling" element={<RequireAuth><AppLayout><DataProfilingPage /></AppLayout></RequireAuth>} />
+      <Route path="/data-profiling/:dataProfileId" element={<RequireAuth><AppLayout><SpecificDataProfilePage /></AppLayout></RequireAuth>} />
+      <Route path="/data-profiling/create" element={<RequireAuth><AppLayout><CreateDataProfile /></AppLayout></RequireAuth>} />
       <Route path="/user" element={<RequireAuth><AppLayout><UserPage /></AppLayout></RequireAuth>} />
       <Route path="/admin" element={<RequireAuth><AppLayout><AdminPage /></AppLayout></RequireAuth>} />
       <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />

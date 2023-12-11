@@ -1,7 +1,7 @@
 from databases.data_profile_manager import DataProfileManager
 from databases.database_manager import DatabaseManager
 from databases.dashboard_manager import DashboardManager
-from databases.sql_executor import SQLExecutor
+from databases.table_manager import TableManager
 from databases.organization_manager import OrganizationManager
 from databases.user_manager import UserManager
 from models.organization import Organization
@@ -62,8 +62,8 @@ def create_sample_dashboard():
             dashboard.name, dashboard.organization
         )
         if not existing_dashboard:
-            sql_executor = SQLExecutor(session)
-            charts = create_sample_charts(sql_executor)
+            table_manager = TableManager(session)
+            charts = create_sample_charts(table_manager)
 
             dashboard.charts.extend(charts)  # Directly append the list of charts
             manager.save_dashboard(dashboard)
@@ -72,22 +72,22 @@ def create_sample_dashboard():
             logger.debug("Sample dashboard already exists.")
 
 
-def create_sample_charts(sql_executor: SQLExecutor):
+def create_sample_charts(table_manager: TableManager):
     # Add more chart creation logic here as needed
     return [
-        create_sample_bar_chart(sql_executor),
-        create_sample_pie_chart(sql_executor),
-        create_sample_line_chart(sql_executor),
+        create_sample_bar_chart(table_manager),
+        create_sample_pie_chart(table_manager),
+        create_sample_line_chart(table_manager),
     ]
 
 
-def create_sample_bar_chart(sql_executor: SQLExecutor):
+def create_sample_bar_chart(table_manager: TableManager):
     query = """
         SELECT productline, SUM(sales) FROM sample_sales
         GROUP BY productline
     """
 
-    sales_per_product = sql_executor.execute_select_query(query)
+    sales_per_product = table_manager.execute_select_query(query)
 
     # Transforming the data for the bar chart
     chart_data = [
@@ -110,7 +110,7 @@ def create_sample_bar_chart(sql_executor: SQLExecutor):
     return bar_chart
 
 
-def create_sample_pie_chart(sql_executor: SQLExecutor):
+def create_sample_pie_chart(table_manager: TableManager):
     query = """
         SELECT country, ROUND(SUM(sales)::numeric,2) AS total_sales FROM sample_sales
         GROUP BY country
@@ -118,7 +118,7 @@ def create_sample_pie_chart(sql_executor: SQLExecutor):
         LIMIT 10
     """
 
-    sales_by_country = sql_executor.execute_select_query(query)
+    sales_by_country = table_manager.execute_select_query(query)
 
     # Transforming the data for the pie chart
     chart_data = [
@@ -138,14 +138,14 @@ def create_sample_pie_chart(sql_executor: SQLExecutor):
     return Chart(order=2, config=pie_chart_config)
 
 
-def create_sample_line_chart(sql_executor: SQLExecutor):
+def create_sample_line_chart(table_manager: TableManager):
     query = """
         SELECT year_id, SUM(sales) AS yearly_sales FROM sample_sales
         GROUP BY year_id
         ORDER BY year_id
     """
 
-    yearly_sales = sql_executor.execute_select_query(query)
+    yearly_sales = table_manager.execute_select_query(query)
 
     # Transforming the data for the line chart
     chart_data = [
@@ -172,6 +172,7 @@ def create_sample_dataprofile():
         name="Sample Profile",
         file_type="pdf",
         organization_id=1,
+        description="Sample Description",
     )
     # Using DatabaseManager to manage the database session
     with DatabaseManager() as session:

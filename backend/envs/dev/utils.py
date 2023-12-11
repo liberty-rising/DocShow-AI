@@ -1,9 +1,11 @@
+import pandas as pd
+
 from databases.database_manager import DatabaseManager
-from databases.sql_executor import SQLExecutor
 from databases.table_manager import TableManager
 from databases.table_metadata_manager import TableMetadataManager
+from utils.utils import get_app_logger
 
-import pandas as pd
+logger = get_app_logger(__name__)
 
 
 def seed_db():
@@ -16,29 +18,28 @@ def seed_db():
     - sample_tables: Dictionary mapping table names to corresponding CSV file names.
     - existing_tables: List of table names that already exist in the database.
     - session: Database session managed by DatabaseManager.
-    - executor: Instance of SQLExecutor for executing SQL queries.
     - manager: Instance of TableManager for table operations.
 
     Workflow:
     1. Initialize `sample_tables` dictionary to hold table-to-file mappings.
-    2. Use DatabaseManager to create a session and SQLExecutor to get existing table names.
+    2. Use DatabaseManager to create a session and TableManager to get existing table names.
     3. Loop through `sample_tables` and create tables if they don't exist, using data from CSV files.
     """
 
     # Get existing tables
     with DatabaseManager() as session:
-        executor = SQLExecutor(session)
-        existing_tables = executor.get_all_table_names_as_list()
+        table_manager = TableManager(session)
+        existing_tables = table_manager.list_all_tables()
 
-    # Create sample table if it doesn't exist
-    table_manager = TableManager()
-    if "sample_sales" not in existing_tables:
-        df = pd.read_csv("envs/dev/sample_data/sample_sales_data.csv")
-        df.columns = map(str.lower, df.columns)
-        table_manager.create_table_from_df(df, "sample_sales")
+        # Create sample table if it doesn't exist
+        if "sample_sales" not in existing_tables:
+            df = pd.read_csv("envs/dev/sample_data/sample_sales_data.csv")
+            df.columns = map(str.lower, df.columns)
+            table_manager.create_table_from_df(
+                df=df, org_id=1, table_name="sample_sales"
+            )
 
-        # Add metadata
-        with DatabaseManager() as session:
+            # Add metadata
             metadata_manager = TableMetadataManager(session)
             metadata_manager.add_table_metadata(
                 table_name="sample_sales",
@@ -82,3 +83,5 @@ def seed_db():
                     and time-based sales performance.
                 """,
             )
+            logger.info('Created table "sample_sales".')
+        logger.info('Sample table "sample_sales" already exists.')

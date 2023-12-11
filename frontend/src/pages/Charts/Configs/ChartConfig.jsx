@@ -11,18 +11,29 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
     const [selectedTable, setSelectedTable] = useState('');
     const [chartTypes, setChartTypes] = useState([]);
     const [selectedChartType, setSelectedChartType] = useState('');
+    const [organizationId, setOrganizationId] = useState(null);
 
     useEffect(() => {
-        // Fetch tables from API
-        axios.get(`${API_URL}tables/`)
-            .then(response => setTables(response.data))
-            .catch(error => console.error('Error fetching tables:', error))
+        // Fetch user data from API
+        axios.get(`${API_URL}users/me/`)
+            .then(response => {
+                // Set organizationId state
+                setOrganizationId(response.data.organization_id);
+    
+                // Fetch tables from API using organizationId
+                axios.get(`${API_URL}organization/${response.data.organization_id}/tables/`)
+                    .then(response => setTables(response.data))
+                    .catch(error => console.error('Error fetching tables:', error));
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    }, []);
 
+    useEffect(() => {
         // Fetch chart types from API
         axios.get(`${API_URL}charts/types/`)
             .then(response => setChartTypes(response.data))
             .catch(error => console.error('Error fetching chart types:', error));
-    }, []);
+    }, []); // Empty dependency array means this effect runs once on mount
 
     useEffect(() => {
         onConfigChange({

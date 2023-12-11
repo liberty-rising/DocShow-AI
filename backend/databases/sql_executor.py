@@ -14,6 +14,7 @@ class SQLExecutor:
         try:
             df.to_sql(table_name, self.session.bind, if_exists="append", index=False)
         except Exception as e:
+            self.session.rollback()
             print(
                 f"An error occurred while appending data to table {table_name}: {str(e)}"
             )
