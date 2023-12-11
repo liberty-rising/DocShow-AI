@@ -12,6 +12,7 @@ const CreateChartPage = () => {
     const [chartConfig, setChartConfig] = useState({ title: '', table: '', type: '', query: '', nivoConfig: {} });
     const [isChatEnabled, setIsChatEnabled] = useState(false);
     const [chartChatId, setChartChatId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); // Add isLoading state
 
     const handleChartConfigChange = (config) => {
         setChartConfig(prevConfig => ({ ...prevConfig, ...config }))
@@ -24,7 +25,8 @@ const CreateChartPage = () => {
     }
     
     const handleSendRequest = async (message) => {
-        // Message to LLM
+        setIsLoading(true); // Set isLoading to true
+
         try {
             // Ensure nivoConfig is set to an empty object if it doesn't exist
             const configToSend = {
@@ -67,6 +69,8 @@ const CreateChartPage = () => {
                 console.error("Error Message:", error.message);
             }
             console.error("Error Config:", error.config);
+        } finally {
+            setIsLoading(false); // Set isLoading to false after request completes
         }
     }
 
@@ -95,6 +99,7 @@ const CreateChartPage = () => {
                 onConfigChange={handleChartConfigChange} 
                 onRequiredSelected={handleRequiredSelected} 
                 chartConfig={chartConfig} 
+                isLoading={isLoading}
             />
             <ChatInterface onSendRequest={handleSendRequest} disabled={!isChatEnabled} />
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', mt: 2 }}>

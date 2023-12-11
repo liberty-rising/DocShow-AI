@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import axios from 'axios';
 import TableSelector from "./Components/TableSelector";
 import ChartTypeSelector from "./Components/ChartTypeSelector";
 import ChartPreview from "./Components/ChartPreview";
 import { API_URL } from "../../../utils/constants";
 
-function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
+function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoading }) {
     const [tables, setTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState('');
     const [chartTypes, setChartTypes] = useState([]);
@@ -71,12 +71,15 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 120, marginBottom: 2, width: '100%' }}>
             <TableSelector selectedTable={selectedTable} onTableChange={handleTableChange} tables={tables} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
-            {canShowPreview() ? (
-                <ChartPreview chartConfig={chartConfig} />
+            {isLoading ? (
+                <CircularProgress />
             ) : (
-                <Typography variant="caption">Configure the chart to preview it here.</Typography>
+                canShowPreview() ? (
+                    <ChartPreview chartConfig={chartConfig} />
+                ) : (
+                    <Typography variant="caption">Configure the chart to preview it here.</Typography>
+                )
             )}
-            
         </Box>
     )
 }
