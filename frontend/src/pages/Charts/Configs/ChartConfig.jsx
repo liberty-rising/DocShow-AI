@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import axios from 'axios';
-import TableSelector from "./Components/TableSelector";
-import ChartTypeSelector from "./Components/ChartTypeSelector";
-import ChartPreview from "./Components/ChartPreview";
+import TableSelectDropdown from "../../../components/tables/selects/TableSelectDropdown";
+import ChartTypeSelector from "./components/ChartTypeSelector";
+import ChartPreview from "./components/ChartPreview";
+import { fetchOrganizationTables } from "../../../api/organizationTables";
 import { API_URL } from "../../../utils/constants";
 
 function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoading }) {
@@ -11,21 +12,14 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoadin
     const [selectedTable, setSelectedTable] = useState('');
     const [chartTypes, setChartTypes] = useState([]);
     const [selectedChartType, setSelectedChartType] = useState('');
-    const [organizationId, setOrganizationId] = useState(null);
 
     useEffect(() => {
-        // Fetch user data from API
-        axios.get(`${API_URL}users/me/`)
-            .then(response => {
-                // Set organizationId state
-                setOrganizationId(response.data.organization_id);
+        const getOrganizationTables = async () => {
+            const data = await fetchOrganizationTables();
+            setTables(data);
+        };
     
-                // Fetch tables from API using organizationId
-                axios.get(`${API_URL}organization/${response.data.organization_id}/tables/`)
-                    .then(response => setTables(response.data))
-                    .catch(error => console.error('Error fetching tables:', error));
-            })
-            .catch(error => console.error('Error fetching user data:', error));
+        getOrganizationTables();
     }, []);
 
     useEffect(() => {
@@ -69,7 +63,7 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoadin
 
     return(
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 120, marginBottom: 2, width: '100%' }}>
-            <TableSelector selectedTable={selectedTable} onTableChange={handleTableChange} tables={tables} />
+            <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableChange={handleTableChange} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
             {isLoading ? (
                 <CircularProgress />

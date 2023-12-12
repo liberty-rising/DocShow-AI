@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import BarChartComponent from "../../Components/BarChart";
+import BarChartComponent from "../../components/BarChart";
 
 function ChartPreview({ chartConfig }) {
     // Render the chart based on chartConfig

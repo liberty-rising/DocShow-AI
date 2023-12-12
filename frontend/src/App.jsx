@@ -8,25 +8,25 @@ import {
 import './api/axiosInterceptor'
 import { NavigationProvider } from './hooks/useNavigation';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import AppLayout from './components/Layouts/AppLayout';
-import LandingLayout from './components/Layouts/LandingLayout';
-import RequireAuth from './components/Auth/RequireAuth';
+import AppLayout from './components/layouts/AppLayout';
+import LandingLayout from './components/layouts/LandingLayout';
+import RequireAuth from './components/auth/RequireAuth';
 import AboutPage from './pages/About';
-import AdminPage from './pages/Admin/Admin';
-import AnalyticsPage from './pages/Analytics/Analytics';
+import AdminPage from './pages/admin/Admin';
+import AnalyticsPage from './pages/analytics/Analytics';
 import BlogPage from './pages/Blog';
-import CreateChartPage from './pages/Charts/CreateChart';
-import CreateDashboardPage from './pages/Dashboards/CreateDashboard';
-import DashboardMenuPage from './pages/Dashboards/DashboardsMenuPage';
-import Dashboard from './pages/Dashboards/Dashboard';
-import DataProfilingPage from './pages/DataProfiling/DataProfiling';
-import CreateDataProfile from './pages/DataProfiling/CreateDataProfile';
-import SpecificDataProfilePage from './pages/DataProfiling/SpecificDataProfilePage';
+import CreateChartPage from './pages/charts/CreateChart';
+import CreateDashboardPage from './pages/dashboards/CreateDashboard';
+import DashboardMenuPage from './pages/dashboards/DashboardsMenuPage';
+import Dashboard from './pages/dashboards/Dashboard';
+import DataProfilingPage from './pages/data-profiling/DataProfiling';
+import CreateDataProfile from './pages/data-profiling/CreateDataProfile';
+import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfilePage';
 import LandingPage from './pages/Landing'; 
 import LoginPage from './pages/Login';
 import PricingPage from './pages/Pricing';
 import RegisterPage from './pages/Register';
-import UploadPage from './pages/Upload/Upload';
+import UploadPage from './pages/upload/Upload';
 import UserPage from './pages/User';
 import Logout from './pages/Logout';
 
