@@ -51,10 +51,11 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoadin
         return chartConfig.nivoConfig && Object.keys(chartConfig.nivoConfig).length > 0;
     };
 
-    const handleTableChange = (event) => {
-        const selectedTable = event.target.value;
-        setSelectedTable(selectedTable);
-    }
+    const handleTableSelect = async (table) => {
+        setSelectedTable(table);
+        const data = await fetchOrganizationTables(table); // fetchTableData is your API call function
+        setTables(data);
+    };
 
     const handleChartTypeChange = (event) => {
         const selectedType = event.target.value;
@@ -63,7 +64,7 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoadin
 
     return(
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 120, marginBottom: 2, width: '100%' }}>
-            <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableChange={handleTableChange} />
+            <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableSelect={handleTableSelect} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
             {isLoading ? (
                 <CircularProgress />
