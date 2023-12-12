@@ -7,12 +7,13 @@ function TableSelectDropdown({ tables, selectedTable, onTableSelect }) {
   };
 
   return (
-    <FormControl fullWidth>
+    <FormControl fullWidth margin="normal">
       <InputLabel id="table-select-label">Select Table</InputLabel>
       <Select
         labelId="table-select-label"
         id="table-select"
         value={selectedTable}
+        label="Select Table"
         onChange={handleChange}
       >
         {tables.map((table) => (
