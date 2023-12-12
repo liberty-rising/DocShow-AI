@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import ChartConfig from "./Configs/ChartConfig";
-import ChatInterface from "./Configs/Components/ChatInterface";
+import ChartConfig from "./configs/ChartConfig";
+import ChatInterface from "./configs/components/ChatInterface";
 import { API_URL } from "../../utils/constants";
 
 const CreateChartPage = () => {
