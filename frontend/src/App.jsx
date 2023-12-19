@@ -13,7 +13,7 @@ import LandingLayout from './components/layouts/LandingLayout';
 import RequireAuth from './components/auth/RequireAuth';
 import AboutPage from './pages/About';
 import AdminPage from './pages/admin/Admin';
-import AnalyticsPage from './pages/analytics/Analytics';
+import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import BlogPage from './pages/Blog';
 import CreateChartPage from './pages/charts/CreateChart';
 import CreateDashboardPage from './pages/dashboards/CreateDashboard';

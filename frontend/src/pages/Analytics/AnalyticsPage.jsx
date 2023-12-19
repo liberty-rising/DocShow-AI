@@ -8,7 +8,6 @@ import { fetchOrganizationTables } from '../../api/organizationTables';
 function AnalyticsPage() {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState('');
-  const [tableData, setTableData] = useState(null);
 
   useEffect(() => {
     const getOrganizationTables = async () => {
@@ -19,10 +18,8 @@ function AnalyticsPage() {
     getOrganizationTables();
   }, []);
 
-  const handleTableSelect = async (table) => {
+  const handleTableSelect = (table) => {
     setSelectedTable(table);
-    const data = await fetchOrganizationTables(table); // fetchTableData is your API call function
-    setTableData(data);
   };
 
   useEffect(() => {
@@ -39,7 +36,7 @@ function AnalyticsPage() {
           <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableSelect={handleTableSelect} />
         </Grid>
         <Grid item xs={12}>
-          <AIAssistant />
+          <AIAssistant table={selectedTable} />
         </Grid>
       </Grid>
     </Box>

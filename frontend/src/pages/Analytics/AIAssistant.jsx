@@ -3,7 +3,7 @@ import { Box, CircularProgress, TextField, Button, Typography, Paper } from '@mu
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
 
-const AIAssistant = () => {
+const AIAssistant = ({ table }) => {
   const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const chatEndRef = useRef(null);
@@ -50,8 +50,7 @@ const AIAssistant = () => {
 
   return (
     <Box>
-      <Typography variant="h4">💬 AI Assistant</Typography>
-      <Paper style={{ height: '200px', width: '100%', overflowY: 'auto', padding: '10px', marginTop: '10px', marginBottom: '10px' }}>
+      <Paper style={{ height: '100px', width: '100%', overflowY: 'auto', padding: '10px', marginTop: '10px', marginBottom: '10px' }}>
         {chatHistory.map((chat, index) => (
             <Typography key={index}>{`${chat.role}: ${chat.message}`}</Typography>
         ))}
