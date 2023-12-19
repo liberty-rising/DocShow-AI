@@ -3,7 +3,9 @@ from fastapi import APIRouter, Depends
 from databases.chat_history_manager import ChatHistoryManager
 from databases.database_manager import DatabaseManager
 from llms.base import BaseLLM
+from llms.gpt import GPTLLM
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object
+from models.chat import AnalyticsRequest, AnalyticsResponse
 from models.user import User
 from security import get_current_user
 
@@ -17,9 +19,18 @@ async def chat_endpoint(
     current_user: User = Depends(get_current_user),
 ):
     user_input = request.user_input
-    # Assume llm_chat is a function that sends user_input to your LLM and gets a response
     llm_output = llm.generate_text(user_input)
     return ChatResponse(llm_output=llm_output)
+
+
+@chat_router.post("/chat/analytics/")
+async def chat_analytics_endpoint(
+    request: AnalyticsRequest,
+    current_user: User = Depends(get_current_user),
+):
+    gpt = GPTLLM(chat_id=request.chat_id, user=current_user, store_history=True)
+    response = gpt.generate_text(request.prompt)
+    return AnalyticsResponse(chat_id=gpt.chat_id, response=response)
 
 
 @chat_router.delete("/chat_history/")

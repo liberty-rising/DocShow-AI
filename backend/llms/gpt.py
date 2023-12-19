@@ -1,5 +1,5 @@
 from openai import ChatCompletion
-from typing import Optional
+from typing import List, Optional
 
 import json
 import openai
@@ -8,6 +8,8 @@ import tiktoken
 from .base import BaseLLM
 from databases.chat_history_manager import ChatHistoryManager
 from databases.database_manager import DatabaseManager
+from llms.prompt_manager import PromptManager
+from llms.system_message_manager import SystemMessageManager
 from models.user import User
 from settings import OPENAI_API_KEY
 from utils.nivo_assistant import NivoAssistant
@@ -58,7 +60,9 @@ class GPTLLM(BaseLLM):
         self.chat_id = chat_id
         self.user_id = user.id
         self.organization_id = user.organization_id
+        self.prompt_manager = PromptManager()
         self.store_history = store_history
+        self.system_message_manager = SystemMessageManager()
         self.llm_type = llm_type
         self.database_type = database_type
         self.history = self._set_init_history()
@@ -115,49 +119,10 @@ class GPTLLM(BaseLLM):
 
     def _get_system_message_content(self, assistant_type: str = "generic") -> str:
         """Generate a system message based on the assistant type."""
-        messages = {
-            "sql_code": f"You are a {self.database_type} SQL statement assistant. Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.",
-            "nivo_charts": """
-                You are a Nivo chart generator assistant, specializing in creating configurations for responsive chart components in Nivo, a visualization library for React.
-                Your role is to generate configurations, SQL queries, and titles for charts like ResponsiveBar, ResponsiveLine, etc.
-                Focus on ensuring that the charts are highly responsive, adapting seamlessly to different screen sizes without the need for fixed dimensions like width or height.
-                Style the charts in a clean and modern way.
-                Avoid introductory statements, filler words, or extra formatting in your outputs.
-                Remember, the key is to prioritize responsiveness and clarity in the visualization design.
-            """,
-            "nivo_config_for_charts": """
-                You are a JSON generator assistant.
-                You will be creating a JSON that will hold the configuration needed for a nivo chart (react library).
-                You will be given the user's request, the name and metadata of the table to be visualized, the type of chart, the query used on the table, and the current nivo configuration.
-                Generate the necessary nivo configuration in the form of a JSON. If the chart does not have any styling, add some, and make it look nice.
-                Implement any styling the user asks for.
-                Return only the pure JSON.
-            """,
-            "sql_code_for_charts": f"""
-                You are a {self.database_type} SQL statement assistant.
-                Your query will be used to create a chart using the NIVO library.
-                You will be given the table name, information about the table, type of chart that will be used, the existing query (if there is one), along with what data the user wishes to
-                visualise.
-                The user may not always use the correct names for the columns, it is your job to decide which column the user is referring to by using the information you have about the
-                table.
-                Generate {self.database_type} SQL statements based on the given prompt. Return only the pure code.
-            """,
-            "title_for_chart": """
-                You are a chart title generator assistant.
-                You will be naming a chart based on the given inputs.
-                Return only the chart name.
-            """,
-            "sql_desc": """
-                You are an SQL table description assistant. Generate concise, informative descriptions of SQL tables based on CREATE TABLE queries and sample data.
-                Your descriptions should help in categorizing new data and provide context for future queries, reports, and analytics.
-            """,
-            "table_categorization": """
-                You are a table categorization assistant. Your task is to analyze sample data and existing table metadata to identify the most suitable
-                table for appending the sample data. Return only the name of the table.
-            """,
-            "generic": "You are a generic assistant.",
-        }
-        return messages.get(assistant_type, "You are a generic assistant.")
+        system_message_content: str = (
+            self.system_message_manager.get_system_message_content(assistant_type)
+        )
+        return system_message_content
 
     def _create_message(self, role: str, prompt: str):
         """Create either a user, system, or assistant message."""
@@ -270,16 +235,9 @@ class GPTLLM(BaseLLM):
         """
         self._add_system_message(assistant_type="sql_code")
 
-        prompt = "Generate SQL CREATE TABLE statement for the following sample data:"
-        if header:
-            prompt += f"\n\nHeader:\n{header}"
-        prompt += f"\n\nSample data:\n{sample_content}"
-        if existing_table_names:
-            prompt += f"\n\nDo not use the following table names as they are already in use: \n{existing_table_names}"
-        if extra_desc:
-            prompt += (
-                f"\n\nAdditional information about the sample data: \n{extra_desc}"
-            )
+        prompt = self.prompt_manager.create_table_create_prompt(
+            sample_content, header, existing_table_names, extra_desc
+        )
 
         gpt_response: str = await self._send_and_receive_message(prompt)
 
@@ -302,21 +260,9 @@ class GPTLLM(BaseLLM):
 
         self._add_system_message(assistant_type="sql_desc")
 
-        prompt = f"""
-            Generate a brief description for the table that will be created using the SQL CREATE TABLE query below.
-            This description should help in determining whether to categorize new data into this table
-            and should also provide the context needed to generate suggested queries for reports and analytics in the future.
-
-            SQL CREATE TABLE Query:
-            {create_query}
-
-            Sample Data:
-            {sample_content}
-
-            Only generate the description, no formatting or title. Do not include any additional text, explanations, or filler words.
-            """
-        if extra_desc:
-            prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
+        prompt = self.prompt_manager.create_table_desc_prompt(
+            create_query, sample_content, extra_desc
+        )
 
         gpt_response = await self._send_and_receive_message(prompt)
 
@@ -335,33 +281,9 @@ class GPTLLM(BaseLLM):
         # TODO: minValue and maxValue should always be set to auto
         # TODO: keys, indexBy is not a valid key for all charts, should be dynamically added.
 
-        prompt = f"""
-            Generate a responsive chart configuration based on the following request.
-            Focus on optimizing the configuration for responsiveness, ensuring the chart is clearly visible and legible on a variety of screen sizes.
-
-            User request:
-            {msg}
-            Metadata about the table:
-            {table_metadata}
-            Chart type:
-            Responsive {chart_type}
-            Current nivo configuration:
-            {nivo_config_preview}
-
-            Provide output in JSON format as follows:
-            {{
-                "title":"",
-                "query":"",
-                "nivoConfig":{{}}
-            }}
-
-            The 'nivoConfig' should be complete or updated based on the user's requests.
-            The 'data' key in 'nivoConfig' shows a preview of the data; do not update it.
-            The 'keys' key in 'nivoConfig' should be updated based on the names of the query columns.
-            The 'indexBy' key in 'nivoConfig' should be set to the name of the column which should be used to index the data.
-            Prioritize responsive design to ensure the chart adapts well to different screen sizes.
-            Do not set the parameters 'width' and 'height' as the charts are all 'Responsive' versions of themselves.
-        """
+        prompt = self.prompt_manager.create_chart_config_prompt(
+            msg, table_metadata, chart_type, nivo_config_preview
+        )
 
         updated_config = await self._send_and_receive_message(
             prompt
@@ -391,19 +313,9 @@ class GPTLLM(BaseLLM):
 
         self._add_system_message(assistant_type="table_categorization")
 
-        prompt = f"""
-            Based on the sample data and existing table metadata, determine to which table the sample data should be appended.
-
-            Sample Data:
-            {sample_content}
-
-            Existing Table Metadata:
-            {table_metadata}
-
-            Return only the name of the table.
-            """
-        if extra_desc:
-            prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
+        prompt = self.prompt_manager.create_get_table_name_from_sample_prompt(
+            sample_content, extra_desc, table_metadata
+        )
 
         gpt_response = self._send_and_receive_message(prompt)
 
@@ -417,3 +329,6 @@ class GPTLLM(BaseLLM):
         assistant_message_content = self._send_and_receive_message(prompt)
 
         return assistant_message_content
+
+    def generate_analytics_text(self, input_text: str, table_names: List[str]):
+        pass
