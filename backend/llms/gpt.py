@@ -331,4 +331,4 @@ class GPTLLM(BaseLLM):
         return assistant_message_content
 
     def generate_analytics_text(self, input_text: str, table_names: List[str]):
-        pass
+        self._add_system_message(assistant_type="analytics_chat")
