@@ -29,11 +29,19 @@ async def save_data_profiles(
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
         if data_profile_manager.get_dataprofile_by_name(request.name):
-            raise HTTPException(status_code=400, detail="Data Profile alredy exists")
+            raise HTTPException(status_code=400, detail="Data Profile already exists")
 
-        new_data_profile = DataProfile(name=request.name)
+        new_data_profile = DataProfile(
+            name=request.name,
+            description=request.description,
+        )
         created_data_profile = data_profile_manager.create_dataprofile(new_data_profile)
-        response = DataProfileCreateResponse(created_data_profile.name)
+
+        # Make sure to pass the fields as keyword arguments
+        response = DataProfileCreateResponse(
+            name=created_data_profile.name,
+            description=created_data_profile.description,
+        )
         return response
 
 
