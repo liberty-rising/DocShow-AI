@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
+# from starlette.responses import JSONResponse
+
 from databases.database_manager import DatabaseManager
 from databases.data_profile_manager import DataProfileManager
 from models.data_profile import (
@@ -55,3 +57,23 @@ async def get_data_profile(
         if data_profile is None:
             raise HTTPException(status_code=404, detail="Data Profile not found")
         return data_profile
+
+
+# @data_profile_router.post("/data-profiles/preview-endpoint/")
+# async def preview_data_profile(
+#     file: UploadFile = File(...),
+#     instructions: str = Form(...),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     # Read the file's content
+#     file_content = await file.read()
+
+#     # Process the file content, perhaps to convert it into a string
+#     # if it's a binary file, like a PDF or an image.
+#     text_content = process_file_content(file_content)
+
+#     # Use Langchain to send a request to your LLM
+#     # Here you can customize the request as needed
+#     response = llm.generate(text_content, instructions)
+
+#     return JSONResponse(content=response)
