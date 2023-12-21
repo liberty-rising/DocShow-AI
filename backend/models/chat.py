@@ -1,10 +1,9 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
 
 
 class AnalyticsRequest(BaseModel):
     chat_id: Optional[int]
-    table_names: List[str]
     prompt: str
 
 
