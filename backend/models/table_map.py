@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String
 from .base import Base
 
 
-class OrganizationTableMap(Base):
+class TableMap(Base):
     """
     Represents a mapping between an organization and a table.
 
@@ -14,7 +14,7 @@ class OrganizationTableMap(Base):
         table_alias (str): The alias for the table.
     """
 
-    __tablename__ = "organization_table_map"
+    __tablename__ = "table_map"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     organization_id = Column(Integer)

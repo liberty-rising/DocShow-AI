@@ -1,13 +1,14 @@
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
 
 import pandas as pd
 
 from fastapi import HTTPException
 from databases.sql_executor import SQLExecutor
+from databases.table_map_manager import TableMapManager
 from databases.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
-from models.organization_table_map import OrganizationTableMap
+from models.table_map import TableMap
 from utils.sql_string_manipulator import SQLStringManipulator
 
 
@@ -34,14 +35,12 @@ class TableManager:
             if self.session:
                 print(f"Session: {self.session}")
                 alias = table_name if not alias else alias
-                self.session.add(
-                    OrganizationTableMap(
-                        organization_id=org_id, table_name=table_name, table_alias=alias
-                    )
+                table_map_manager = TableMapManager(self.session)
+                table_map = TableMap(
+                    organization_id=org_id, table_name=table_name, table_alias=alias
                 )
-                self.session.commit()
+                table_map_manager.create_table_map(table_map)
         except Exception as e:
-            self.session.rollback() if self.session else None
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -181,24 +180,6 @@ class TableManager:
             result = executor.execute_select_query(query, format_as_dict)
             return result
         except Exception as e:
-            print(f"An error occurred: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
-
-    def get_org_tables(self, org_id: int) -> List:
-        """Returns a list of names of all of the tables associated with an organization."""
-        try:
-            if self.session:
-                table_names = (
-                    self.session.query(OrganizationTableMap.table_name)
-                    .filter(OrganizationTableMap.organization_id == org_id)
-                    .all()
-                )
-                return [
-                    name[0] for name in table_names
-                ]  # Extracting table_name from each tuple
-            return []
-        except Exception as e:
-            self.session.rollback() if self.session else None
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 

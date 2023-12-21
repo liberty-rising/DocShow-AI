@@ -33,9 +33,6 @@ function AnalyticsPage() {
       <Typography variant="h4" gutterBottom>📊 Data Analytics</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableSelect={handleTableSelect} />
-        </Grid>
-        <Grid item xs={12}>
           <AIAssistant table={selectedTable} />
         </Grid>
       </Grid>

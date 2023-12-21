@@ -1,15 +1,18 @@
+from typing import List
+
 from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.agents.agent_types import AgentType
 from langchain.llms.openai import OpenAI
 from langchain.sql_database import SQLDatabase
-
 from settings import DB_URL
 
 
-class GPTLang:
-    def __init__(self):
-        self.db = SQLDatabase.from_uri(DB_URL)
+class GPTLangSQL:
+    def __init__(self, tables: List[str]):
+        if not tables:
+            raise ValueError("No tables provided")
+        self.db = SQLDatabase.from_uri(DB_URL, include_tables=tables)
         self.toolkit = SQLDatabaseToolkit(db=self.db, llm=OpenAI(temperature=0))
         self.agent_executor = create_sql_agent(
             llm=OpenAI(temperature=0),
