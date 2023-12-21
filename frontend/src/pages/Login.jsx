@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import qs from 'qs';
-import { Box, Button, Container, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../utils/constants';
 
 function LoginPage({ onLogin }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { updateAuth } = useAuth();
 
@@ -17,7 +19,7 @@ function LoginPage({ onLogin }) {
     
     try {
         const response = await axios.post(`${API_URL}token/`, qs.stringify ({
-            username,
+            username: email,
             password
         }), {
             headers: {
@@ -25,16 +27,12 @@ function LoginPage({ onLogin }) {
             }
         });
 
-        // Assuming the backend sets the cookie automatically
-        // If login is successful, navigate to root
         if (response.status === 200) {
-            // Here you might want to do additional checks or set state
             updateAuth(true);
             navigate('/dashboards'); 
         }
     } catch (error) {
         console.error('Login error:', error);
-        // Handle login error (e.g., show an error message)
     }
   };
 
@@ -44,61 +42,70 @@ function LoginPage({ onLogin }) {
 
   return (
     <Container component="main" maxWidth="xs">
-        <Box
-            sx={{
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-            }}
-        >
-            <Typography component="h1" variant="h5">
-                Login
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="username"
-                    label="Username"
-                    name="username"
-                    autoComplete="username"
-                    autoFocus
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                >
-                    Sign In
-                </Button>
-                <Button
-                    type="button"
-                    fullWidth
-                    variant="outlined"
-                    onClick={handleRegister}
-                    sx={{ mt: 1, mb: 2 }}
-                >
-                    Register
-                </Button>
-            </Box>
-        </Box>
+      <Box
+          sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+          }}
+      >
+          <LockOutlinedIcon color="secondary" sx={{ m: 1, bgcolor: 'background.paper', borderRadius: '50%' }} />
+          <Typography component="h1" variant="h5">
+              Sign in
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+              <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  autoFocus
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+              />
+              <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Remember me"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+              >
+                  Sign In
+              </Button>
+              <Typography align="center" sx={{ mt: 2 }}>
+                  <Button onClick={() => {/* logic to handle forgot password */}}>
+                      Forgot password?
+                  </Button>
+                  <Button onClick={handleRegister}>
+                      Don't have an account? Sign Up
+                  </Button>
+              </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
+              Copyright © Your Website 2023.
+          </Typography>
+      </Box>
     </Container>
   );
 }
