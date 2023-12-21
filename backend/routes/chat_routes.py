@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends
 
 from databases.chat_history_manager import ChatHistoryManager
 from databases.database_manager import DatabaseManager
+from databases.table_map_manager import TableMapManager
 from llms.base import BaseLLM
-from llms.gpt_lang import GPTLang
+from llms.gpt_lang import GPTLangSQL
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object
 from models.chat import AnalyticsRequest, AnalyticsResponse
 from models.user import User
@@ -28,7 +29,11 @@ async def chat_analytics_endpoint(
     request: AnalyticsRequest,
     current_user: User = Depends(get_current_user),
 ):
-    gpt = GPTLang()
+    with DatabaseManager() as session:
+        table_map_manager = TableMapManager(session)
+        org_tables = table_map_manager.get_org_tables(current_user.organization_id)
+
+    gpt = GPTLangSQL(tables=org_tables)
     response = gpt.generate(request.prompt)
     return AnalyticsResponse(chat_id=1, response=response)
 
