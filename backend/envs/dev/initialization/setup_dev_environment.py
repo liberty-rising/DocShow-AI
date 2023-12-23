@@ -41,7 +41,7 @@ def create_admin_user():
 
     with DatabaseManager() as session:
         user_manager = UserManager(session)
-        existing_user = user_manager.get_user(admin_user.username)
+        existing_user = user_manager.get_user_by_username(admin_user.username)
         if not existing_user:
             user_manager.create_user(admin_user)
             logger.debug("Admin user created.")

@@ -3,6 +3,7 @@ from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from pydantic import EmailStr
 from typing import Optional
 
 from databases.database_manager import DatabaseManager
@@ -21,12 +22,22 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token/")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def authenticate_user(username: str, password: str) -> User:
+def authenticate_user(username: str, email: EmailStr, password: str) -> User:
     with DatabaseManager() as session:
         manager = UserManager(session)
-        user = manager.get_user(username)
+
+        if email:
+            print("email", email)
+            user = manager.get_user_by_email(email=email)
+            print("user", user)
+        elif username:
+            user = manager.get_user_by_username(username=username)
+        else:
+            return None
+
         if user and verify_password(password, user.hashed_password):
             return user
+
         return None
 
 
@@ -67,7 +78,7 @@ def verify_refresh_token(refresh_token: str = Cookie(None)) -> User:
         # Find the user in the database
         with DatabaseManager() as session:
             manager = UserManager(session)
-            user = manager.get_user(username)
+            user = manager.get_user_by_username(username)
 
         if user is None or user.refresh_token != refresh_token:
             raise HTTPException(
@@ -164,7 +175,7 @@ def get_current_user(request: Request) -> User:
 
     with DatabaseManager() as session:
         user_manager = UserManager(session)
-        user = user_manager.get_user(username=username)
+        user = user_manager.get_user_by_username(username=username)
 
         if user is None:
             raise HTTPException(

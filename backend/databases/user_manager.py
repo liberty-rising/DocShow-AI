@@ -25,7 +25,19 @@ class UserManager:
         """
         self.db_session = session
 
-    def get_user(self, username: str):
+    def get_user_by_email(self, email: str) -> User:
+        """
+        Get a user based on their email.
+
+        Args:
+            email (str): The email of the user.
+
+        Returns:
+            User: The User object if found, else None.
+        """
+        return self.db_session.query(User).filter(User.email == email).first()
+
+    def get_user_by_username(self, username: str) -> User:
         """
         Get a user based on their username.
 

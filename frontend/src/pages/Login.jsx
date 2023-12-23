@@ -2,26 +2,31 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import qs from 'qs';
 import { Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import validator from 'validator';
 import { API_URL } from '../utils/constants';
 
 function LoginPage({ onLogin }) {
-  const [email, setEmail] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { updateAuth } = useAuth();
+  const [errorMessage, setErrorMessage] = useState(''); 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     
+    // Determine if usernameOrEmail should be sent as username or email
+    const isEmail = validator.isEmail(usernameOrEmail);
+    console.log(isEmail)
+    const data = isEmail ? { email: usernameOrEmail, password } : { username: usernameOrEmail, password };
+
     try {
-        const response = await axios.post(`${API_URL}token/`, qs.stringify ({
-            username: email,
-            password
-        }), {
+        const response = await axios.post(`${API_URL}token/`, qs.stringify (data), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -32,7 +37,12 @@ function LoginPage({ onLogin }) {
             navigate('/dashboards'); 
         }
     } catch (error) {
-        console.error('Login error:', error);
+        if (error.response && error.response.status === 401) {
+            // Handle 401 error here
+            setErrorMessage('Invalid credentials');
+        } else {
+            setErrorMessage(`Login error: ${error.message}`);
+        }
     }
   };
 
@@ -60,12 +70,12 @@ function LoginPage({ onLogin }) {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
+                  label="Username or Email"
+                  name="usernameOrEmail"
+                  autoComplete="username"
                   autoFocus
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
               />
               <TextField
                   margin="normal"
@@ -85,6 +95,7 @@ function LoginPage({ onLogin }) {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
               />
+              {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
               <Button
                   type="submit"
                   fullWidth
