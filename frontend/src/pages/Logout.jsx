@@ -11,6 +11,7 @@ function Logout() {
   useEffect(() => {
     // Clear the authentication cookie
     Cookies.remove('access_token');
+    Cookies.remove('refresh_token');
 
     // Update authentication state
     updateAuth(false);
