@@ -1,8 +1,10 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 from typing import Optional
+
+import re
 
 from .base import Base
 
@@ -95,3 +97,18 @@ class UserUpdate(BaseModel):
     username: str
     organization_id: Optional[int]
     role: Optional[UserRole]
+
+
+class ChangePassword(BaseModel):
+    old_password: str = Field(...)
+    new_password: str = Field(...)
+
+    @validator("new_password")
+    def validate_new_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password should have at least 8 characters")
+        if not re.search(r"\d", v):
+            raise ValueError("Password should contain at least one digit")
+        if not re.search(r"\W", v):
+            raise ValueError("Password should contain at least one symbol")
+        return v
