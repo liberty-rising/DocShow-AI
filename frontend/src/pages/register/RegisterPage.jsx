@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import RegisterForm from './RegisterForm';
 import { useAuth } from '../../contexts/AuthContext';
