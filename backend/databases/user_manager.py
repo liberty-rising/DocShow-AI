@@ -175,3 +175,21 @@ class UserManager:
             self.db_session.delete(db_user)
             self.db_session.commit()
             return db_user
+
+    def update_user_password(self, username: str, new_hashed_password: str):
+        """
+        Update a user's password in the database.
+
+        Args:
+            old_password (str): The user's current password.
+            new_password (str): The user's new password.
+
+        Returns:
+            User: The updated User object if found, else None.
+        """
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            db_user.hashed_password = new_hashed_password
+            self.db_session.commit()
+            self.db_session.refresh(db_user)
+        return db_user

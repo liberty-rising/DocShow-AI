@@ -27,7 +27,7 @@ import LoginPage from './pages/Login';
 import PricingPage from './pages/Pricing';
 import RegisterPage from './pages/Register';
 import UploadPage from './pages/upload/Upload';
-import UserPage from './pages/User';
+import UserPage from './pages/user/UserPage';
 import Logout from './pages/Logout';
 
 function AppWrapper() {

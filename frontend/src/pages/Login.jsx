@@ -22,7 +22,6 @@ function LoginPage({ onLogin }) {
     
     // Determine if usernameOrEmail should be sent as username or email
     const isEmail = validator.isEmail(usernameOrEmail);
-    console.log(isEmail)
     const data = isEmail ? { email: usernameOrEmail, password } : { username: usernameOrEmail, password };
 
     try {
