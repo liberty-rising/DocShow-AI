@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Alert, Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import RegisterForm from './RegisterForm';
+import { useAuth } from '../../contexts/AuthContext';
+import { API_URL } from '../../utils/constants';
+
+function RegisterPage() {
+  const [subscribe, setSubscribe] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const { updateAuth } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (username, email, password) => {
+    try {
+        const response = await axios.post(`${API_URL}register/`, {
+            username,
+            email,
+            password,
+            // You can add subscribe or any additional fields if required by your API
+        });
+
+        if (response.data.message === 'Registration successful') {
+            updateAuth(true);
+            navigate('/login');
+        }
+    } catch (error) {
+        if (error.response) {
+            if (error.response.status === 400) {
+              setErrorMessage(error.response.data.detail);
+            } else if (error.response.data && error.response.data.detail && error.response.data.detail[0]) {
+              let errorMessage = error.response.data.detail[0].msg;
+              if (typeof errorMessage === 'string') {
+                errorMessage = errorMessage.replace('Value error, ', '');
+                setErrorMessage(errorMessage);
+              }
+            }
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message)
+          }
+        }
+    }
+
+  return (
+    <Container component="main" maxWidth="xs">
+      <Box
+          sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+          }}
+      >
+          <LockOutlinedIcon color="secondary" sx={{ m: 1, bgcolor: 'background.paper', borderRadius: '50%' }} />
+          <Typography component="h1" variant="h5">
+              Sign up
+          </Typography>
+          <RegisterForm onSubmit={handleSubmit} errorMessage={errorMessage} />
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
+              Copyright © DocShow AI 2024.
+          </Typography>
+      </Box>
+    </Container>
+  );
+};
+
+export default RegisterPage;

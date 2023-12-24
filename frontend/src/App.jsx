@@ -25,7 +25,7 @@ import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfileP
 import LandingPage from './pages/Landing'; 
 import LoginPage from './pages/Login';
 import PricingPage from './pages/Pricing';
-import RegisterPage from './pages/Register';
+import RegisterPage from './pages/register/RegisterPage';
 import UploadPage from './pages/upload/Upload';
 import UserPage from './pages/user/UserPage';
 import Logout from './pages/Logout';
