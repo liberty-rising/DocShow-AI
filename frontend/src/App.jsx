@@ -11,24 +11,24 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LandingLayout from './components/layouts/LandingLayout';
 import RequireAuth from './components/auth/RequireAuth';
-import AboutPage from './pages/About';
-import AdminPage from './pages/admin/Admin';
+import AboutPage from './pages/about/AboutPage';
+import AdminPage from './pages/admin/AdminPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
-import BlogPage from './pages/Blog';
-import CreateChartPage from './pages/charts/CreateChart';
+import BlogPage from './pages/blog/BlogPage';
+import CreateChartPage from './pages/charts/CreateChartPage';
 import CreateDashboardPage from './pages/dashboards/CreateDashboard';
 import DashboardMenuPage from './pages/dashboards/DashboardsMenuPage';
 import Dashboard from './pages/dashboards/Dashboard';
-import DataProfilingPage from './pages/data-profiling/DataProfiling';
+import DataProfilingPage from './pages/data-profiling/DataProfilingPage';
 import CreateDataProfile from './pages/data-profiling/CreateDataProfile';
 import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfilePage';
-import LandingPage from './pages/Landing'; 
-import LoginPage from './pages/Login';
-import PricingPage from './pages/Pricing';
+import LandingPage from './pages/landing/LandingPage'; 
+import LoginPage from './pages/login/LoginPage';
+import PricingPage from './pages/pricing/PricingPage';
 import RegisterPage from './pages/register/RegisterPage';
-import UploadPage from './pages/upload/Upload';
+import UploadPage from './pages/upload/UploadPage';
 import UserPage from './pages/user/UserPage';
-import Logout from './pages/Logout';
+import Logout from './pages/logout/LogoutPage';
 
 function AppWrapper() {
   return (

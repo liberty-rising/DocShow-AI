@@ -4,10 +4,10 @@ import qs from 'qs';
 import { Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import validator from 'validator';
-import { API_URL } from '../utils/constants';
+import { API_URL } from '../../utils/constants';
 
 function LoginPage({ onLogin }) {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
