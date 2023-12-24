@@ -51,6 +51,18 @@ class UserCreate(BaseModel):
     organization_id: Optional[int] = None
     role: Optional[str] = None
 
+    @validator("password")
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password should have at least 8 characters")
+        if not re.search(r"\d", v):
+            raise ValueError("Password should contain at least one digit")
+        if not re.search(r"\W", v):
+            raise ValueError("Password should contain at least one symbol")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password should contain at least one uppercase letter")
+        return v
+
 
 class UserOut(BaseModel):
     """
@@ -111,4 +123,6 @@ class ChangePassword(BaseModel):
             raise ValueError("Password should contain at least one digit")
         if not re.search(r"\W", v):
             raise ValueError("Password should contain at least one symbol")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password should contain at least one uppercase letter")
         return v
