@@ -15,6 +15,7 @@ import AboutPage from './pages/about/AboutPage';
 import AdminPage from './pages/admin/AdminPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import BlogPage from './pages/blog/BlogPage';
+import ChangePasswordPage from './pages/change-password/ChangePasswordPage';
 import CreateChartPage from './pages/charts/CreateChartPage';
 import CreateDashboardPage from './pages/dashboards/CreateDashboard';
 import DashboardMenuPage from './pages/dashboards/DashboardsMenuPage';
@@ -60,6 +61,7 @@ function App() {
         element={isAuthenticated ? <Navigate to ="/dashboards" /> : 
           <LandingLayout><LoginPage /></LandingLayout>} 
       />
+      <Route path="/change-password" element={<RequireAuth><LandingLayout><ChangePasswordPage /></LandingLayout></RequireAuth>} />
       <Route path="/register" element={<LandingLayout><RegisterPage /></LandingLayout>} />
       <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
       <Route path="/blog" element={<LandingLayout><BlogPage /></LandingLayout>} />

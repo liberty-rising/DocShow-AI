@@ -33,7 +33,16 @@ function LoginPage({ onLogin }) {
 
         if (response.status === 200) {
             updateAuth(true);
-            navigate('/dashboards'); 
+            const userResponse = await axios.get(`${API_URL}users/me/`, {
+                headers: {
+                    'Authorization': `Bearer ${response.data.access_token}`
+                }
+            });
+            if (userResponse.data.requires_password_update) {
+                navigate('/change-password'); 
+            } else {
+                navigate('/dashboards'); 
+            } 
         }
     } catch (error) {
         if (error.response && error.response.status === 401) {

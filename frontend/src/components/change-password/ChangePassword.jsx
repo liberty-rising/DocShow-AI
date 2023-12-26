@@ -9,6 +9,7 @@ const ChangePassword = ({ handleChangePassword, errorMessage, successMessage }) 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const success = await handleChangePassword(oldPassword, newPassword, confirmPassword);
+    console.log('handleChangePassword result:', success);
     if (success) {
       setOldPassword('');
       setNewPassword('');

@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr, Field, validator
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 from typing import Optional
 
@@ -29,6 +29,7 @@ class User(Base):
     hashed_password = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
     role = Column(String, nullable=True)
+    requires_password_update = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
     refresh_token = Column(Text, nullable=True)
 
@@ -50,6 +51,7 @@ class UserCreate(BaseModel):
     password: str
     organization_id: Optional[int] = None
     role: Optional[str] = None
+    requires_password_update: Optional[bool] = False
 
     @validator("password")
     def validate_password(cls, v):
@@ -85,6 +87,7 @@ class UserOut(BaseModel):
     email: EmailStr
     organization_id: Optional[int]
     role: Optional[str]
+    requires_password_update: bool
 
 
 class UserRole(str, Enum):
@@ -109,6 +112,7 @@ class UserUpdate(BaseModel):
     username: str
     organization_id: Optional[int]
     role: Optional[UserRole]
+    requires_password_update: Optional[bool] = False
 
 
 class ChangePassword(BaseModel):

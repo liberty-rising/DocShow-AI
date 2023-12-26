@@ -4,9 +4,10 @@ import EmailIcon from '@mui/icons-material/Email';
 import BusinessIcon from '@mui/icons-material/Business';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Alert, Box, CircularProgress, Grid, Snackbar, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, Grid, Typography } from '@mui/material';
 import InfoCard from './InfoCard';
-import ChangePassword from './ChangePassword';
+import ChangePassword from '../../components/change-password/ChangePassword';
+import { updateUserPassword } from '../../utils/updateUserPassword';
 import { API_URL } from '../../utils/constants';
 
 const UserPage = () => {
@@ -43,42 +44,7 @@ const UserPage = () => {
   }, []);
 
   const handleChangePassword = async (oldPassword, newPassword, confirmPassword) => {
-    if (newPassword !== confirmPassword) {
-      setErrorMessage('Passwords do not match!');
-      return;
-    }
-  
-    try {
-      const response = await axios.put(`${API_URL}users/change-password/`, { old_password: oldPassword, new_password: newPassword });
-  
-      if (response.status === 200) {
-        setSuccessMessage('Password changed successfully');
-        setErrorMessage('');
-        return true;  
-      } else {
-        setErrorMessage('Failed to change password!');
-        return false;
-      }
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          setErrorMessage(error.response.data.detail);
-        } else if (error.response.data && error.response.data.detail && error.response.data.detail[0]) {
-          let errorMessage = error.response.data.detail[0].msg;
-          if (typeof errorMessage === 'string') {
-            errorMessage = errorMessage.replace('Value error, ', '');
-            setErrorMessage(errorMessage);
-          }
-        }
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message)
-      }
-      return false;
-    }
+    return await updateUserPassword(oldPassword, newPassword, confirmPassword, setErrorMessage, setSuccessMessage);
   };
 
   return (
