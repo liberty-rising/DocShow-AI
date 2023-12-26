@@ -9,10 +9,13 @@ Usage:
     >>> run_startup_routines()
 """
 from envs.dev.initialization.setup_dev_environment import (
-    create_admin_user,
+    create_admin_user as dev_create_admin_user,
     create_sample_dashboard,
     create_sample_organization,
     create_sample_dataprofile,
+)
+from envs.prod.initialization.setup_prod_environment import (
+    create_admin_user as prod_create_admin_user,
 )
 from envs.dev.utils import seed_db
 from settings import APP_ENV, JWT_SECRET_KEY
@@ -27,10 +30,13 @@ def run_startup_routines():
 
     if APP_ENV == "development":
         create_sample_organization()
-        create_admin_user()
+        dev_create_admin_user()
         seed_db()
         create_sample_dashboard()
         create_sample_dataprofile()
+
+    if APP_ENV == "prod":
+        prod_create_admin_user()
 
 
 def check_jwt_secret_key():
