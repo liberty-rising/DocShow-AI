@@ -15,6 +15,7 @@ def create_admin_user():
         email="admin@docshow.ai",
         organization_id=1,
         role="admin",
+        requires_password_update=True,
     )
 
     with DatabaseManager() as session:

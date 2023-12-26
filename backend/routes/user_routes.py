@@ -25,7 +25,15 @@ async def get_users(current_admin_user: User = Depends(get_current_admin_user)):
 
 @user_router.get("/users/me/", response_model=UserOut)
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    user_out = UserOut(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        organization_id=current_user.organization_id,
+        role=current_user.role,
+        requires_password_update=current_user.requires_password_update,
+    )
+    return user_out
 
 
 @user_router.get("/users/roles/")
@@ -57,10 +65,8 @@ async def update_user(
 async def change_user_password(
     change_password: ChangePassword, current_user: User = Depends(get_current_user)
 ):
-    print("change_password", change_password)
     # Verify old password
     if not verify_password(change_password.old_password, current_user.hashed_password):
-        print("HELLO")
         raise HTTPException(status_code=400, detail="Invalid old password")
 
     with DatabaseManager() as session:
