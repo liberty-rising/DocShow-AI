@@ -21,7 +21,12 @@ from security import (
     verify_refresh_token,
     update_user_refresh_token,
 )
-from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from settings import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    REFRESH_TOKEN_EXPIRE_DAYS,
+    REMEMBER_ME_ACCESS_TOKEN_EXPIRE_MINUTES,
+    REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS,
+)
 
 
 auth_router = APIRouter()
@@ -45,6 +50,7 @@ async def login_for_access_token(
     username: Optional[str] = Form(None),
     email: Optional[EmailStr] = Form(None),
     password: str = Form(...),
+    remember: bool = Form(False),
 ):
     """
     Authenticate a user and set a JWT token in a cookie upon successful authentication.
@@ -61,7 +67,6 @@ async def login_for_access_token(
     form_data = CustomOAuth2PasswordRequestForm(
         username=username, email=email, password=password
     )
-    print("form_data", form_data)
     user = authenticate_user(form_data.username, form_data.email, form_data.password)
     if not user:
         raise HTTPException(
@@ -69,13 +74,22 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-    access_token = create_token(
-        {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    refresh_token = create_token(
-        {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    )
+    if remember:
+        access_token = create_token(
+            {"sub": user.username},
+            timedelta(minutes=REMEMBER_ME_ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+        refresh_token = create_token(
+            {"sub": user.username},
+            timedelta(days=REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS),
+        )
+    else:
+        access_token = create_token(
+            {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        refresh_token = create_token(
+            {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        )
     update_user_refresh_token(
         user_id=user.id,
         refresh_token=refresh_token,

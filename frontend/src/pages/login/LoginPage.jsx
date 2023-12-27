@@ -22,7 +22,9 @@ function LoginPage({ onLogin }) {
     
     // Determine if usernameOrEmail should be sent as username or email
     const isEmail = validator.isEmail(usernameOrEmail);
-    const data = isEmail ? { email: usernameOrEmail, password } : { username: usernameOrEmail, password };
+    const data = isEmail 
+        ? { email: usernameOrEmail, password, remember: rememberMe } 
+        : { username: usernameOrEmail, password, rememer: rememberMe };
 
     try {
         const response = await axios.post(`${API_URL}token/`, qs.stringify (data), {
