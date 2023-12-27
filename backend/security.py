@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -8,8 +8,9 @@ from typing import Optional
 
 from databases.database_manager import DatabaseManager
 from databases.user_manager import UserManager
+from models.token import ResetTokenData
 from models.user import User
-from settings import JWT_SECRET_KEY
+from settings import JWT_SECRET_KEY, PASSWORD_RESET_EXPIRE_MINUTES
 
 
 # Configuration for JWT token
@@ -222,3 +223,35 @@ def update_user_refresh_token(
     with DatabaseManager() as session:
         manager = UserManager(session)
         manager.update_refresh_token(user_id, refresh_token)
+
+
+def generate_password_reset_token(username: str):
+    payload = {
+        "username": username,
+        "exp": datetime.utcnow() + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
+    }
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
+
+
+def decode_reset_token(token: str):
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("username")
+        exp = payload.get("exp")
+        if username is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Could not validate credentials",
+            )
+        # Check if the token has expired
+        if datetime.now(timezone.utc) > datetime.fromtimestamp(exp, tz=timezone.utc):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Token has expired"
+            )
+
+        return ResetTokenData(username=username, exp=exp)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )

@@ -1,14 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+
+from models.user import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    User,
+    UserOut,
+    UserRole,
+    UserUpdate,
+)
+from databases.database_manager import DatabaseManager
+from databases.user_manager import UserManager
 from security import (
+    decode_reset_token,
+    generate_password_reset_token,
     get_current_admin_user,
     get_current_user,
     get_password_hash,
     verify_password,
 )
-
-from models.user import ChangePassword, User, UserOut, UserRole, UserUpdate
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from utils.email import send_password_reset_email
 
 user_router = APIRouter()
 
@@ -63,7 +74,8 @@ async def update_user(
 
 @user_router.put("/users/change-password/")
 async def change_user_password(
-    change_password: ChangePassword, current_user: User = Depends(get_current_user)
+    change_password: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
 ):
     # Verify old password
     if not verify_password(change_password.old_password, current_user.hashed_password):
@@ -76,6 +88,51 @@ async def change_user_password(
         new_hashed_password = get_password_hash(change_password.new_password)
         updated_user = user_manager.update_user_password(
             username=current_user.username,
+            new_hashed_password=new_hashed_password,
+        )
+
+        if not updated_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return {
+            "message": f"Successfully updated password for {updated_user.username}."
+        }
+
+
+@user_router.post("/users/forgot-password/")
+async def forgot_password(
+    request: ForgotPasswordRequest, background_tasks: BackgroundTasks
+):
+    # Get user by email
+    with DatabaseManager() as session:
+        user_manager = UserManager(session)
+        user = user_manager.get_user_by_email(email=request.email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+    # Generate password reset token
+    token = generate_password_reset_token(user.username)
+
+    # Send password reset email
+    background_tasks.add_task(send_password_reset_email, [user.email], token)
+
+    return {"message": "Password reset email sent"}
+
+
+@user_router.put("/users/reset-password/")
+async def reset_password(request: ResetPasswordRequest):
+    token_data = decode_reset_token(request.token)
+
+    if request.new_password != request.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+
+    with DatabaseManager() as session:
+        user_manager = UserManager(session)
+
+        # Update user password
+        new_hashed_password = get_password_hash(request.new_password)
+        updated_user = user_manager.update_user_password(
+            username=token_data.username,
             new_hashed_password=new_hashed_password,
         )
 

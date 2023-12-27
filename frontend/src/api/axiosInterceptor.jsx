@@ -10,7 +10,8 @@ axios.interceptors.response.use(response => response, async (error) => {
         && error.response.status === 401 
         && !originalRequest._retry 
         && !originalRequest.url.includes('refresh-token/') // Check if the failed request is not for the refresh-token endpoint
-        && !originalRequest.url.includes('token/')) { // Exclude the login endpoint
+        && !originalRequest.url.includes('token/') // Exclude the login endpoint
+        && !originalRequest.url.includes('forgot-password/')) { // Exclude the forgot-password endpoint
         originalRequest._retry = true;
         try {
             // Attempt to refresh the token

@@ -115,9 +115,31 @@ class UserUpdate(BaseModel):
     requires_password_update: Optional[bool] = False
 
 
-class ChangePassword(BaseModel):
+class ChangePasswordRequest(BaseModel):
     old_password: str = Field(...)
     new_password: str = Field(...)
+
+    @validator("new_password")
+    def validate_new_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Password should have at least 8 characters")
+        if not re.search(r"\d", v):
+            raise ValueError("Password should contain at least one digit")
+        if not re.search(r"\W", v):
+            raise ValueError("Password should contain at least one symbol")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password should contain at least one uppercase letter")
+        return v
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(...)
+    new_password: str = Field(...)
+    confirm_password: str = Field(...)
 
     @validator("new_password")
     def validate_new_password(cls, v):
