@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Box, Container, Typography } from '@mui/material'
+import { Box, Container } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ChangePassword from '../../components/change-password/ChangePassword';
 import { updateUserPassword } from '../../utils/updateUserPassword';

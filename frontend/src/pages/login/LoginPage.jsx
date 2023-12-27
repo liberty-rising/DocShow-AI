@@ -113,7 +113,7 @@ function LoginPage({ onLogin }) {
                   Sign In
               </Button>
               <Typography align="center" sx={{ mt: 2 }}>
-                  <Button onClick={() => {/* logic to handle forgot password */}}>
+                  <Button onClick={() => navigate('/forgot-password')}>
                       Forgot password?
                   </Button>
                   <Button onClick={handleRegister}>

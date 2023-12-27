@@ -19,3 +19,4 @@ pydantic[email]==2.4.2
 langchain==0.0.351
 pytest==6.2.5
 pytest-asyncio==0.15.1
+sendgrid==6.11.0

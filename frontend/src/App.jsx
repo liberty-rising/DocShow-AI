@@ -18,15 +18,17 @@ import BlogPage from './pages/blog/BlogPage';
 import ChangePasswordPage from './pages/change-password/ChangePasswordPage';
 import CreateChartPage from './pages/charts/CreateChartPage';
 import CreateDashboardPage from './pages/dashboards/CreateDashboard';
+import CreateDataProfile from './pages/data-profiling/CreateDataProfile';
 import DashboardMenuPage from './pages/dashboards/DashboardsMenuPage';
 import Dashboard from './pages/dashboards/Dashboard';
 import DataProfilingPage from './pages/data-profiling/DataProfilingPage';
-import CreateDataProfile from './pages/data-profiling/CreateDataProfile';
-import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfilePage';
+import ForgotPasswordPage from './pages/forgot-password/forgotPasswordPage';
 import LandingPage from './pages/landing/LandingPage'; 
 import LoginPage from './pages/login/LoginPage';
 import PricingPage from './pages/pricing/PricingPage';
 import RegisterPage from './pages/register/RegisterPage';
+import ResetPasswordPage from './pages/reset-password/ResetPasswordPage';
+import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfilePage';
 import UploadPage from './pages/upload/UploadPage';
 import UserPage from './pages/user/UserPage';
 import Logout from './pages/logout/LogoutPage';
@@ -62,6 +64,8 @@ function App() {
           <LandingLayout><LoginPage /></LandingLayout>} 
       />
       <Route path="/change-password" element={<RequireAuth><LandingLayout><ChangePasswordPage /></LandingLayout></RequireAuth>} />
+      <Route path="/reset-password" element={<LandingLayout><ResetPasswordPage /></LandingLayout>} />
+      <Route path="/forgot-password" element={<LandingLayout><ForgotPasswordPage /></LandingLayout>} />
       <Route path="/register" element={<LandingLayout><RegisterPage /></LandingLayout>} />
       <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
       <Route path="/blog" element={<LandingLayout><BlogPage /></LandingLayout>} />

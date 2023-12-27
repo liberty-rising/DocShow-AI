@@ -12,6 +12,7 @@ Example:
 from decouple import config
 
 APP_ENV = config("APP_ENV")
+APP_HOST = config("APP_HOST")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = config("ACCESS_TOKEN_EXPIRE_MINUTES", default=30)
 REFRESH_TOKEN_EXPIRE_DAYS = config("REFRESH_TOKEN_EXPIRE_DAYS", default=7)
@@ -20,3 +21,7 @@ JWT_SECRET_KEY = config("JWT_SECRET_KEY")
 DB_URL = config("DB_URL")
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
+
+PASSWORD_RESET_EXPIRE_MINUTES = int(config("PASSWORD_RESET_EXPIRE_MINUTES", default=15))
+
+SENDGRID_API_KEY = config("SENDGRID_API_KEY")
