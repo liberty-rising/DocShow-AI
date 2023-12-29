@@ -4,9 +4,9 @@ from typing import Optional
 import pandas as pd
 
 from fastapi import HTTPException
-from databases.sql_executor import SQLExecutor
-from databases.table_map_manager import TableMapManager
-from databases.table_metadata_manager import TableMetadataManager
+from database.sql_executor import SQLExecutor
+from database.table_map_manager import TableMapManager
+from database.table_metadata_manager import TableMetadataManager
 from llms.base import BaseLLM
 from models.table_map import TableMap
 from utils.sql_string_manipulator import SQLStringManipulator

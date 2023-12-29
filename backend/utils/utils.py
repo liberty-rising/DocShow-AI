@@ -8,8 +8,8 @@ import os
 import pandas as pd
 import sys
 
-from databases.database_manager import DatabaseManager
-from databases.table_manager import TableManager
+from database.database_manager import DatabaseManager
+from database.table_manager import TableManager
 
 
 def execute_select_query(query: str):

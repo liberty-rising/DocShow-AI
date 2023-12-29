@@ -6,8 +6,8 @@ import openai
 import tiktoken
 
 from .base import BaseLLM
-from databases.chat_history_manager import ChatHistoryManager
-from databases.database_manager import DatabaseManager
+from database.chat_history_manager import ChatHistoryManager
+from database.database_manager import DatabaseManager
 from llms.prompt_manager import PromptManager
 from llms.system_message_manager import SystemMessageManager
 from models.user import User

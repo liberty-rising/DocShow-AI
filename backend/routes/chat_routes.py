@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from databases.chat_history_manager import ChatHistoryManager
-from databases.database_manager import DatabaseManager
-from databases.table_map_manager import TableMapManager
+from database.chat_history_manager import ChatHistoryManager
+from database.database_manager import DatabaseManager
+from database.table_map_manager import TableMapManager
 from llms.base import BaseLLM
 from llms.gpt_lang import GPTLangSQL
 from llms.utils import ChatRequest, ChatResponse, get_llm_chat_object
