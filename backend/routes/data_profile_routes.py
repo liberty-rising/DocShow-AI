@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 
 # from starlette.responses import JSONResponse
 
-from databases.database_manager import DatabaseManager
-from databases.data_profile_manager import DataProfileManager
+from database.database_manager import DatabaseManager
+from database.data_profile_manager import DataProfileManager
 from models.data_profile import (
     DataProfile,
     DataProfileCreateRequest,

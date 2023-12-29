@@ -6,8 +6,8 @@ from passlib.context import CryptContext
 from pydantic import EmailStr
 from typing import Optional
 
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
 from models.token import ResetTokenData
 from models.user import User
 from settings import JWT_SECRET_KEY, PASSWORD_RESET_EXPIRE_MINUTES

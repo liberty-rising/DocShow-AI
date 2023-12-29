@@ -1,5 +1,5 @@
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
 from models.user import User
 from security import get_password_hash
 from utils.utils import get_app_logger

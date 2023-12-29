@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
 from models.auth import CustomOAuth2PasswordRequestForm
 from models.user import User, UserCreate
 from security import (

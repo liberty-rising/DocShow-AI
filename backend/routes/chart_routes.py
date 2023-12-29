@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional
 
-from databases.chart_manager import ChartManager
-from databases.database_manager import DatabaseManager
-from databases.table_metadata_manager import TableMetadataManager
+from database.chart_manager import ChartManager
+from database.database_manager import DatabaseManager
+from database.table_metadata_manager import TableMetadataManager
 from llms.gpt import GPTLLM
 from models.user import User
 from models.chart import Chart, ChartCreate

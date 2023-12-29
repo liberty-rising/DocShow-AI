@@ -9,8 +9,8 @@ from models.user import (
     UserRole,
     UserUpdate,
 )
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
 from security import (
     decode_reset_token,
     generate_password_reset_token,
