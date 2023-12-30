@@ -1,12 +1,29 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr, Field, validator
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum as SQLEnum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.sql import func
 from typing import Optional
 
 import re
 
 from .base import Base
+
+
+class UserRole(str, Enum):
+    NONE = "none"
+    GUEST = "guest"
+    ORG_MEMBER = "org_member"
+    ORG_ADMIN = "org_admin"
+    SYSTEM_ADMIN = "system_admin"
 
 
 class User(Base):
@@ -35,7 +52,7 @@ class User(Base):
     email = Column(String, unique=True)
     hashed_password = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
-    role = Column(String, nullable=True)
+    role = Column(SQLEnum(UserRole), nullable=True)
     subscribe_to_updates = Column(Boolean, default=True)
     receive_marketing_content = Column(Boolean, default=True)
     requires_password_update = Column(Boolean, default=False)
@@ -104,13 +121,6 @@ class UserOut(BaseModel):
     organization_id: Optional[int]
     role: Optional[str]
     requires_password_update: bool
-
-
-class UserRole(str, Enum):
-    NONE = None
-    GUEST = "guest"
-    USER = "user"
-    ADMIN = "admin"
 
 
 class UserUpdate(BaseModel):
