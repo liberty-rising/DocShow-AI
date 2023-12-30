@@ -20,6 +20,8 @@ class User(Base):
         hashed_password (str): The hashed password for the user.
         organization_id (int): Foreign key linking the user to their organization.
         role (str, optional): The role of the user within the organization.
+        subscribe_to_updates (bool): Indicates whether the user wants to receive updates.
+        receive_marketing_content (bool): Indicates whether the user wants to receive marketing content.
         requires_password_update (bool): Indicates whether the user needs to update their password.
         verification_token (str, optional): The email verification token for the user.
         email_verified (bool): Indicates whether the user's email has been verified.
@@ -34,6 +36,8 @@ class User(Base):
     hashed_password = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
     role = Column(String, nullable=True)
+    subscribe_to_updates = Column(Boolean, default=True)
+    receive_marketing_content = Column(Boolean, default=True)
     requires_password_update = Column(Boolean, default=False)
     verification_token = Column(String, unique=True, index=True)
     email_verified = Column(Boolean, default=False)
@@ -51,6 +55,9 @@ class UserCreate(BaseModel):
         password (str): The password for the new user, unhashed.
         organization_id (Optional[int]): The id of the organization the user belongs to, if any.
         role (Optional[str]): The role or position of the user within the organization, if specified.
+        subscribe_to_updates (Optional[bool]): Whether the user wants to subscribe to updates. Defaults to True.
+        receive_marketing_content (Optional[bool]): Whether the user wants to receive marketing content. Defaults to True.
+        requires_password_update (Optional[bool]): Whether the user is required to update their password. Defaults to False.
     """
 
     username: str
@@ -58,6 +65,8 @@ class UserCreate(BaseModel):
     password: str
     organization_id: Optional[int] = None
     role: Optional[str] = None
+    subscribe_to_updates: Optional[bool] = True
+    receive_marketing_content: Optional[bool] = True
     requires_password_update: Optional[bool] = False
 
     @validator("password")

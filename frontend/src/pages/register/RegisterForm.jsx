@@ -5,12 +5,13 @@ function RegisterForm({ onSubmit, errorMessage }) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [subscribe, setSubscribe] = useState(false);
+    const [subscribe, setSubscribe] = useState(true);
+    const [marketingContent, setMarketingContent] = useState(true); // New state variable
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-        await onSubmit(username, email, password);
-      };
+        await onSubmit(username, email, password, subscribe, marketingContent, marketingContent); // Include new state variable in submission
+    };
   
     return (
         <Box component="form" onSubmit={handleFormSubmit} noValidate sx={{ mt: 1 }}>
@@ -41,41 +42,37 @@ function RegisterForm({ onSubmit, errorMessage }) {
                 margin="normal"
                 required
                 fullWidth
-                name="password"
-                label="Password"
-                type="password"
                 id="password"
-                autoComplete="new-password"
+                label="Password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
             />
             <FormControlLabel
                 control={<Checkbox value="subscribe" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
+                label="I want to receive updates by email."
                 checked={subscribe}
                 onChange={(e) => setSubscribe(e.target.checked)}
             />
-            {errorMessage && 
-            <Box mt={2} mb={2}>
-            <Alert severity="error">{errorMessage}</Alert>
-            </Box>
-            }
+            <FormControlLabel
+                control={<Checkbox value="marketingContent" color="primary" />}
+                label="I want to receive marketing content."
+                checked={marketingContent}
+                onChange={(e) => setMarketingContent(e.target.checked)}
+            />
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
             >
-                SIGN UP
+                Sign Up
             </Button>
-            <Typography align="center" sx={{ mt: 2 }}>
-                  Already have an account? 
-                  <Button onClick={() => navigate('/login')}>
-                      Sign in
-                  </Button>
-            </Typography>
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
         </Box>
-    )
-};
+    );
+}
 
 export default RegisterForm;

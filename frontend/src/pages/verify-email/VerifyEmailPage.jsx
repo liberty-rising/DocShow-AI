@@ -1,29 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography } from '@mui/material';
+import { useAuth } from '../../contexts/AuthContext';
 import { API_URL } from '../../utils/constants';
 import axios from 'axios';
+import { set } from 'date-fns';
 
 const VerifyEmailPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const email = location.state?.email || null;
+    const [token, setToken] = useState(null);
+    const { setIsEmailVerified } = useAuth();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
+        setToken(token);
+    }, [location]);
 
+    useEffect(() => {
         if (token) {
         axios.put(`${API_URL}users/verify-email/`, { token })
             .then(response => {
                 // Handle successful verification
+                setIsEmailVerified(true);
                 navigate('/login');
             })
             .catch(error => {
             // Handle failed verification
             });
         }
-    }, [location, navigate]);
+    }, [token, navigate, setIsEmailVerified]);
 
     const handleResendEmail = async (event) => {
         event.preventDefault();

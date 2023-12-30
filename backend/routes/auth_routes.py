@@ -188,7 +188,12 @@ async def register(response: Response, user: UserCreate):
 
         # Add user to the database
         db_user = User(
-            username=user.username, email=user.email, hashed_password=hashed_password
+            username=user.username,
+            email=user.email,
+            hashed_password=hashed_password,
+            subscribe_to_updates=user.subscribe_to_updates,
+            receive_marketing_content=user.receive_marketing_content,
+            requires_password_update=user.requires_password_update,
         )
         user_manager.create_user(db_user)
 

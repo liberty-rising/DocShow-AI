@@ -15,7 +15,7 @@ function RequireAuth({ children }) {
 
   if (!isEmailVerified) {
     // Redirect to the verify-email page if email is not verified
-    return <Navigate to="/verify-email" state={{ email: 'user@example.com' }} />;
+    return <Navigate to="/verify-email" />;
   }
 
   return children;

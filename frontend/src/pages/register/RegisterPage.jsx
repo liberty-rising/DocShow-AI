@@ -8,18 +8,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import { API_URL } from '../../utils/constants';
 
 function RegisterPage() {
-  const [subscribe, setSubscribe] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { updateAuth } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (username, email, password) => {
+  const handleSubmit = async (username, email, password, subscribe, marketingContent) => {
     try {
         const response = await axios.post(`${API_URL}register/`, {
             username,
             email,
             password,
-            // You can add subscribe or any additional fields if required by your API
+            subscribe,
+            marketingContent,
         });
 
         if (response.data.message === 'Registration successful') {

@@ -269,12 +269,9 @@ def generate_email_verification_token(email: str):
 
 def decode_email_verification_token(token: str) -> EmailVerificationTokenData:
     try:
-        print("token", token)
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
-        print("payload", payload)
         email = payload.get("email")
         exp = payload.get("exp")
-        print(email, exp)
         if email is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
