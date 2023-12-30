@@ -5,7 +5,7 @@ from database.table_manager import TableManager
 from database.organization_manager import OrganizationManager
 from database.user_manager import UserManager
 from models.organization import Organization
-from models.user import User
+from models.user import User, UserRole
 from models.chart import Chart
 from models.dashboard import Dashboard
 from models.data_profile import DataProfile
@@ -36,7 +36,7 @@ def create_admin_user():
         hashed_password=get_password_hash("admin"),
         email="admin@docshow.ai",
         organization_id=1,
-        role="admin",
+        role=UserRole.SYSTEM_ADMIN,
         email_verified=True,
     )
 

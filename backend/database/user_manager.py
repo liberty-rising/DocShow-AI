@@ -5,7 +5,7 @@ It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user da
 from typing import Optional
 
 from sqlalchemy.orm import Session
-from models.user import User
+from models.user import User, UserRole
 
 
 class UserManager:
@@ -111,7 +111,7 @@ class UserManager:
         user_id: int,
         email: Optional[str],
         organization_id: Optional[int],
-        role: Optional[str],
+        role: Optional[UserRole],
         refresh_token: Optional[str],
     ):
         """
@@ -121,7 +121,7 @@ class UserManager:
             user_id (int): The ID of the user to be updated.
             email (str, optional): The updated email. Defaults to None.
             organization_id (int, optional): The updated organization id. Defaults to None.
-            role (str, optional): The updated role. Defaults to None.
+            role (UserRole, optional): The updated role. Defaults to None.
             refresh_token (str, optional): The updated refresh token. Defaults to None.
 
         Returns:
@@ -150,7 +150,7 @@ class UserManager:
         return db_user
 
     def update_user_by_username(
-        self, username: str, organization_id: int, role: str
+        self, username: str, organization_id: int, role: UserRole
     ) -> User:
         db_user = self.db_session.query(User).filter(User.username == username).first()
         if db_user:

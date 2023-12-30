@@ -1,6 +1,6 @@
 from database.database_manager import DatabaseManager
 from database.user_manager import UserManager
-from models.user import User
+from models.user import User, UserRole
 from security import get_password_hash
 from utils.utils import get_app_logger
 
@@ -14,8 +14,9 @@ def create_admin_user():
         hashed_password=get_password_hash("admin"),
         email="admin@docshow.ai",
         organization_id=1,
-        role="admin",
+        role=UserRole.SYSTEM_ADMIN,
         requires_password_update=True,
+        email_verified=True,
     )
 
     with DatabaseManager() as session:
