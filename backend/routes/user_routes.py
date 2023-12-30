@@ -184,9 +184,7 @@ async def verify_email(request: VerifyEmailRequest):
 
         # Decode the token and get the user
         token_data = decode_email_verification_token(request.token)
-        print(f"token_data: {token_data}")
         user = user_manager.get_user_by_email(token_data.email)
-        print(f"verication token: {user.verification_token}")
 
         # Verify the token
         if user.verification_token != request.token:
