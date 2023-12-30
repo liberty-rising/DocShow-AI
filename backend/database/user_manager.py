@@ -193,3 +193,38 @@ class UserManager:
             self.db_session.commit()
             self.db_session.refresh(db_user)
         return db_user
+
+    def update_user_verification_token(self, username: str, verification_token: str):
+        """
+        Update a user's verification token in the database.
+
+        Args:
+            username (str): The user's username.
+            verification_token (str): The user's verification token.
+
+        Returns:
+            User: The updated User object if found, else None.
+        """
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            db_user.verification_token = verification_token
+            self.db_session.commit()
+            self.db_session.refresh(db_user)
+        return db_user
+
+    def update_user_email_verified(self, username: str):
+        """
+        Update a user's email_verified in the database.
+
+        Args:
+            username (str): The user's username.
+
+        Returns:
+            User: The updated User object if found, else None.
+        """
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            db_user.email_verified = True
+            self.db_session.commit()
+            self.db_session.refresh(db_user)
+        return db_user

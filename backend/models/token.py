@@ -14,3 +14,8 @@ class TokenData(BaseModel):
 class ResetTokenData(BaseModel):
     username: str
     exp: datetime
+
+
+class EmailVerificationTokenData(BaseModel):
+    email: str
+    exp: datetime

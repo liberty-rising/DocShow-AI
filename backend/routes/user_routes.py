@@ -4,22 +4,29 @@ from models.user import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
+    SendVerificationEmailRequest,
     User,
     UserOut,
     UserRole,
     UserUpdate,
+    VerifyEmailRequest,
 )
 from database.database_manager import DatabaseManager
 from database.user_manager import UserManager
 from security import (
+    decode_email_verification_token,
     decode_reset_token,
+    generate_email_verification_token,
     generate_password_reset_token,
     get_current_admin_user,
     get_current_user,
     get_password_hash,
     verify_password,
 )
-from utils.email import send_password_reset_email
+from utils.email import (
+    send_password_reset_email_with_sendgrid,
+    send_verification_email_with_sendgrid,
+)
 
 user_router = APIRouter()
 
@@ -114,7 +121,9 @@ async def forgot_password(
     token = generate_password_reset_token(user.username)
 
     # Send password reset email
-    background_tasks.add_task(send_password_reset_email, [user.email], token)
+    background_tasks.add_task(
+        send_password_reset_email_with_sendgrid, [user.email], token
+    )
 
     return {"message": "Password reset email sent"}
 
@@ -142,3 +151,48 @@ async def reset_password(request: ResetPasswordRequest):
         return {
             "message": f"Successfully updated password for {updated_user.username}."
         }
+
+
+@user_router.post("/users/send-verification-email/")
+async def send_verification_email(
+    request: SendVerificationEmailRequest, background_tasks: BackgroundTasks
+):
+    with DatabaseManager() as session:
+        user_manager = UserManager(session)
+        user = user_manager.get_user_by_email(request.email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Generate a verification token and save it in the database
+        token = generate_email_verification_token(user.email)
+        user_manager.update_user_verification_token(
+            username=user.username, verification_token=token
+        )
+
+        # Add a background task to send the email
+        background_tasks.add_task(
+            send_verification_email_with_sendgrid, user.email, token
+        )
+
+    return {"message": f"Verification email sent for {user.email}"}
+
+
+@user_router.put("/users/verify-email/")
+async def verify_email(request: VerifyEmailRequest):
+    with DatabaseManager() as session:
+        user_manager = UserManager(session)
+
+        # Decode the token and get the user
+        token_data = decode_email_verification_token(request.token)
+        print(f"token_data: {token_data}")
+        user = user_manager.get_user_by_email(token_data.email)
+        print(f"verication token: {user.verification_token}")
+
+        # Verify the token
+        if user.verification_token != request.token:
+            raise HTTPException(status_code=400, detail="Invalid verification token")
+
+        # Update the user's email_verified field
+        user_manager.update_user_email_verified(username=user.username)
+
+        return {"message": f"Successfully verified email for {user.email}."}

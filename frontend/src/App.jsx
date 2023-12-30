@@ -31,6 +31,7 @@ import ResetPasswordPage from './pages/reset-password/ResetPasswordPage';
 import SpecificDataProfilePage from './pages/data-profiling/SpecificDataProfilePage';
 import UploadPage from './pages/upload/UploadPage';
 import UserPage from './pages/user/UserPage';
+import VerifyEmailPage from './pages/verify-email/VerifyEmailPage';
 import Logout from './pages/logout/LogoutPage';
 
 function AppWrapper() {
@@ -66,6 +67,7 @@ function App() {
       <Route path="/change-password" element={<RequireAuth><LandingLayout><ChangePasswordPage /></LandingLayout></RequireAuth>} />
       <Route path="/reset-password" element={<LandingLayout><ResetPasswordPage /></LandingLayout>} />
       <Route path="/forgot-password" element={<LandingLayout><ForgotPasswordPage /></LandingLayout>} />
+      <Route path="/verify-email" element={<LandingLayout><VerifyEmailPage /></LandingLayout>} />
       <Route path="/register" element={<LandingLayout><RegisterPage /></LandingLayout>} />
       <Route path="/pricing" element={<LandingLayout><PricingPage /></LandingLayout>} />
       <Route path="/blog" element={<LandingLayout><BlogPage /></LandingLayout>} />

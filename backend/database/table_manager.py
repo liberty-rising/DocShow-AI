@@ -33,7 +33,6 @@ class TableManager:
         try:
             print(f"Mapping table {table_name} to organization {org_id}")
             if self.session:
-                print(f"Session: {self.session}")
                 alias = table_name if not alias else alias
                 table_map_manager = TableMapManager(self.session)
                 table_map = TableMap(

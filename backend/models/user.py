@@ -17,7 +17,12 @@ class User(Base):
         id (int): The unique identifier for each user.
         username (str): The username chosen by the user.
         email (str): The email address of the user.
+        hashed_password (str): The hashed password for the user.
         organization_id (int): Foreign key linking the user to their organization.
+        role (str, optional): The role of the user within the organization.
+        requires_password_update (bool): Indicates whether the user needs to update their password.
+        verification_token (str, optional): The email verification token for the user.
+        email_verified (bool): Indicates whether the user's email has been verified.
         created_at (datetime): The timestamp when the user was created.
         refresh_token (str, optional): The refresh token for the user.
     """
@@ -30,6 +35,8 @@ class User(Base):
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
     role = Column(String, nullable=True)
     requires_password_update = Column(Boolean, default=False)
+    verification_token = Column(String, unique=True, index=True)
+    email_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
     refresh_token = Column(Text, nullable=True)
 
@@ -152,3 +159,11 @@ class ResetPasswordRequest(BaseModel):
         if not re.search(r"[A-Z]", v):
             raise ValueError("Password should contain at least one uppercase letter")
         return v
+
+
+class SendVerificationEmailRequest(BaseModel):
+    email: str = Field(...)
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(...)
