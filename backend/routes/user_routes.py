@@ -196,3 +196,8 @@ async def verify_email(request: VerifyEmailRequest):
         user_manager.update_user_email_verified(username=user.username)
 
         return {"message": f"Successfully verified email for {user.email}."}
+
+
+@user_router.get("/users/is-email-verified/")
+async def is_user_verified(current_user: User = Depends(get_current_user)):
+    return {"email_verified": current_user.email_verified}
