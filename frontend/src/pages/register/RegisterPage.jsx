@@ -23,8 +23,13 @@ function RegisterPage() {
         });
 
         if (response.data.message === 'Registration successful') {
-            updateAuth(true);
-            navigate('/login');
+            // Call the send-verification-email endpoint
+            await axios.post(`${API_URL}users/send-verification-email/`, {
+              email,
+            });
+
+            // Navigate to the verify-email page instead of login
+            navigate('/verify-email', { state: { email } });
         }
     } catch (error) {
         if (error.response) {

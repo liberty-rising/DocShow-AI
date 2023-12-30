@@ -8,9 +8,13 @@ from typing import Optional
 
 from database.database_manager import DatabaseManager
 from database.user_manager import UserManager
-from models.token import ResetTokenData
+from models.token import EmailVerificationTokenData, ResetTokenData
 from models.user import User
-from settings import JWT_SECRET_KEY, PASSWORD_RESET_EXPIRE_MINUTES
+from settings import (
+    EMAIL_VERIFICATION_EXPIRE_MINUTES,
+    JWT_SECRET_KEY,
+    PASSWORD_RESET_EXPIRE_MINUTES,
+)
 
 
 # Configuration for JWT token
@@ -28,9 +32,7 @@ def authenticate_user(username: str, email: EmailStr, password: str) -> User:
         manager = UserManager(session)
 
         if email:
-            print("email", email)
             user = manager.get_user_by_email(email=email)
-            print("user", user)
         elif username:
             user = manager.get_user_by_username(username=username)
         else:
@@ -230,10 +232,10 @@ def generate_password_reset_token(username: str):
         "username": username,
         "exp": datetime.utcnow() + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decode_reset_token(token: str):
+def decode_reset_token(token: str) -> ResetTokenData:
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("username")
@@ -250,6 +252,41 @@ def decode_reset_token(token: str):
             )
 
         return ResetTokenData(username=username, exp=exp)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+
+
+def generate_email_verification_token(email: str):
+    payload = {
+        "email": email,
+        "exp": datetime.utcnow() + timedelta(minutes=EMAIL_VERIFICATION_EXPIRE_MINUTES),
+    }
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_email_verification_token(token: str) -> EmailVerificationTokenData:
+    try:
+        print("token", token)
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        print("payload", payload)
+        email = payload.get("email")
+        exp = payload.get("exp")
+        print(email, exp)
+        if email is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Could not validate credentials",
+            )
+        # Check if the token has expired
+        if datetime.now(timezone.utc) > datetime.fromtimestamp(exp, tz=timezone.utc):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Token has expired"
+            )
+
+        return EmailVerificationTokenData(email=email, exp=exp)
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
