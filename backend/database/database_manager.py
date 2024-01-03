@@ -1,4 +1,4 @@
-from settings import DB_URL
+from settings import DATABASE_URL
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 class DatabaseManager:
     def __init__(self):
-        self.engine = create_engine(DB_URL)
+        self.engine = create_engine(DATABASE_URL)
 
     def __enter__(self):
         Session = sessionmaker(bind=self.engine)
