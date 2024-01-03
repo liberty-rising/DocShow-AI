@@ -1,7 +1,12 @@
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from models.base import Base
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models.base import Base  # noqa: E402
 
 
 def run_migrations_online():
@@ -9,7 +14,7 @@ def run_migrations_online():
 
     # For app database
     if connectable is None:
-        db_url = context.get_x_argument(as_dictionary=True).get("app_db", None)
+        db_url = context.get_x_argument(as_dictionary=True).get("db", None)
         if db_url:
             connectable = engine_from_config(
                 context.config.get_section(context.config.config_ini_section),
