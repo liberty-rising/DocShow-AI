@@ -21,10 +21,10 @@ jobs:
       run: pip install black flake8 mypy
 
     - name: Check Python code formatting with Black
-      run: black --check backend/
+      run: black --check --exclude backend/alembic/versions backend/
 
     - name: Check Python code style with Flake8
-      run: flake8 backend/
+      run: flake8 --exclude=backend/alembic/versions backend/
 
     - name: Run Mypy Type Checking
-      run: mypy backend/
+      run: mypy --ignore-missing-imports --exclude backend/alembic/versions backend/

@@ -4,12 +4,13 @@ It integrates with a database manager to perform CRUD operations on the User mod
 the security module for creating JWT tokens and password hashing/verification.
 """
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-from databases.database_manager import DatabaseManager
-from databases.user_manager import UserManager
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
+from models.auth import CustomOAuth2PasswordRequestForm
 from models.user import User, UserCreate
 from security import (
     authenticate_user,
@@ -20,7 +21,12 @@ from security import (
     verify_refresh_token,
     update_user_refresh_token,
 )
-from settings import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from settings import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    REFRESH_TOKEN_EXPIRE_DAYS,
+    REMEMBER_ME_ACCESS_TOKEN_EXPIRE_MINUTES,
+    REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS,
+)
 
 
 auth_router = APIRouter()
@@ -40,7 +46,11 @@ class LogoutResponse(BaseModel):
 
 @auth_router.post("/token/", response_model=LoginResponse)
 async def login_for_access_token(
-    response: Response, form_data: OAuth2PasswordRequestForm = Depends()
+    response: Response,
+    username: Optional[str] = Form(None),
+    email: Optional[EmailStr] = Form(None),
+    password: str = Form(...),
+    remember: bool = Form(False),
 ):
     """
     Authenticate a user and set a JWT token in a cookie upon successful authentication.
@@ -49,25 +59,37 @@ async def login_for_access_token(
     it creates a JWT token and sets it in a secure, HttpOnly cookie in the response.
 
     Args:
-        form_data (OAuth2PasswordRequestForm): Contains the user's provided username and password.
+        form_data (CustomOAuth2PasswordRequestForm): Contains the user's provided username/email and password.
 
     Returns:
         dict: A success message indicating successful authentication. The JWT token is not returned in the response body but is set in a secure cookie.
     """
-    user = authenticate_user(form_data.username, form_data.password)
+    form_data = CustomOAuth2PasswordRequestForm(
+        username=username, email=email, password=password
+    )
+    user = authenticate_user(form_data.username, form_data.email, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-    access_token = create_token(
-        {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    refresh_token = create_token(
-        {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    )
+    if remember:
+        access_token = create_token(
+            {"sub": user.username},
+            timedelta(minutes=REMEMBER_ME_ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+        refresh_token = create_token(
+            {"sub": user.username},
+            timedelta(days=REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS),
+        )
+    else:
+        access_token = create_token(
+            {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        refresh_token = create_token(
+            {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        )
     update_user_refresh_token(
         user_id=user.id,
         refresh_token=refresh_token,
@@ -154,7 +176,7 @@ async def register(response: Response, user: UserCreate):
         user_manager = UserManager(session)
 
         # Ensure unique username and email
-        existing_user = user_manager.get_user(username=user.username)
+        existing_user = user_manager.get_user_by_username(username=user.username)
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already registered")
         existing_email = user_manager.get_email(email=user.email)
@@ -166,7 +188,12 @@ async def register(response: Response, user: UserCreate):
 
         # Add user to the database
         db_user = User(
-            username=user.username, email=user.email, hashed_password=hashed_password
+            username=user.username,
+            email=user.email,
+            hashed_password=hashed_password,
+            subscribe_to_updates=user.subscribe_to_updates,
+            receive_marketing_content=user.receive_marketing_content,
+            requires_password_update=user.requires_password_update,
         )
         user_manager.create_user(db_user)
 

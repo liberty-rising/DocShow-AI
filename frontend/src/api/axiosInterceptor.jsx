@@ -9,7 +9,13 @@ axios.interceptors.response.use(response => response, async (error) => {
     if (error.response 
         && error.response.status === 401 
         && !originalRequest._retry 
-        && !originalRequest.url.includes('refresh-token/')) { // Check if the failed request is not for the refresh-token endpoint
+        && !originalRequest.url.includes('refresh-token/') // Check if the failed request is not for the refresh-token endpoint
+        && !originalRequest.url.includes('token/') // Exclude the login endpoint
+        && !originalRequest.url.includes('register/') // Exclude the register endpoint
+        && !originalRequest.url.includes('forgot-password/') // Exclude the forgot-password endpoint
+        && !originalRequest.url.includes('users/is-email-verified/') // Exclude the is-email-verified endpoint
+        && !originalRequest.url.includes('users/verify-email/') // Exclude the verify-email endpoint
+        && !originalRequest.url.includes('users/send-verification-email/')) { // Exclude the send-verification-email endpoint
         originalRequest._retry = true;
         try {
             // Attempt to refresh the token

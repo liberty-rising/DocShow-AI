@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { useNavigate } from 'react-router-dom';
-import ChartDisplay from '../Charts/ChartDisplay';
+import ChartDisplay from '../charts/ChartDisplay';
 import { API_URL } from '../../utils/constants';
 
 function Dashboard() {

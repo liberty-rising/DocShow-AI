@@ -3,12 +3,14 @@ import { Box, CircularProgress, TextField, Button, Typography, Paper } from '@mu
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
 
-const AIAssistant = () => {
+const AIAssistant = ({ table }) => {
   const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const chatEndRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  // const [chatId, setChatId] = useState(null);
 
+  const chatId = 1; // TODO: Should be dynamic
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -23,8 +25,8 @@ const AIAssistant = () => {
     setUserInput('');  // Clear the input field immediately
   
     try {
-      const response = await axios.post(`${API_URL}chat/`, { user_input: userInput });
-      const llmOutput = response.status === 200 ? response.data.llm_output : 'Failed to get response.';
+      const response = await axios.post(`${API_URL}chat/analytics/`, { chat_id: chatId, prompt: userInput });
+      const llmOutput = response.status === 200 ? response.data.response : 'Failed to get response.';
       setChatHistory(prevHistory => [...prevHistory, { role: 'AI', message: llmOutput }]);
     } catch (error) {
       setChatHistory(prevHistory => [...prevHistory, { role: 'AI', message: 'An error occurred.' }]);
@@ -50,8 +52,7 @@ const AIAssistant = () => {
 
   return (
     <Box>
-      <Typography variant="h4">💬 AI Assistant</Typography>
-      <Paper style={{ height: '200px', width: '100%', overflowY: 'auto', padding: '10px', marginTop: '10px', marginBottom: '10px' }}>
+      <Paper style={{ height: '100px', width: '100%', overflowY: 'auto', padding: '10px', marginTop: '10px', marginBottom: '10px' }}>
         {chatHistory.map((chat, index) => (
             <Typography key={index}>{`${chat.role}: ${chat.message}`}</Typography>
         ))}

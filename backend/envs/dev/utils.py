@@ -1,8 +1,8 @@
 import pandas as pd
 
-from databases.database_manager import DatabaseManager
-from databases.table_manager import TableManager
-from databases.table_metadata_manager import TableMetadataManager
+from database.database_manager import DatabaseManager
+from database.table_manager import TableManager
+from database.table_metadata_manager import TableMetadataManager
 from utils.utils import get_app_logger
 
 logger = get_app_logger(__name__)

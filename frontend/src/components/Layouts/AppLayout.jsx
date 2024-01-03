@@ -1,11 +1,11 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Header from '../Header/Header';
-import Navigation from '../Navigation/Navigation';
-import BlogLink from '../Header/Links/Blog';
-import AboutLink from '../Header/Links/About';
-import LogoutLink from '../Header/Links/Logout';
+import Header from '../header/Header';
+import Navigation from '../navigation/Navigation';
+import BlogLink from '../header/links/Blog';
+import AboutLink from '../header/links/About';
+import LogoutLink from '../header/links/Logout';
 
 const AppLayout = ({ children }) => {
     const navLinks = [

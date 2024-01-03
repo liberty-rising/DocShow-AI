@@ -5,15 +5,18 @@ repos:
     -   id: black
         language_version: python3  # Ensure black uses the correct version of Python
         files: ^backend/  # Run black only on files in the backend/ directory
+        exclude: ^backend/alembic/versions/  # Exclude alembic migration files
 -   repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
     -   id: flake8
         files: ^backend/  # Run flake8 only on files in the backend/ directory
+        exclude: ^backend/alembic/versions/  # Exclude alembic migration files
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.7.1'  # Use the latest version
     hooks:
     -   id: mypy
         files: ^backend/
+        exclude: ^backend/alembic/versions/  # Exclude alembic migration files
 

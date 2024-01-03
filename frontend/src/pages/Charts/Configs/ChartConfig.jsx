@@ -1,31 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import axios from 'axios';
-import TableSelector from "./Components/TableSelector";
-import ChartTypeSelector from "./Components/ChartTypeSelector";
-import ChartPreview from "./Components/ChartPreview";
+import TableSelectDropdown from "../../../components/tables/selects/TableSelectDropdown";
+import ChartTypeSelector from "./components/ChartTypeSelector";
+import ChartPreview from "./components/ChartPreview";
+import { fetchOrganizationTables } from "../../../api/organizationTables";
 import { API_URL } from "../../../utils/constants";
 
-function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
+function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig, isLoading }) {
     const [tables, setTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState('');
     const [chartTypes, setChartTypes] = useState([]);
     const [selectedChartType, setSelectedChartType] = useState('');
-    const [organizationId, setOrganizationId] = useState(null);
 
     useEffect(() => {
-        // Fetch user data from API
-        axios.get(`${API_URL}users/me/`)
-            .then(response => {
-                // Set organizationId state
-                setOrganizationId(response.data.organization_id);
+        const getOrganizationTables = async () => {
+            const data = await fetchOrganizationTables();
+            setTables(data);
+        };
     
-                // Fetch tables from API using organizationId
-                axios.get(`${API_URL}organization/${response.data.organization_id}/tables/`)
-                    .then(response => setTables(response.data))
-                    .catch(error => console.error('Error fetching tables:', error));
-            })
-            .catch(error => console.error('Error fetching user data:', error));
+        getOrganizationTables();
     }, []);
 
     useEffect(() => {
@@ -57,10 +51,11 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
         return chartConfig.nivoConfig && Object.keys(chartConfig.nivoConfig).length > 0;
     };
 
-    const handleTableChange = (event) => {
-        const selectedTable = event.target.value;
-        setSelectedTable(selectedTable);
-    }
+    const handleTableSelect = async (table) => {
+        setSelectedTable(table);
+        const data = await fetchOrganizationTables(table); // fetchTableData is your API call function
+        setTables(data);
+    };
 
     const handleChartTypeChange = (event) => {
         const selectedType = event.target.value;
@@ -69,14 +64,17 @@ function ChartConfig({ onConfigChange, onRequiredSelected, chartConfig }) {
 
     return(
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 120, marginBottom: 2, width: '100%' }}>
-            <TableSelector selectedTable={selectedTable} onTableChange={handleTableChange} tables={tables} />
+            <TableSelectDropdown tables={tables} selectedTable={selectedTable} onTableSelect={handleTableSelect} />
             <ChartTypeSelector selectedChartType={selectedChartType} onChartTypeChange={handleChartTypeChange} chartTypes={chartTypes} />
-            {canShowPreview() ? (
-                <ChartPreview chartConfig={chartConfig} />
+            {isLoading ? (
+                <CircularProgress />
             ) : (
-                <Typography variant="caption">Configure the chart to preview it here.</Typography>
+                canShowPreview() ? (
+                    <ChartPreview chartConfig={chartConfig} />
+                ) : (
+                    <Typography variant="caption">Configure the chart to preview it here.</Typography>
+                )
             )}
-            
         </Box>
     )
 }

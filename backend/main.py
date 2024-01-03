@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from databases.database_manager import DatabaseManager
+from database.database_manager import DatabaseManager
 from models.base import Base
 from routes.auth_routes import auth_router
 from routes.chat_routes import chat_router

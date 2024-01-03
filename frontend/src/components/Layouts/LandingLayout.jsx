@@ -1,11 +1,11 @@
 import React from "react";
 import { Box, Toolbar } from "@mui/material";
-import Header from '../Header/Header';
-import HomeLink from "../Header/Links/Home";
-import LoginLink from "../Header/Links/Login";
-import PricingLink from "../Header/Links/Pricing";
-import BlogLink from "../Header/Links/Blog";
-import AboutLink from "../Header/Links/About";
+import Header from '../header/Header';
+import HomeLink from "../header/links/Home";
+import LoginLink from "../header/links/Login";
+import PricingLink from "../header/links/Pricing";
+import BlogLink from "../header/links/Blog";
+import AboutLink from "../header/links/About";
 
 const LandingLayout = ({ children }) => {
     const navLinks = [

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from databases.dashboard_manager import DashboardManager
-from databases.database_manager import DatabaseManager
+from database.dashboard_manager import DashboardManager
+from database.database_manager import DatabaseManager
 from models.dashboard import Dashboard, DashboardCreate
 from models.user import User
 from security import get_current_user

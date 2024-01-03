@@ -1,11 +1,11 @@
-from databases.data_profile_manager import DataProfileManager
-from databases.database_manager import DatabaseManager
-from databases.dashboard_manager import DashboardManager
-from databases.table_manager import TableManager
-from databases.organization_manager import OrganizationManager
-from databases.user_manager import UserManager
+from database.data_profile_manager import DataProfileManager
+from database.database_manager import DatabaseManager
+from database.dashboard_manager import DashboardManager
+from database.table_manager import TableManager
+from database.organization_manager import OrganizationManager
+from database.user_manager import UserManager
 from models.organization import Organization
-from models.user import User
+from models.user import User, UserRole
 from models.chart import Chart
 from models.dashboard import Dashboard
 from models.data_profile import DataProfile
@@ -36,12 +36,13 @@ def create_admin_user():
         hashed_password=get_password_hash("admin"),
         email="admin@docshow.ai",
         organization_id=1,
-        role="admin",
+        role=UserRole.SYSTEM_ADMIN,
+        email_verified=True,
     )
 
     with DatabaseManager() as session:
         user_manager = UserManager(session)
-        existing_user = user_manager.get_user(admin_user.username)
+        existing_user = user_manager.get_user_by_username(admin_user.username)
         if not existing_user:
             user_manager.create_user(admin_user)
             logger.debug("Admin user created.")
