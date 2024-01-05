@@ -91,7 +91,7 @@ def get_app_logger(name):
     logger = logging.getLogger(name)
 
     # Set log level based on the environment
-    log_level = logging.DEBUG if os.getenv("APP_ENV") == "development" else logging.INFO
+    log_level = logging.DEBUG if os.getenv("APP_ENV") == "dev" else logging.INFO
 
     logger.setLevel(log_level)
 
