@@ -33,3 +33,18 @@ spec:
             secretKeyRef:
               name: jwt-secret
               key: JWT_SECRET_KEY
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sendgrid-api-key
+              key: SENDGRID_API_KEY
+        - name: SPACES_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: spaces-access-key
+              key: SPACES_ACCESS_KEY
+        - name: SPACES_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: spaces-secret-access-key
+              key: SPACES_SECRET_ACCESS_KEY

@@ -4,3 +4,9 @@ metadata:
   name: backend-config
 data:
   APP_ENV: "prod"
+  APP_HOST: "docshow.ai"
+  EMAIL_VERIFICATION_EXPIRE_MINUTES: "15"
+  PASSWORD_RESET_EXPIRE_MINUTES: "15"
+  SPACES_BUCKET_NAME: "docshowai"
+  SPACES_ENDPOINT_URL: "https://docshowai.fra1.digitaloceanspaces.com"
+  SPACES_REGION_NAME: "fra1"
