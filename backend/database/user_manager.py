@@ -228,3 +228,22 @@ class UserManager:
             self.db_session.commit()
             self.db_session.refresh(db_user)
         return db_user
+
+    def update_user_requires_password_update(
+        self, username: str, requires_password_update: bool
+    ):
+        """
+        Update a user's requires_password_update in the database.
+
+        Args:
+            username (str): The user's username.
+
+        Returns:
+            User: The updated User object if found, else None.
+        """
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            db_user.requires_password_update = requires_password_update
+            self.db_session.commit()
+            self.db_session.refresh(db_user)
+        return db_user
