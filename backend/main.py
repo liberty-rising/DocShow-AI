@@ -29,6 +29,11 @@ async def shutdown_event():
     pass
 
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
 # Registering the startup and shutdown events
 app.router.on_startup.append(startup_event)
 app.router.on_shutdown.append(shutdown_event)
