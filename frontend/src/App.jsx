@@ -22,7 +22,7 @@ import CreateDataProfile from './pages/data-profiling/CreateDataProfile';
 import DashboardMenuPage from './pages/dashboards/DashboardsMenuPage';
 import Dashboard from './pages/dashboards/Dashboard';
 import DataProfilingPage from './pages/data-profiling/DataProfilingPage';
-import ForgotPasswordPage from './pages/forgot-password/forgotPasswordPage';
+import ForgotPasswordPage from './pages/forgot-password/ForgotPasswordPage';
 import LandingPage from './pages/landing/LandingPage'; 
 import LoginPage from './pages/login/LoginPage';
 import PricingPage from './pages/pricing/PricingPage';
