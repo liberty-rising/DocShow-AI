@@ -9,6 +9,7 @@ spec:
       - name: migration
         image: registry.digitalocean.com/docshow-ai/migration-prod:latest
         command: ["alembic", "upgrade", "head"]
+        env:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
