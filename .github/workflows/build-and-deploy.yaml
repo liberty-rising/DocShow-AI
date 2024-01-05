@@ -25,8 +25,15 @@ jobs:
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
         docker push registry.digitalocean.com/docshow-ai/backend-prod:latest
 
+    - name: Build and Push Migration Docker Image
+      run: |
+        docker build -t registry.digitalocean.com/docshow-ai/migration-prod:latest -f backend/Dockerfile.migration backend/
+        echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+        docker push registry.digitalocean.com/docshow-ai/migration-prod:latest
+
     - name: Set up Kubectl and Update Deployment
       run: |
         echo "${{ secrets.KUBECONFIG_SECRET }}" | base64 --decode > kubeconfig.yml
         kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend=registry.digitalocean.com/docshow-ai/frontend-prod:latest
         kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend=registry.digitalocean.com/docshow-ai/backend-prod:latest
+        kubectl --kubeconfig=kubeconfig.yml apply -f k8s/migration-job.yaml
