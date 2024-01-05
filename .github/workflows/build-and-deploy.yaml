@@ -15,25 +15,25 @@ jobs:
 
     - name: Build and Push Frontend Docker Image
       run: |
-        docker build --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} -t registry.digitalocean.com/docshow-ai/frontend-prod:latest -f frontend/Dockerfile.prod frontend/
+        docker build --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} -t registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }} -f frontend/Dockerfile.prod frontend/
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-        docker push registry.digitalocean.com/docshow-ai/frontend-prod:latest
+        docker push registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }}
 
     - name: Build and Push Backend Docker Image
       run: |
-        docker build -t registry.digitalocean.com/docshow-ai/backend-prod:latest -f backend/Dockerfile.prod backend/
+        docker build -t registry.digitalocean.com/docshow-ai/backend-prod:${{ github.sha }} -f backend/Dockerfile.prod backend/
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-        docker push registry.digitalocean.com/docshow-ai/backend-prod:latest
+        docker push registry.digitalocean.com/docshow-ai/backend-prod:${{ github.sha }}
 
     - name: Build and Push Migration Docker Image
       run: |
-        docker build -t registry.digitalocean.com/docshow-ai/migration-prod:latest -f backend/Dockerfile.migration backend/
+        docker build -t registry.digitalocean.com/docshow-ai/migration-prod:${{ github.sha }} -f backend/Dockerfile.migration backend/
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-        docker push registry.digitalocean.com/docshow-ai/migration-prod:latest
+        docker push registry.digitalocean.com/docshow-ai/migration-prod:${{ github.sha }}
 
     - name: Set up Kubectl and Update Deployment
       run: |
         echo "${{ secrets.KUBECONFIG_SECRET }}" | base64 --decode > kubeconfig.yml
-        kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend=registry.digitalocean.com/docshow-ai/frontend-prod:latest
-        kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend=registry.digitalocean.com/docshow-ai/backend-prod:latest
+        kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend=registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }}
+        kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend=registry.digitalocean.com/docshow-ai/backend-prod:${{ github.sha }}
         kubectl --kubeconfig=kubeconfig.yml apply -f k8s/migration-job.yaml
