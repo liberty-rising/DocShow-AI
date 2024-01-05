@@ -98,6 +98,11 @@ async def change_user_password(
             new_hashed_password=new_hashed_password,
         )
 
+        if updated_user.requires_password_update:
+            user_manager.update_user_requires_password_update(
+                username=current_user.username, requires_password_update=False
+            )
+
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
 

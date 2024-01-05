@@ -3,5 +3,7 @@ kind: ConfigMap
 metadata:
   name: frontend-config
 data:
+  # Not used by vite due to env variables needing to be set at build time
+  # Currently using GitHub secrets to set env variables at build time
   VITE_API_URL: "https://docshow.ai/api/"
   VITE_APP_ENV: "prod"
