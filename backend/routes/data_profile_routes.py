@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 
-# from starlette.responses import JSONResponse
 import tempfile
-import os
 
 from database.database_manager import DatabaseManager
 from database.data_profile_manager import DataProfileManager
@@ -70,19 +68,16 @@ async def preview_data_profile(
 ):
     suffix = file.filename.split(".")[-1]
     # Save the uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+    with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
         temp_file.write(await file.read())
         temp_file_path = temp_file.name
 
-    # Use the ImageConversionManager context manager to convert the PDF to JPG
-    with ImageConversionManager(temp_file_path, "/tmp/") as manager:
-        jpg_file = manager.convert_to_jpg(temp_file_path)
-        gpt = GPTLLM()
-        data = gpt.extract_data_from_jpg(instructions, jpg_file)
-
-    # Clean up the uploaded temp file
-    os.unlink(temp_file_path)
-    return data
+        # Use the ImageConversionManager context manager to convert the PDF to JPG
+        with ImageConversionManager(temp_file_path, "/tmp/") as manager:
+            jpg_file = manager.convert_to_jpg(temp_file_path)
+            gpt = GPTLLM()
+            data = gpt.extract_data_from_jpg(instructions, jpg_file)
+        return data
 
 
 # the response has to be a json
