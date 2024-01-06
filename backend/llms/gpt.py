@@ -1,5 +1,5 @@
 from openai import ChatCompletion
-from typing import List, Optional
+from typing import Optional
 
 import json
 import openai
@@ -124,9 +124,22 @@ class GPTLLM(BaseLLM):
         )
         return system_message_content
 
-    def _create_message(self, role: str, prompt: str):
+    def _create_message(self, role: str, prompt: str, image_url: str = ""):
         """Create either a user, system, or assistant message."""
-        return {"role": f"{role}", "content": f"{prompt}"}
+        if image_url:
+            return {
+                "role": f"{role}",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image",
+                        "image_url": {"url": image_url},
+                    },
+                ],
+                "image_url": f"{image_url}",
+            }
+        else:
+            return {"role": f"{role}", "content": f"{prompt}"}
 
     def _add_system_message(self, assistant_type: str) -> None:
         """
@@ -151,8 +164,8 @@ class GPTLLM(BaseLLM):
 
         self.llm_type = assistant_type
 
-    async def _send_and_receive_message(self, prompt: str) -> str:
-        user_message = self._create_message("user", prompt)
+    async def _send_and_receive_message(self, prompt: str, image_url: str = "") -> str:
+        user_message = self._create_message("user", prompt, image_url)
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
@@ -330,5 +343,14 @@ class GPTLLM(BaseLLM):
 
         return assistant_message_content
 
-    def generate_analytics_text(self, input_text: str, table_names: List[str]):
-        self._add_system_message(assistant_type="analytics_chat")
+    def extract_data_from_jpg(self, instructions: str, jpg_file: str):
+        self._add_system_message(assistant_type="jpg_data_extraction")
+
+        base64_image = tiktoken.image_to_base64(jpg_file)
+        image_url = f"data:image/jpeg;base64,{base64_image}"
+
+        prompt = self.prompt_manager.jpg_data_extraction_prompt(instructions)
+
+        assistant_message_content = self._send_and_receive_message(prompt, image_url)
+
+        return assistant_message_content

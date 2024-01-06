@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 
-# from starlette.responses import JSONResponse
 import tempfile
-import os
 
 from database.database_manager import DatabaseManager
 from database.data_profile_manager import DataProfileManager
+from llms.gpt import GPTLLM
 from models.data_profile import (
     DataProfile,
     DataProfileCreateRequest,
@@ -69,57 +68,13 @@ async def preview_data_profile(
 ):
     suffix = file.filename.split(".")[-1]
     # Save the uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+    with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
         temp_file.write(await file.read())
         temp_file_path = temp_file.name
 
-    # Use the ImageConversionManager context manager to convert the PDF to JPG
-    jpg_files = []
-    with ImageConversionManager(temp_file_path, "/change-me/") as manager:
-        jpg_files = manager.convert_to_jpg(temp_file_path)
-
-    # Clean up the uploaded temp file
-    os.unlink(temp_file_path)
-
-    # Assuming you have a function to send the JPGs to the LLM and get a response
-    # Send the JPG files to the LLM using the API
-    # You need to define how you'll handle multiple JPGs - this is just a placeholder
-    # if jpg_files:
-    #     # Here you would typically prepare and send your request to the LLM API.
-    #     # This will vary greatly depending on the LLM's API specifics.
-    #     # For now, this is a placeholder for how you might make the request.
-    #     # Replace with your actual API endpoint and key
-    #     llm_api_endpoint = "https://api.example.com/llm"
-    #     api_key = "your_api_key"
-    #     response = requests.post(
-    #         llm_api_endpoint,
-    #         headers={"Authorization": f"Bearer {api_key}"},
-    #         files={"file": open(jpg_files[0], "rb")},
-    #     )
-
-    #     # Handle the response
-    #     if response.status_code == 200:
-    #         llm_response = response.json()
-    #     else:
-    #         raise HTTPException(status_code=500, detail="LLM API request failed")
-    # else:
-    #     raise HTTPException(status_code=500, detail="Failed to convert file")
-
-    # Clean up the created JPG files
-    for jpg_file in jpg_files:
-        os.unlink(jpg_file)
-
-    # Return the LLM's response as JSON
-    # return JSONResponse(content=llm_response)
-
-
-# Now you would include this router in your FastAPI application instance.
-# from fastapi import FastAPI
-# app = FastAPI()
-# app.include_router(data_profile_router)
-
-
-# the response has to be a json
-
-# file -- > convert to jpg --> |
-# data-profile             --> | --> llm --> response
+        # Use the ImageConversionManager context manager to convert the PDF to JPG
+        with ImageConversionManager(temp_file_path, "/tmp/") as manager:
+            jpg_file = manager.convert_to_jpg(temp_file_path)
+            gpt = GPTLLM()
+            data = gpt.extract_data_from_jpg(instructions, jpg_file)
+        return data

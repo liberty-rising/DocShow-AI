@@ -57,14 +57,11 @@ class ImageConversionManager:
         # Add more conditions for other file types if needed
 
     def _convert_pdf_to_jpg(self, file_path):
-        images = convert_from_path(file_path)
-        jpg_files = []
-        for i, image in enumerate(images):
-            jpg_filename = f"output_page_{i}.jpg"
-            jpg_file_path = os.path.join(self.output_folder, jpg_filename)
-            image.save(jpg_file_path, "JPEG")
-            jpg_files.append(jpg_file_path)
-        return jpg_files
+        image = convert_from_path(file_path)
+        jpg_filename = os.path.basename(file_path).replace(".pdf", ".jpg")
+        jpg_file_path = os.path.join(self.output_folder, jpg_filename)
+        image.save(jpg_file_path, "JPEG")
+        return jpg_file_path
 
     def _convert_png_to_jpg(self, file_path):
         rgb_im = Image.open(file_path).convert("RGB")

@@ -93,3 +93,22 @@ class PromptManager:
         if extra_desc:
             prompt += f"\n\nAdditional information about the sample data: {extra_desc}"
         return prompt
+
+    def jpg_data_extraction_prompt(self, instructions: str):
+        prompt = f"""
+            Extract the following data from the given JPG file:
+
+            User request:
+            {instructions}
+
+            Provide output in JSON format using the requested information as keys.
+
+            Example output:
+            {{
+                "client_name":"John Doe",
+                "invoice_amount":"1000",
+                "date":"01-01-2021"
+            }}
+            In this example, the requested information would have been client name, invoice amount, and date.
+            """
+        return prompt
