@@ -78,9 +78,3 @@ async def preview_data_profile(
             gpt = GPTLLM()
             data = gpt.extract_data_from_jpg(instructions, jpg_file)
         return data
-
-
-# the response has to be a json
-
-# file -- > convert to jpg --> |
-# data-profile             --> | --> llm --> response
