@@ -46,6 +46,10 @@ class SystemMessageManager:
                 You are a table categorization assistant. Your task is to analyze sample data and existing table metadata to identify the most suitable
                 table for appending the sample data. Return only the name of the table.
             """,
+            """jpg_data_extraction""": """
+                You are a JPG data extraction assistant. Your task is to extract specific data in the order specifed from a JPG file and return it in a json format.
+                Return only the extracted data.
+            """,
             "generic": "You are a generic assistant.",
         }
 

@@ -81,3 +81,22 @@ class DigitalOceanSpaceManager:
 
         # The response contains the presigned URL
         return response
+
+    def delete_file(self, organization_name, object_name):
+        """Delete a file from an S3 bucket
+
+        :param organization_name: Name of the organization the file belongs to
+        :param object_name: S3 object name
+        :return: True if the referenced object was deleted, otherwise False
+        """
+
+        # Prepend the organization_name to the object_name
+        object_name = f"{organization_name}/{object_name}"
+
+        # Delete the file
+        try:
+            self.client.delete_object(Bucket=self.bucket_name, Key=object_name)
+        except Exception as e:
+            print(e)
+            return False
+        return True
