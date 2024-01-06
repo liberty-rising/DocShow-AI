@@ -89,7 +89,7 @@ function DataProfilingPage() {
       formData.append('file', selectedFile);
       formData.append('instructions', instructions);
 
-      axios.post(`${API_URL}data-profiles/preview-endpoint/`, formData, { 
+      axios.post(`${API_URL}data-profiles/preview/`, formData, { 
         headers: {
           'Content-Type': 'multipart/form-data'
         }
