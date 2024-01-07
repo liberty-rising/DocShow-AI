@@ -1,5 +1,5 @@
 from openai import ChatCompletion
-from typing import Optional
+from typing import Dict, List, Optional
 
 import json
 import openai
@@ -12,6 +12,7 @@ from llms.prompt_manager import PromptManager
 from llms.system_message_manager import SystemMessageManager
 from models.user import User
 from settings import OPENAI_API_KEY
+from utils.file_manager import FileManager
 from utils.nivo_assistant import NivoAssistant
 
 
@@ -51,21 +52,29 @@ class GPTLLM(BaseLLM):
         - If 'chat_id' is provided and 'store_history' is True, the chat history will be fetched from the database.
         - The history of the chat is maintained in a list, which is empty by default unless fetched from the database.
         """
-        openai.api_key = OPENAI_API_KEY
-        self.model = "gpt-4-1106-preview"
-        self.response_format = {"type": ""}
-        self.max_tokens = 8192  # As of Oct 2023
-        self.is_system_added = False  # Flag to check if system message is added
 
+        # User and chat identifiers
         self.chat_id = chat_id
         self.user_id = user.id
         self.organization_id = user.organization_id
-        self.prompt_manager = PromptManager()
-        self.store_history = store_history
-        self.system_message_manager = SystemMessageManager()
-        self.llm_type = llm_type
+
+        openai.api_key = OPENAI_API_KEY
         self.database_type = database_type
+        self.llm_type = llm_type
+        self.model = "gpt-4-1106-preview"
+        self.max_tokens = 8192  # As of Oct 2023
+        self.is_system_added = False  # Flag to check if system message is added
+        self.response_format = {"type": ""}
+        self.store_history = store_history
         self.history = self._set_init_history()
+
+        # Vision settings
+        self.image_detail = "high"
+
+        # Managers
+        self.file_manager = FileManager()
+        self.prompt_manager = PromptManager()
+        self.system_message_manager = SystemMessageManager()
 
     def _set_init_history(self):
         """Helper function to set the initial history for the instance."""
@@ -82,13 +91,23 @@ class GPTLLM(BaseLLM):
         else:
             self.response_format = {"type": ""}
 
+    def _set_model(self, model_type: str):
+        if model_type == "img":
+            self.model = "gpt-4-vision-preview"
+        else:
+            self.model = "gpt-4-1106-preview"
+
     async def _api_call(self, payload: dict) -> str:
         """Make an API call to get a response based on the conversation history."""
-        completion: ChatCompletion = await openai.ChatCompletion.acreate(
-            model=self.model,
-            messages=payload["messages"],
-            response_format=self.response_format,
-        )
+        params = {
+            "model": self.model,
+            "messages": payload["messages"],
+            "max_tokens": 1000,
+        }
+        if self.response_format["type"]:
+            params["response_format"] = self.response_format
+
+        completion: ChatCompletion = await openai.ChatCompletion.acreate(**params)
         return str(
             completion.choices[0].message.content
         )  # TODO: Typecasting is not recommended for mypy
@@ -101,9 +120,48 @@ class GPTLLM(BaseLLM):
         )  # Use the .encode() method to tokenize and count the tokens
         return token_count
 
-    def _total_tokens(self):
+    def _count_image_tokens(self, width: int, height: int) -> int:
+        """Count the number of tokens in the given image."""
+        if max(width, height) > 2048:
+            aspect_ratio = width / height
+            if width > height:
+                width = 2048
+                height = int(width / aspect_ratio)
+            else:
+                height = 2048
+                width = int(height * aspect_ratio)
+
+        # Scale down such that the shortest side is 768px long
+        aspect_ratio = width / height
+        if width < height:
+            width = 768
+            height = int(width / aspect_ratio)
+        else:
+            height = 768
+            width = int(height * aspect_ratio)
+
+        # Count how many 512px squares the image consists of
+        num_squares = (width // 512) * (height // 512)
+
+        # Each square costs 170 tokens, and 85 tokens are always added to the final total
+        token_cost = 170 * num_squares + 85
+
+        return token_cost
+
+    def _total_tokens(self) -> int:
         """Calculate total tokens in the given history."""
-        return sum(self._count_tokens(message["content"]) for message in self.history)
+        total_tokens = 0
+        for message in self.history:
+            content = message["content"]
+            if isinstance(content, str):
+                total_tokens += self._count_tokens(content)
+            elif isinstance(content, list):
+                for item in content:
+                    if isinstance(item, dict) and "image_url" in item:
+                        total_tokens += self._count_image_tokens(
+                            1024, 1024
+                        )  # Adjust these values based on your image's actual dimensions
+        return total_tokens
 
     def _truncate_history(self):
         """Truncate history to fit within token limits."""
@@ -124,22 +182,20 @@ class GPTLLM(BaseLLM):
         )
         return system_message_content
 
-    def _create_message(self, role: str, prompt: str, image_url: str = ""):
+    def _create_message(
+        self, role: str, prompt: str, jpg_presigned_urls: List[str] = []
+    ):
         """Create either a user, system, or assistant message."""
-        if image_url:
-            return {
-                "role": f"{role}",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {
-                        "type": "image",
-                        "image_url": {"url": image_url},
-                    },
-                ],
-                "image_url": f"{image_url}",
-            }
-        else:
-            return {"role": f"{role}", "content": f"{prompt}"}
+        content: List[Dict] = [{"type": "text", "text": prompt}]
+        for url in jpg_presigned_urls:
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": url, "detail": self.image_detail},
+                }
+            )
+
+        return {"role": role, "content": content}
 
     def _add_system_message(self, assistant_type: str) -> None:
         """
@@ -164,8 +220,10 @@ class GPTLLM(BaseLLM):
 
         self.llm_type = assistant_type
 
-    async def _send_and_receive_message(self, prompt: str, image_url: str = "") -> str:
-        user_message = self._create_message("user", prompt, image_url)
+    async def _send_and_receive_message(
+        self, prompt: str, jpg_presigned_urls: List[str] = []
+    ) -> str:
+        user_message = self._create_message("user", prompt, jpg_presigned_urls)
         self.history.append(user_message)
 
         # Check token limit and truncate history if needed
@@ -343,14 +401,16 @@ class GPTLLM(BaseLLM):
 
         return assistant_message_content
 
-    def extract_data_from_jpg(self, instructions: str, jpg_file: str):
+    async def extract_data_from_jpgs(
+        self, instructions: str, jpg_presigned_urls: List[str]
+    ):
         self._add_system_message(assistant_type="jpg_data_extraction")
-
-        base64_image = tiktoken.image_to_base64(jpg_file)
-        image_url = f"data:image/jpeg;base64,{base64_image}"
+        self._set_model(model_type="img")
 
         prompt = self.prompt_manager.jpg_data_extraction_prompt(instructions)
 
-        assistant_message_content = self._send_and_receive_message(prompt, image_url)
-
+        assistant_message_content = await self._send_and_receive_message(
+            prompt, jpg_presigned_urls
+        )
+        # data = json.loads(assistant_message_content) TODO: Ajust prompt to only return the json
         return assistant_message_content

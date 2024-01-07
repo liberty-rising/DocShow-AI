@@ -101,7 +101,7 @@ class PromptManager:
             User request:
             {instructions}
 
-            Provide output in JSON format using the requested information as keys.
+            Provide output in a JSON string using the requested information as keys.
 
             Example output:
             {{
@@ -110,5 +110,7 @@ class PromptManager:
                 "date":"01-01-2021"
             }}
             In this example, the requested information would have been client name, invoice amount, and date.
+
+            Return only the requested information, no additional text or formatting.
             """
         return prompt
