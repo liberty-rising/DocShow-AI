@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from typing import List
 
 import tempfile
 
 from database.database_manager import DatabaseManager
 from database.data_profile_manager import DataProfileManager
+from database.organization_manager import OrganizationManager
 from llms.gpt import GPTLLM
 from models.data_profile import (
     DataProfile,
@@ -11,6 +13,7 @@ from models.data_profile import (
     DataProfileCreateResponse,
 )
 from models.user import User
+from object_storage.digitalocean_space_manager import DigitalOceanSpaceManager
 from security import get_current_user
 from utils.image_conversion_manager import ImageConversionManager
 
@@ -62,19 +65,43 @@ async def get_data_profile(
 
 @data_profile_router.post("/data-profiles/preview/")
 async def preview_data_profile(
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
     instructions: str = Form(...),
     current_user: User = Depends(get_current_user),
 ):
-    suffix = file.filename.split(".")[-1]
-    # Save the uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
-        temp_file.write(await file.read())
-        temp_file_path = temp_file.name
+    temp_file_paths = []
+    for file in files:
+        if file.filename:
+            suffix = file.filename.split(".")[-1]
 
-        # Use the ImageConversionManager context manager to convert the PDF to JPG
-        with ImageConversionManager(temp_file_path, "/tmp/") as manager:
-            jpg_file = manager.convert_to_jpg(temp_file_path)
-            gpt = GPTLLM()
-            data = gpt.extract_data_from_jpg(instructions, jpg_file)
-        return data
+        # Save the uploaded file temporarily
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix="." + suffix)
+        temp_file.write(await file.read())
+        temp_file.close()
+        temp_file_paths.append(temp_file.name)
+
+    # Get the organization name
+    with DatabaseManager() as session:
+        org_manager = OrganizationManager(session)
+        organization_name = org_manager.get_organization(
+            current_user.organization_id
+        ).name
+
+    # Use the ImageConversionManager context manager to convert the PDF to JPG
+    with ImageConversionManager(temp_file_paths) as manager:
+        jpg_file_paths = manager.convert_to_jpgs()
+
+        print("jpg_file_paths", jpg_file_paths)
+
+        # Upload the JPG file to DigitalOcean Spaces, automatically deleting it when done
+        with DigitalOceanSpaceManager(
+            organization_name=organization_name, file_paths=jpg_file_paths
+        ) as space_manager:
+            space_manager.upload_files()
+            jpg_presigned_urls = space_manager.create_presigned_urls()
+            gpt = GPTLLM(chat_id=1, user=current_user)
+            extracted_data = await gpt.extract_data_from_jpgs(
+                instructions, jpg_presigned_urls
+            )
+
+        return extracted_data
