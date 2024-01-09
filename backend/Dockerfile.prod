@@ -1,32 +1,18 @@
-# Build Stage
-FROM python:3.9-slim-buster as builder
+FROM python:3.9-slim-buster
 
 WORKDIR /app/backend
 
+# Copy the application files
 COPY . /app/backend
 
-# Install curl, postgres client, and build-essential
+# Install required system dependencies
 RUN apt-get update && \
-    apt-get install -y curl postgresql-client build-essential && \
+    apt-get install -y curl postgresql-client build-essential poppler-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-
-# Final Stage
-FROM python:3.9-slim-buster
-
-WORKDIR /app/backend
-
-# Copy from builder
-COPY --from=builder /app/backend /app/backend
-
-# Install curl, postgres client, build-essential, and poppler-utils
-RUN apt-get update && \
-    apt-get install -y curl postgresql-client build-essential poppler-utils && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
 
