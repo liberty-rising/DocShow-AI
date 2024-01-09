@@ -8,6 +8,9 @@ It's compatible with the S3 API, which allows it to integrate
 with existing tools and workflows.
 """
 import boto3
+import os
+
+from typing import List
 
 from settings import (
     SPACES_ACCESS_KEY,
@@ -19,7 +22,7 @@ from settings import (
 
 
 class DigitalOceanSpaceManager:
-    def __init__(self):
+    def __init__(self, organization_name: str = "", file_paths: List[str] = []):
         session = boto3.session.Session()
         self.client = session.client(
             "s3",
@@ -30,54 +33,78 @@ class DigitalOceanSpaceManager:
         )
         self.bucket_name = SPACES_BUCKET_NAME
 
-    def upload_file(self, organization_name, file_path, object_name=None):
-        """Upload a file to an S3 bucket
+        self.organization_name = organization_name.replace(" ", "_")
 
-        :param organization_name: Name of the organization the file belongs to
-        :param file_path: File to upload
-        :param object_name: S3 object name. If not specified then file_path is used
-        :return: True if file was uploaded, else False
+        self.file_paths = file_paths
+        self.file_names = [os.path.basename(file_path) for file_path in file_paths]
+        self.object_names: List[str] = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        if self.file_paths:
+            self.delete_files()
+
+    def upload_files(self):
+        """Upload multiple files to an S3 bucket
+
+        :return: True if files were uploaded, else False
         """
+        all_uploaded = True
 
-        # If S3 object_name was not specified, use file_path
-        if object_name is None:
-            object_name = file_path
+        # Upload the files
+        for file_path, file_name in zip(self.file_paths, self.file_names):
+            # Prepend the organization_name to the object_name
+            object_name = f"{self.organization_name}/{file_name}"
+            try:
+                self.client.upload_file(file_path, self.bucket_name, object_name)
+                self.object_names.append(object_name)
+            except Exception as e:
+                print(e)
+                all_uploaded = False
 
-        # Prepend the organization_name to the object_name
-        object_name = f"{organization_name}/{object_name}"
+        return all_uploaded
 
-        # Upload the file
-        try:
-            self.client.upload_file(file_path, self.bucket_name, object_name)
-        except Exception as e:
-            print(e)
-            return False
-        return True
+    def create_presigned_urls(self, expiration=900) -> List[str]:
+        """Generate presigned URLs to share S3 objects
 
-    def create_presigned_url(
-        self, organization_name, object_name, expiration=900
-    ) -> str:
-        """Generate a presigned URL to share an S3 object
-
-        :param organization_name: Name of the organization the file belongs to
-        :param object_name: name of the object
         :param expiration: Time in seconds for the presigned URL to remain valid
-        :return: Presigned URL as string. If error, returns an empty string.
+        :return: List of presigned URLs as strings. If error, returns an empty string for that URL.
         """
+        presigned_urls = []
 
-        # Generate a presigned URL for the S3 object
-        try:
-            response: str = self.client.generate_presigned_url(
-                "get_object",
-                Params={
-                    "Bucket": self.bucket_name,
-                    "Key": f"{organization_name}/{object_name}",
-                },
-                ExpiresIn=expiration,
-            )
-        except Exception as e:
-            print(e)
-            return ""
+        # Generate a presigned URL for each S3 object
+        for object_name in self.object_names:
+            try:
+                response: str = self.client.generate_presigned_url(
+                    "get_object",
+                    Params={
+                        "Bucket": self.bucket_name,
+                        "Key": object_name,
+                    },
+                    ExpiresIn=expiration,
+                )
+                presigned_urls.append(response)
+            except Exception as e:
+                print(e)
+                presigned_urls.append("")
 
-        # The response contains the presigned URL
-        return response
+        return presigned_urls
+
+    def delete_files(self):
+        """Delete multiple files from an S3 bucket
+
+        :return: True if all files were deleted successfully, else False
+        """
+        all_deleted = True
+
+        # Delete the files
+        for object_name in self.object_names:
+            try:
+                self.client.delete_object(Bucket=self.bucket_name, Key=object_name)
+            except Exception as e:
+                print(e)
+                all_deleted = False
+
+        return all_deleted
