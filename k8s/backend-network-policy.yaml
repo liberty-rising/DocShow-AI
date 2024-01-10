@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    # Allow traffic from the Ingress controller namespace
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+    # # Also allow traffic from frontend pods (if needed)
+    # - podSelector:
+    #     matchLabels:
+    #       app: frontend
+  - ports:
+    - protocol: TCP
+      port: 8000
+  egress:
+  - to:
+    # Allow access to DNS service
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to:
+    # Allow specific egress to PostgreSQL database (consider specifying a specific CIDR if possible)
+    - ipBlock:
+        cidr: 0.0.0.0/0  # Update this if a more specific CIDR block can be used
+    ports:
+    - protocol: TCP
+      port: 80  # For outbound web traffic
+    - protocol: TCP
+      port: 25060  # For PostgreSQL database
