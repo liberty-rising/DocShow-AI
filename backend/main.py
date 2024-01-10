@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from database.database_manager import DatabaseManager
 from models.base import Base
@@ -11,6 +12,7 @@ from routes.file_routes import file_router
 from routes.organization_routes import organization_router
 from routes.table_routes import table_router
 from routes.user_routes import user_router
+from settings import APP_ENV
 from startup import run_startup_routines
 from utils.utils import get_app_logger
 
@@ -19,6 +21,19 @@ logger = get_app_logger(__name__)
 logger.info("Logger initialised.")
 
 app = FastAPI()
+
+if APP_ENV == "prod":
+    origins = ["https://docshow.ai"]
+else:
+    origins = ["https://127.0.0.1"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 async def startup_event():
