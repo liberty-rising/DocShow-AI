@@ -59,11 +59,7 @@ function App() {
         path="/" 
         element={<LandingLayout><LandingPage /></LandingLayout>} 
       />
-      <Route 
-        path="/login" 
-        element={isAuthenticated ? <Navigate to ="/dashboards" /> : 
-          <LandingLayout><LoginPage /></LandingLayout>} 
-      />
+      <Route path="/login" element={<LandingLayout><LoginPage /></LandingLayout>} />
       <Route path="/change-password" element={<RequireAuth><LandingLayout><ChangePasswordPage /></LandingLayout></RequireAuth>} />
       <Route path="/reset-password" element={<LandingLayout><ResetPasswordPage /></LandingLayout>} />
       <Route path="/forgot-password" element={<LandingLayout><ForgotPasswordPage /></LandingLayout>} />

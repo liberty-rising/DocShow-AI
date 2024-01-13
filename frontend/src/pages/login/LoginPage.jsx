@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import qs from 'qs';
 import { Box, Button, Checkbox, Container, FormControlLabel, TextField, Typography } from '@mui/material';
@@ -14,9 +14,10 @@ function LoginPage({ onLogin }) {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { updateAuth } = useAuth();
+  const { updateAuth, updateEmailVerification } = useAuth();
   const [errorMessage, setErrorMessage] = useState(''); 
 
+ 
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -24,7 +25,7 @@ function LoginPage({ onLogin }) {
     const isEmail = validator.isEmail(usernameOrEmail);
     const data = isEmail 
         ? { email: usernameOrEmail, password, remember: rememberMe } 
-        : { username: usernameOrEmail, password, rememer: rememberMe };
+        : { username: usernameOrEmail, password, remember: rememberMe };
 
     try {
         const response = await axios.post(`${API_URL}token/`, qs.stringify (data), {
@@ -42,8 +43,13 @@ function LoginPage({ onLogin }) {
             });
             if (userResponse.data.requires_password_update) {
                 navigate('/change-password'); 
+            } else if (userResponse.data.email_verified == false) {
+                console.log("email_verified is false")
+                navigate('/verify-email');
             } else {
-                navigate('/dashboards'); 
+                console.log("email_verified is true")
+                updateEmailVerification(true);
+                navigate('/dashboards')
             } 
         }
     } catch (error) {

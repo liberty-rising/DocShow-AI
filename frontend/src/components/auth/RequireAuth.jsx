@@ -14,6 +14,7 @@ function RequireAuth({ children }) {
   }
 
   if (!isEmailVerified) {
+    console.log("from require auth")
     // Redirect to the verify-email page if email is not verified
     return <Navigate to="/verify-email" />;
   }
