@@ -52,10 +52,14 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(newAuthState);
   };
 
+  const updateEmailVerification = (newEmailVerificationState) => {
+    setIsEmailVerified(newEmailVerificationState);
+  };
+
   // The Provider component from our created context is used here. 
   // It makes the `isAuthenticated` state and `updateAuth` function available to any descendants of this component
   return (
-    <AuthContext.Provider value={{ isAuthenticated, updateAuth, isEmailVerified, setIsEmailVerified, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, updateAuth, isEmailVerified, updateEmailVerification, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

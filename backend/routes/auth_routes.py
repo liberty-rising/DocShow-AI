@@ -74,6 +74,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     if remember:
         access_token = create_token(
             {"sub": user.username},
@@ -85,7 +86,8 @@ async def login_for_access_token(
         )
     else:
         access_token = create_token(
-            {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            {"sub": user.username},
+            timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         )
         refresh_token = create_token(
             {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
@@ -125,7 +127,8 @@ async def refresh_access_token(
         )
 
     access_token = create_token(
-        {"sub": user.username}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        {"sub": user.username},
+        timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     new_refresh_token = create_token(
         {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
@@ -198,25 +201,25 @@ async def register(response: Response, user: UserCreate):
         user_manager.create_user(db_user)
 
         # Generate access token
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
+            {"sub": user.username},
+            timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+        refresh_token = create_token(
+            {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         )
 
-        # Set cookie
-        response.set_cookie(
-            key="access_token",
-            value=f"Bearer {access_token}",
-            httponly=True,
-            max_age=1800,
-            secure=True,
-            samesite="lax",
+        update_user_refresh_token(
+            user_id=user.id,
+            refresh_token=refresh_token,
         )
 
+        set_tokens_in_cookies(response, access_token, refresh_token)
         return {"message": "Registration successful"}
 
 
 @auth_router.post("/logout/", response_model=LogoutResponse)
 async def logout(response: Response):
     response.delete_cookie(key="access_token")
+    response.delete_cookie(key="refresh_token")
     return {"message": "Logged out successfully"}

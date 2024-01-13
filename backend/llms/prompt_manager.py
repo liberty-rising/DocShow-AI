@@ -105,9 +105,16 @@ class PromptManager:
 
             Example output:
             {{
-                "client_name":"John Doe",
-                "invoice_amount":"1000",
-                "date":"01-01-2021"
+                {{
+                    "client_name":"John Doe",
+                    "invoice_amount":"1000",
+                    "date":"01-01-2021"
+                }},
+                {{
+                    "client_name":"Jane Doe",
+                    "invoice_amount":"2000",
+                    "date":"01-01-2021"
+                }}
             }}
             In this example, the requested information would have been client name, invoice amount, and date.
 
