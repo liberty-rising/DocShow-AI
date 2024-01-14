@@ -247,3 +247,19 @@ class UserManager:
             self.db_session.commit()
             self.db_session.refresh(db_user)
         return db_user
+
+    def delete_user_by_username(self, username: str) -> User:
+        """
+        Delete a user based on their username.
+
+        Args:
+            username (str): The username of the user.
+
+        Returns:
+            User: The deleted User object if found, else None.
+        """
+        db_user = self.db_session.query(User).filter(User.username == username).first()
+        if db_user:
+            self.db_session.delete(db_user)
+            self.db_session.commit()
+        return db_user

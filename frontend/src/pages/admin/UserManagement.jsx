@@ -18,6 +18,17 @@ function UserManagement() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      await axios.delete(`${API_URL}users/delete/${selectedUser.username}`);
+      // Refetch users after deletion
+      const response = await axios.get(`${API_URL}users/`);
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error deleting user', error);
+    }
+  };
+
   const fetchRoles = async () => {
     try {
       const response = await axios.get(`${API_URL}users/roles/`);
@@ -155,6 +166,7 @@ function UserManagement() {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Button variant="contained" onClick={handleUpdateUser} disabled={!selectedUser.username}>Update</Button>
+            <Button variant="contained" onClick={handleDeleteUser} disabled={!selectedUser.username} style={{marginLeft:'10px'}}>Delete</Button>
           </Grid>
         </Grid>
       </CardContent>

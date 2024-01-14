@@ -204,3 +204,19 @@ async def verify_email(request: VerifyEmailRequest):
 @user_router.get("/users/is-email-verified/")
 async def is_user_verified(current_user: User = Depends(get_current_user)):
     return {"email_verified": current_user.email_verified}
+
+
+@user_router.delete("/users/delete/{username}")
+async def delete_user(
+    username: str, current_admin_user: User = Depends(get_current_admin_user)
+):
+    with DatabaseManager() as session:
+        user_manager = UserManager(session)
+
+        # Delete user
+        deleted_user = user_manager.delete_user_by_username(username)
+
+        if not deleted_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return {"message": f"Successfully deleted user {username}."}
