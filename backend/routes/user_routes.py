@@ -23,6 +23,7 @@ from security import (
     get_password_hash,
     verify_password,
 )
+from settings import SENDGRID_API_KEY, APP_HOST, APP_ENV
 from utils.email import (
     send_password_reset_email_with_sendgrid,
     send_verification_email_with_sendgrid,
@@ -162,6 +163,9 @@ async def reset_password(request: ResetPasswordRequest):
 async def send_verification_email(
     request: SendVerificationEmailRequest, background_tasks: BackgroundTasks
 ):
+    print(
+        "APP_ENV", APP_ENV, "APP_HOST", APP_HOST, "SENDGRID_API_KEY", SENDGRID_API_KEY
+    )
     print("Getting user by email")
     with DatabaseManager() as session:
         user_manager = UserManager(session)
