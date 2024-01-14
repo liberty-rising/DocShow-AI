@@ -35,10 +35,13 @@ async def send_verification_email_with_sendgrid(email: List[str], token: str):
     )
     # Disable click tracking in development
     # if APP_ENV == "dev":
+    print("Disabling click tracking")
     message.tracking_settings = TrackingSettings()
     message.tracking_settings.click_tracking = ClickTracking(False, False)
     try:
+        print("Sending email")
         sg = SendGridAPIClient(SENDGRID_API_KEY)
+        print("Sending email")
         response = await sg.send(message)
         print(response.status_code)
         print(response.body)

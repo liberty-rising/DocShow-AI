@@ -162,18 +162,21 @@ async def reset_password(request: ResetPasswordRequest):
 async def send_verification_email(
     request: SendVerificationEmailRequest, background_tasks: BackgroundTasks
 ):
+    print("Getting user by email")
     with DatabaseManager() as session:
         user_manager = UserManager(session)
         user = user_manager.get_user_by_email(request.email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
+        print("Generating verification token")
         # Generate a verification token and save it in the database
         token = generate_email_verification_token(user.email)
         user_manager.update_user_verification_token(
             username=user.username, verification_token=token
         )
 
+        print("Sending verification email")
         # Add a background task to send the email
         background_tasks.add_task(
             send_verification_email_with_sendgrid, user.email, token
