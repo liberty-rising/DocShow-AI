@@ -10,6 +10,7 @@ import { API_URL } from '../../utils/constants';
 function RegisterPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const { updateAuth } = useAuth();
 
   const handleSubmit = async (username, email, password, subscribe, marketingContent) => {
     try {
@@ -22,6 +23,7 @@ function RegisterPage() {
         });
 
         if (response.data.message === 'Registration successful') {
+            updateAuth(true);
             // Call the send-verification-email endpoint
             await axios.post(`${API_URL}users/send-verification-email/`, {
               email,
