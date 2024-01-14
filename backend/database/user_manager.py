@@ -61,7 +61,7 @@ class UserManager:
         """
         return self.db_session.query(User).filter(User.email == email).first()
 
-    def create_user(self, user: User):
+    def create_user(self, user: User) -> User:
         """
         Add a new user to the database.
 

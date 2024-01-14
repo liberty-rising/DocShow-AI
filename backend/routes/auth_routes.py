@@ -162,7 +162,7 @@ async def verify_token(current_user: User = Depends(get_current_user)):
 
 
 @auth_router.post("/register/", response_model=RegistrationResponse)
-async def register(response: Response, user: UserCreate):
+async def register(response: Response, user_create_request: UserCreate):
     """
     Register a new user and set a JWT token in a cookie upon successful registration.
 
@@ -170,7 +170,7 @@ async def register(response: Response, user: UserCreate):
     sets it in a secure, HttpOnly cookie in the response, and returns a success message.
 
     Args:
-        user (UserCreate): Pydantic model containing the user's registration details, such as username, email, and password.
+        user_create_request (UserCreate): Pydantic model containing the user's registration details, such as username, email, and password.
 
     Returns:
         dict: A success message indicating successful registration. The JWT token is not returned in the response body but is set in a secure cookie.
@@ -179,38 +179,40 @@ async def register(response: Response, user: UserCreate):
         user_manager = UserManager(session)
 
         # Ensure unique username and email
-        existing_user = user_manager.get_user_by_username(username=user.username)
+        existing_user = user_manager.get_user_by_username(
+            username=user_create_request.username
+        )
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already registered")
-        existing_email = user_manager.get_email(email=user.email)
+        existing_email = user_manager.get_email(email=user_create_request.email)
         if existing_email:
             raise HTTPException(status_code=400, detail="Email already registered")
 
         # Hash the user's password
-        hashed_password = get_password_hash(user.password)
+        hashed_password = get_password_hash(user_create_request.password)
 
         # Add user to the database
         db_user = User(
-            username=user.username,
-            email=user.email,
+            username=user_create_request.username,
+            email=user_create_request.email,
             hashed_password=hashed_password,
-            subscribe_to_updates=user.subscribe_to_updates,
-            receive_marketing_content=user.receive_marketing_content,
-            requires_password_update=user.requires_password_update,
+            subscribe_to_updates=user_create_request.subscribe_to_updates,
+            receive_marketing_content=user_create_request.receive_marketing_content,
+            requires_password_update=user_create_request.requires_password_update,
         )
-        user_manager.create_user(db_user)
+        new_user = user_manager.create_user(db_user)
 
         # Generate access token
         access_token = create_token(
-            {"sub": user.username},
+            {"sub": new_user.username},
             timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         )
         refresh_token = create_token(
-            {"sub": user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+            {"sub": new_user.username}, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         )
 
         update_user_refresh_token(
-            user_id=user.id,
+            user_id=new_user.id,
             refresh_token=refresh_token,
         )
 
