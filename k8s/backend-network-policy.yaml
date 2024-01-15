@@ -41,4 +41,6 @@ spec:
     - protocol: TCP
       port: 80  # For outbound web traffic
     - protocol: TCP
+      port: 443  # For outbound web traffic like SendGrid
+    - protocol: TCP
       port: 25060  # For PostgreSQL database
