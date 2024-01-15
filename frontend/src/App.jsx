@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LandingLayout from './components/layouts/LandingLayout';
 import RequireAuth from './components/auth/RequireAuth';
+import RequireSysAdminAuth from './components/auth/RequireSysAdminAuth';
 import AboutPage from './pages/about/AboutPage';
 import AdminPage from './pages/admin/AdminPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
@@ -78,7 +79,7 @@ function App() {
       <Route path="/data-profiling/:dataProfileId" element={<RequireAuth><AppLayout><SpecificDataProfilePage /></AppLayout></RequireAuth>} />
       <Route path="/data-profiling/create" element={<RequireAuth><AppLayout><CreateDataProfile /></AppLayout></RequireAuth>} />
       <Route path="/user" element={<RequireAuth><AppLayout><UserPage /></AppLayout></RequireAuth>} />
-      <Route path="/admin" element={<RequireAuth><AppLayout><AdminPage /></AppLayout></RequireAuth>} />
+      <Route path="/admin" element={<RequireSysAdminAuth><AppLayout><AdminPage /></AppLayout></RequireSysAdminAuth>} />
       <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />
     </Routes>
   );

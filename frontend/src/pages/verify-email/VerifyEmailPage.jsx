@@ -11,7 +11,7 @@ const VerifyEmailPage = () => {
     const navigate = useNavigate();
     const email = location.state?.email || null;
     const [token, setToken] = useState(null);
-    const { setIsEmailVerified } = useAuth();
+    const { updateAuth, updateEmailVerification } = useAuth();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -21,17 +21,31 @@ const VerifyEmailPage = () => {
 
     useEffect(() => {
         if (token) {
-        axios.put(`${API_URL}users/verify-email/`, { token })
-            .then(response => {
-                // Handle successful verification
-                setIsEmailVerified(true);
-                navigate('/login');
-            })
-            .catch(error => {
-            // Handle failed verification
-            });
+            console.log("token", token)
+            axios.put(`${API_URL}users/verify-email/`, { token })
+                .then(response => {
+                    // Handle successful verification
+                    updateEmailVerification(true);
+    
+                    axios.get(`${API_URL}verify-token/`)
+                        .then(response => {
+                            // Handle successful token verification
+                            updateAuth(true);
+                            console.log('Token verified successfully');
+                            navigate('/dashboards');
+                        })
+                        .catch(error => {
+                            // Handle failed token verification
+                            console.log('Failed to verify token');
+                            navigate('/login', { state: { emailVerified: true } });
+                        });
+                })
+                .catch(error => {
+                    // Handle failed verification
+                    navigate('/login');
+                });
         }
-    }, [token, navigate, setIsEmailVerified]);
+    }, [token, navigate, updateEmailVerification]);
 
     const handleResendEmail = async (event) => {
         event.preventDefault();

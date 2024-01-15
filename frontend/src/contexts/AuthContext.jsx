@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../utils/constants';
-import { set } from 'date-fns';
 
 //Contexts in React are used for passing data deeply through the component tree without having to pass props down manually at every level
 export const AuthContext = createContext();
@@ -16,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   // State for keeping track of whether the user is authenticated. 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false); // Add a state for email verification
+  const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
 
   useEffect(() => {
@@ -26,6 +26,9 @@ export const AuthProvider = ({ children }) => {
         // Update based on the response message
         if (response.data.message === "User is authenticated") {
           setIsAuthenticated(true);
+
+          const userResponse = await axios.get(`${API_URL}users/me/`);
+          setUserRole(userResponse.data.role);
 
           const emailResponse = await axios.get(`${API_URL}users/is-email-verified/`);
           setIsEmailVerified(emailResponse.data.email_verified);
@@ -56,10 +59,14 @@ export const AuthProvider = ({ children }) => {
     setIsEmailVerified(newEmailVerificationState);
   };
 
+  const updateUserRole = (newUserRole) => {
+    setUserRole(newUserRole);
+  }
+
   // The Provider component from our created context is used here. 
   // It makes the `isAuthenticated` state and `updateAuth` function available to any descendants of this component
   return (
-    <AuthContext.Provider value={{ isAuthenticated, updateAuth, isEmailVerified, updateEmailVerification, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, updateAuth, isEmailVerified, updateEmailVerification, updateUserRole, userRole, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

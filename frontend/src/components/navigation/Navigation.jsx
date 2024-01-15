@@ -9,26 +9,31 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Navigation = () => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true); // State to manage drawer toggle
   const drawerWidth = isDrawerOpen ? 220 : 60; // 60px for collapsed width
+  const { userRole } = useAuth(); // Get user role from AuthContext
 
   // Toggle drawer function
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
 
-  const menuItems = [
+  let menuItems = [
     { text: 'Dashboards', icon: <DashboardIcon />, path: '/dashboards' },
     { text: 'Data Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Data Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
     { text: 'Data Profiling', icon: <AnalyticsIcon />, path: '/data-profiling' },
     { text: 'User Panel', icon: <AccountBoxIcon />, path: '/user' },
-    { text: 'Admin Panel', icon: <AdminPanelSettingsIcon />, path: '/admin' },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }
   ];
+  
+  if (userRole === 'system_admin') {
+    menuItems.push({ text: 'Admin Panel', icon: <AdminPanelSettingsIcon />, path: '/admin' });
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
