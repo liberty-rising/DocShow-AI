@@ -20,7 +20,9 @@ function UserManagement() {
 
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`${API_URL}users/delete/${selectedUser.username}`);
+      await axios.delete(`${API_URL}users/delete/`, {
+       data: {username: selectedUser.username}
+      });
       // Refetch users after deletion
       const response = await axios.get(`${API_URL}users/`);
       setUsers(response.data);
