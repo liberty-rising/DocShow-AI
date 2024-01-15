@@ -162,6 +162,10 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
 
+class DeleteUserRequest(BaseModel):
+    username: str
+
+
 class ResetPasswordRequest(BaseModel):
     token: str = Field(...)
     new_password: str = Field(...)
