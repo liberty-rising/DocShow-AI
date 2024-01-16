@@ -1,7 +1,7 @@
-import { Typography, Grid } from '@mui/material';
-import TableManagement from './TableManagement.jsx';
-import UserManagement from './UserManagement.jsx';
-import OrganizationManagement from './OrganizationManagement.jsx'; // Import the new component
+import { Typography, Grid } from "@mui/material";
+import TableManagement from "./TableManagement.jsx";
+import UserManagement from "./UserManagement.jsx";
+import OrganizationManagement from "./OrganizationManagement.jsx"; // Import the new component
 
 function AdminPage() {
   return (

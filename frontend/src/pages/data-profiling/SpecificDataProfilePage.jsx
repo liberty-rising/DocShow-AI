@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Box, Typography, CircularProgress, Table, TableBody, TableCell, TableRow, TableContainer, Paper } from '@mui/material';
-import { API_URL } from '../../utils/constants';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableContainer,
+  Paper,
+} from "@mui/material";
+import { API_URL } from "../../utils/constants";
 
 function SpecificDataProfilePage() {
   const { dataProfileId } = useParams();
@@ -11,13 +21,14 @@ function SpecificDataProfilePage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get(`${API_URL}/data-profiles/${dataProfileId}`)
-      .then(response => {
+    axios
+      .get(`${API_URL}/data-profiles/${dataProfileId}`)
+      .then((response) => {
         setProfile(response.data);
         setLoading(false);
       })
-      .catch(error => {
-        console.error('Error fetching data profile:', error);
+      .catch((error) => {
+        console.error("Error fetching data profile:", error);
         setError(error);
         setLoading(false);
       });
@@ -28,12 +39,18 @@ function SpecificDataProfilePage() {
   }
 
   if (error) {
-    return <Typography variant="h6" color="error">Error loading profile</Typography>;
+    return (
+      <Typography variant="h6" color="error">
+        Error loading profile
+      </Typography>
+    );
   }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>Data Profile Details</Typography>
+      <Typography variant="h4" gutterBottom>
+        Data Profile Details
+      </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableBody>

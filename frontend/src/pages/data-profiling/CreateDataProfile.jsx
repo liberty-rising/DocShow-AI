@@ -1,30 +1,31 @@
-import React, { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../../utils/constants';
+import React, { useState } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../utils/constants";
 
 const CreateDataProfile = () => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios.post(`${API_URL}data-profile/`, { name, description })
-      .then(response => {
+    axios
+      .post(`${API_URL}data-profile/`, { name, description })
+      .then((response) => {
         // Handle successful data profile creation
-        console.log('Data Profile created:', response.data);
-        navigate('/data-profiling')
+        console.log("Data Profile created:", response.data);
+        navigate("/data-profiling");
       })
-      .catch(error => {
-        console.error('Error creating data profile:', error);
+      .catch((error) => {
+        console.error("Error creating data profile:", error);
       });
   };
 
   const handleBack = () => {
-    navigate('/data-profiling')
-  }
+    navigate("/data-profiling");
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -34,7 +35,7 @@ const CreateDataProfile = () => {
         fullWidth
         label="Name"
         value={name}
-        onChange={e => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value)}
         margin="normal"
       />
       <TextField
@@ -42,7 +43,7 @@ const CreateDataProfile = () => {
         fullWidth
         label="Description"
         value={description}
-        onChange={e => setDescription(e.target.value)}
+        onChange={(e) => setDescription(e.target.value)}
         margin="normal"
       />
       <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>

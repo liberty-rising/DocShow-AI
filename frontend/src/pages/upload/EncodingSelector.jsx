@@ -1,5 +1,5 @@
-import React from 'react';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import React from "react";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const EncodingSelector = ({ encodings, encoding, setEncoding }) => (
   <FormControl fullWidth>
@@ -11,7 +11,9 @@ const EncodingSelector = ({ encodings, encoding, setEncoding }) => (
       onChange={(e) => setEncoding(e.target.value)}
     >
       {encodings.map((enc, index) => (
-        <MenuItem key={index} value={enc}>{enc.toUpperCase()}</MenuItem>
+        <MenuItem key={index} value={enc}>
+          {enc.toUpperCase()}
+        </MenuItem>
       ))}
     </Select>
   </FormControl>

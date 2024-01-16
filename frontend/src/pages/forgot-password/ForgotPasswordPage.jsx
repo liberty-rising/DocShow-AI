@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography } from '@mui/material';
-import Alert from '@mui/material/Alert';
-import axios from 'axios';
-import validator from 'validator';
-import { API_URL } from '../../utils/constants';
+import React, { useState } from "react";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import axios from "axios";
+import validator from "validator";
+import { API_URL } from "../../utils/constants";
 
 function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); 
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     // Validate email
     if (!validator.isEmail(email)) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
 
     // Send request to backend server
     try {
       await axios.post(`${API_URL}users/forgot-password/`, { email });
-      alert('Password reset email sent!');
+      alert("Password reset email sent!");
     } catch (error) {
-      setErrorMessage('Error sending password reset email. Please try again.');
+      setErrorMessage("Error sending password reset email. Please try again.");
     }
   };
 
@@ -31,9 +31,9 @@ function ForgotPasswordPage() {
     <Box
       sx={{
         marginTop: 8,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
       <Typography component="h1" variant="h5">
