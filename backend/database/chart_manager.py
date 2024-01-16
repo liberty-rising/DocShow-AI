@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
 from models.chart import Chart
+from sqlalchemy.orm import Session
 
 
 class ChartManager:

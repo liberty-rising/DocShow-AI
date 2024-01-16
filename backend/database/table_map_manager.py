@@ -1,8 +1,8 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 
+from fastapi import HTTPException
 from models.table_map import TableMap
+from sqlalchemy.orm import Session
 
 
 class TableMapManager:

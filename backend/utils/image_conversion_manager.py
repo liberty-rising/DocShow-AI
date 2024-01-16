@@ -1,8 +1,8 @@
-from PIL import Image
-from pdf2image import convert_from_path
+import os
 from typing import List
 
-import os
+from pdf2image import convert_from_path
+from PIL import Image
 
 
 class ImageConversionManager:

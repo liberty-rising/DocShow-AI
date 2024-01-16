@@ -2,7 +2,7 @@ import React from "react";
 // import { Box, Container, Typography } from "@mui/material";
 
 const BlogPage = () => {
-    <div></div>
+  <div></div>;
 };
 
-export default BlogPage
+export default BlogPage;

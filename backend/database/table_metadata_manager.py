@@ -2,9 +2,10 @@
 This module provides a TableMetadataManager class to manage operations related to the TableMetadata model.
 It facilitates CRUD operations and formatting of table metadata information.
 """
-from sqlalchemy.orm import Session
 from typing import List
+
 from models.table_metadata import TableMetadata
+from sqlalchemy.orm import Session
 
 
 class TableMetadataManager:

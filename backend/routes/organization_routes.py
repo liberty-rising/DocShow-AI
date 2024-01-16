@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
-
 from database.database_manager import DatabaseManager
 from database.organization_manager import OrganizationManager
+from fastapi import APIRouter, Depends, HTTPException
 from models.organization import (
     Organization,
     OrganizationCreateRequest,
@@ -29,10 +28,10 @@ async def get_organizations(current_admin: User = Depends(get_current_admin_user
     return orgs
 
 
-@organization_router.post("/organization/")
+@organization_router.post("/organization/", response_model=OrganizationCreateResponse)
 async def save_organization(
     org: OrganizationCreateRequest, current_user: User = Depends(get_current_user)
-) -> OrganizationCreateResponse:
+):
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)
         if org_manager.get_organization_by_name(org.name):
@@ -40,7 +39,7 @@ async def save_organization(
 
         new_organization = Organization(name=org.name)
         created_organization = org_manager.create_organization(new_organization)
-        response = OrganizationCreateResponse(created_organization.name)
+        response = OrganizationCreateResponse(name=created_organization.name)
         return response
 
 

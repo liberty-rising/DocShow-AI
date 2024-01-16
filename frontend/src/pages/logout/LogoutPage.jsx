@@ -1,8 +1,8 @@
 // src/components/auth/Logout.js
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import { useAuth } from '../../contexts/AuthContext';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Logout() {
   const navigate = useNavigate();
@@ -10,14 +10,14 @@ function Logout() {
 
   useEffect(() => {
     // Clear the authentication cookie
-    Cookies.remove('access_token');
-    Cookies.remove('refresh_token');
+    Cookies.remove("access_token");
+    Cookies.remove("refresh_token");
 
     // Update authentication state
     updateAuth(false);
 
     // Redirect to the login page
-    navigate('/');
+    navigate("/");
   }, [navigate, updateAuth]);
 
   // Optionally, you can render a message or a spinner here

@@ -1,7 +1,7 @@
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, TrackingSettings, ClickTracking
 from typing import List
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import ClickTracking, Mail, TrackingSettings
 from settings import APP_ENV, APP_HOST, SENDGRID_API_KEY
 
 

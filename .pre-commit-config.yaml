@@ -6,6 +6,7 @@ repos:
         language_version: python3  # Ensure black uses the correct version of Python
         files: ^backend/  # Run black only on files in the backend/ directory
         exclude: ^backend/alembic/versions/  # Exclude alembic migration files
+
 -   repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
@@ -19,4 +20,18 @@ repos:
     -   id: mypy
         files: ^backend/
         exclude: ^backend/alembic/versions/  # Exclude alembic migration files
+
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2  # Replace with the latest isort version
+    hooks:
+    -   id: isort
+        files: ^backend/
+        exclude: ^backend/alembic/versions/
+
+-   repo: https://github.com/pre-commit/mirrors-prettier
+    rev: 'v3.1.0'
+    hooks:
+    -   id: prettier
+        files: ^frontend/  
+
 

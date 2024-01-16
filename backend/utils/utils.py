@@ -1,15 +1,14 @@
+import logging
+import os
+import sys
 from csv import Sniffer
-from fastapi import File, UploadFile
 from io import StringIO
 from typing import Any, Dict, Optional
 
-import logging
-import os
 import pandas as pd
-import sys
-
 from database.database_manager import DatabaseManager
 from database.table_manager import TableManager
+from fastapi import File, UploadFile
 
 
 def execute_select_query(query: str):

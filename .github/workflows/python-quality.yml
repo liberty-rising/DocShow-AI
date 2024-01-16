@@ -18,7 +18,7 @@ jobs:
         python-version: '3.8'
 
     - name: Install dependencies
-      run: pip install black flake8 mypy
+      run: pip install black flake8 mypy isort
 
     - name: Check Python code formatting with Black
       run: black --check --exclude backend/alembic/versions backend/
@@ -28,3 +28,6 @@ jobs:
 
     - name: Run Mypy Type Checking
       run: mypy --ignore-missing-imports --exclude backend/alembic/versions backend/
+    
+    - name: Check Python import order with isort
+      run: isort --check-only backend/

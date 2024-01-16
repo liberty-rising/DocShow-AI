@@ -1,19 +1,36 @@
-import React, { useState } from 'react';
-import { Alert, Box, Button, Grid, Paper, Snackbar, TextField, Typography } from '@mui/material';
+import React, { useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 
-const ChangePassword = ({ handleChangePassword, errorMessage, successMessage }) => {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+const ChangePassword = ({
+  handleChangePassword,
+  errorMessage,
+  successMessage,
+}) => {
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const success = await handleChangePassword(oldPassword, newPassword, confirmPassword);
-    console.log('handleChangePassword result:', success);
+    const success = await handleChangePassword(
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    );
+    console.log("handleChangePassword result:", success);
     if (success) {
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     }
   };
 
@@ -61,16 +78,16 @@ const ChangePassword = ({ handleChangePassword, errorMessage, successMessage }) 
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          {successMessage && 
+          {successMessage && (
             <Box mt={2} mb={2}>
               <Alert severity="success">{successMessage}</Alert>
             </Box>
-          }
-          {errorMessage && 
+          )}
+          {errorMessage && (
             <Box mt={2} mb={2}>
               <Alert severity="error">{errorMessage}</Alert>
             </Box>
-          }
+          )}
           <Button
             type="submit"
             fullWidth

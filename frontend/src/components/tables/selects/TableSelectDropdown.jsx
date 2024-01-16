@@ -1,5 +1,5 @@
-import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React from "react";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 function TableSelectDropdown({ tables, selectedTable, onTableSelect }) {
   const handleChange = (event) => {
