@@ -30,4 +30,4 @@ jobs:
       run: mypy --ignore-missing-imports --exclude backend/alembic/versions backend/
     
     - name: Check Python import order with isort
-      run: isort --check-only --exclude backend/alembic/versions backend/
+      run: isort --check-only backend/
