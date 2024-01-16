@@ -4,8 +4,8 @@ It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user da
 """
 from typing import Optional
 
-from sqlalchemy.orm import Session
 from models.user import User, UserRole
+from sqlalchemy.orm import Session
 
 
 class UserManager:

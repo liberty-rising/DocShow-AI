@@ -1,9 +1,8 @@
+import json
 from typing import Optional
 
-import json
-
-from sqlalchemy.orm import Session
 from models.chat_history import ChatHistory  # Replace with your actual import
+from sqlalchemy.orm import Session
 
 
 class ChatHistoryManager:

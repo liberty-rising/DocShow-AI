@@ -1,7 +1,8 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-
 import asyncio
 
+from database.database_manager import DatabaseManager
+from database.user_manager import UserManager
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from models.user import (
     ChangePasswordRequest,
     DeleteUserRequest,
@@ -14,8 +15,6 @@ from models.user import (
     UserUpdate,
     VerifyEmailRequest,
 )
-from database.database_manager import DatabaseManager
-from database.user_manager import UserManager
 from security import (
     decode_email_verification_token,
     decode_reset_token,

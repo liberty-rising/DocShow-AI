@@ -1,11 +1,10 @@
+from database.database_manager import DatabaseManager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from database.database_manager import DatabaseManager
 from models.base import Base
 from routes.auth_routes import auth_router
-from routes.chat_routes import chat_router
 from routes.chart_routes import chart_router
+from routes.chat_routes import chat_router
 from routes.dashboard_routes import dashboard_router
 from routes.data_profile_routes import data_profile_router
 from routes.file_routes import file_router
@@ -15,7 +14,6 @@ from routes.user_routes import user_router
 from settings import APP_ENV
 from startup import run_startup_routines
 from utils.utils import get_app_logger
-
 
 logger = get_app_logger(__name__)
 logger.info("Logger initialised.")

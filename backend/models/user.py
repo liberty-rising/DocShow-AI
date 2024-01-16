@@ -1,19 +1,12 @@
+import re
 from enum import Enum
-from pydantic import BaseModel, EmailStr, Field, validator
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Enum as SQLEnum,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy.sql import func
 from typing import Optional
 
-import re
+from pydantic import BaseModel, EmailStr, Field, validator
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.sql import func
 
 from .base import Base
 

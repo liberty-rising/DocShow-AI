@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends
-from security import get_current_user
-
 from database.database_manager import DatabaseManager
 from database.table_manager import TableManager
 from database.table_metadata_manager import TableMetadataManager
+from fastapi import APIRouter, Depends
 from models.user import User
+from security import get_current_user
 
 table_router = APIRouter()
 

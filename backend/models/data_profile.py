@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
 from pydantic import BaseModel
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
+
 from .base import Base
-from sqlalchemy import UniqueConstraint
 
 
 class DataProfile(Base):

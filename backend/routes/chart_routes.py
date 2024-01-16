@@ -1,20 +1,19 @@
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+import json
+import os
 from typing import Optional
 
 from database.chart_manager import ChartManager
 from database.database_manager import DatabaseManager
 from database.table_metadata_manager import TableMetadataManager
+from fastapi import APIRouter, Depends
 from llms.gpt import GPTLLM
-from models.user import User
 from models.chart import Chart, ChartCreate
 from models.table_metadata import TableMetadata
+from models.user import User
+from pydantic import BaseModel
 from security import get_current_user
 from utils.nivo_assistant import NivoAssistant
 from utils.utils import execute_select_query
-
-import json
-import os
 
 chart_router = APIRouter()
 

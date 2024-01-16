@@ -1,8 +1,8 @@
-from sqlalchemy import inspect, text
-from sqlalchemy.orm import Session
 from typing import List
 
 import pandas as pd
+from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session
 
 
 class SQLExecutor:

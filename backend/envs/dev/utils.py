@@ -1,5 +1,4 @@
 import pandas as pd
-
 from database.database_manager import DatabaseManager
 from database.table_manager import TableManager
 from database.table_metadata_manager import TableMetadataManager
