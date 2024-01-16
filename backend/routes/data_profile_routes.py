@@ -91,8 +91,6 @@ async def preview_data_profile(
     with ImageConversionManager(temp_file_paths) as manager:
         jpg_file_paths = manager.convert_to_jpgs()
 
-        print("jpg_file_paths", jpg_file_paths)
-
         # Upload the JPG file to DigitalOcean Spaces, automatically deleting it when done
         with DigitalOceanSpaceManager(
             organization_name=organization_name, file_paths=jpg_file_paths
