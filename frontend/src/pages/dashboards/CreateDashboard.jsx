@@ -1,40 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../../utils/constants';
+import React, { useState, useEffect } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../utils/constants";
 
 const CreateDashboardPage = () => {
-  const [organization, setOrganization] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [organization, setOrganization] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch organization
-    axios.get(`${API_URL}users/me/`)
-      .then(response => {
+    axios
+      .get(`${API_URL}users/me/`)
+      .then((response) => {
         setOrganization(response.data.organization);
       })
-      .catch(error => console.error('Error fetching organization:', error));
+      .catch((error) => console.error("Error fetching organization:", error));
   }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios.post(`${API_URL}dashboard/`, { name, description, organization })
-      .then(response => {
+    axios
+      .post(`${API_URL}dashboard/`, { name, description, organization })
+      .then((response) => {
         // Handle successful dashboard creation
-        console.log('Dashboard created:', response.data);
-        navigate('/dashboards')
+        console.log("Dashboard created:", response.data);
+        navigate("/dashboards");
       })
-      .catch(error => {
-        console.error('Error creating dashboard:', error);
+      .catch((error) => {
+        console.error("Error creating dashboard:", error);
       });
   };
 
   const handleBack = () => {
-    navigate('/dashboards')
-  }
+    navigate("/dashboards");
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -44,7 +46,7 @@ const CreateDashboardPage = () => {
         fullWidth
         label="Name"
         value={name}
-        onChange={e => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value)}
         margin="normal"
       />
       <TextField
@@ -52,7 +54,7 @@ const CreateDashboardPage = () => {
         fullWidth
         label="Description"
         value={description}
-        onChange={e => setDescription(e.target.value)}
+        onChange={(e) => setDescription(e.target.value)}
         margin="normal"
       />
       <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
