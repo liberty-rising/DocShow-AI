@@ -26,6 +26,8 @@ function DataProfilingPage() {
   const [previewData, setPreviewData] = useState(null); 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const [selectedFiles, setSelectedFiles] = useState([]); // Array of files
+  const [selectedFileNames, setSelectedFileNames] = useState([]); // Array of file names
 
   useEffect(() => {
     axios.get(`${API_URL}data-profiles/`)
@@ -40,6 +42,15 @@ function DataProfilingPage() {
       .catch(error => console.error('Error fetching data profiles:', error));
   }, []);
 
+  const generateTableHeaders = (data) => {
+    if (data && data.length > 0) {
+      return Object.keys(data[0]).map(key => (
+        <TableCell key={key}>{key.replace(/_/g, ' ').toUpperCase()}</TableCell>
+      ));
+    }
+    return null;
+  };
+
   const handleProfileCreate = () => {
     navigate('/data-profiling/create');
   };
@@ -49,10 +60,10 @@ function DataProfilingPage() {
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setSelectedFileName(file.name);
+    const files = Array.from(event.target.files);
+    if (files.length) {
+      setSelectedFiles(files);
+      setSelectedFileNames(files.map(file => file.name));
     }
   };
 
@@ -61,10 +72,12 @@ function DataProfilingPage() {
   };
 
   const handleUpload = () => {
-    if (selectedFile) {
+    if (selectedFiles.length) {
       setIsUploading(true);
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      selectedFiles.forEach(file => {
+        formData.append('files', file); // Append each file to the form data
+      });
       formData.append('instructions', instructions);
 
       axios.post(`${API_URL}upload-url`, formData)
@@ -72,8 +85,8 @@ function DataProfilingPage() {
           console.log(response);
           setIsUploading(false);
           // Reset states after upload
-          setSelectedFile(null);
-          setSelectedFileName('');
+          setSelectedFiles([]);
+          setSelectedFileNames([]);
           setInstructions('');
         })
         .catch(error => {
@@ -84,9 +97,11 @@ function DataProfilingPage() {
   };
 
   const handlePreview = () => {
-    if (selectedFile && instructions) {
+    if (selectedFiles.length && instructions) {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      selectedFiles.forEach(file => {
+        formData.append('files', file); // Append each file
+      });
       formData.append('instructions', instructions);
 
       axios.post(`${API_URL}data-profiles/preview/`, formData, { 
@@ -126,7 +141,7 @@ function DataProfilingPage() {
           variant="contained"
           color="info"
           onClick={handlePreview}
-          disabled={!selectedFile || !instructions} // Disable if no file or instructions
+          disabled={!selectedFiles || !instructions} // Disable if no file or instructions
         >
           Preview
         </Button>
@@ -136,6 +151,7 @@ function DataProfilingPage() {
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
+          multiple // Allow multiple file selection
           style={{ display: 'none' }}
         />
       </Box>
@@ -150,17 +166,32 @@ function DataProfilingPage() {
         helperText="Write any special instructions here"
       />
 
-      {selectedFileName && (
+      {selectedFileNames.length > 0 && (
         <Typography variant="subtitle1" gutterBottom>
-          File selected: {selectedFileName}
+          Files selected: {selectedFileNames.join(', ')}
         </Typography>
       )}
 
       {/* Display preview data if available */}
       {previewData && (
-        <Typography variant="subtitle1" gutterBottom>
-          Preview Data: {JSON.stringify(previewData)}
-        </Typography>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {generateTableHeaders(previewData)}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {previewData.map((row, index) => (
+                <TableRow key={index}>
+                  {Object.values(row).map((value, idx) => (
+                    <TableCell key={idx}>{value}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       <TableContainer component={Paper}>
