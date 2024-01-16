@@ -1,14 +1,14 @@
+from database.dashboard_manager import DashboardManager
 from database.data_profile_manager import DataProfileManager
 from database.database_manager import DatabaseManager
-from database.dashboard_manager import DashboardManager
-from database.table_manager import TableManager
 from database.organization_manager import OrganizationManager
+from database.table_manager import TableManager
 from database.user_manager import UserManager
-from models.organization import Organization
-from models.user import User, UserRole
 from models.chart import Chart
 from models.dashboard import Dashboard
 from models.data_profile import DataProfile
+from models.organization import Organization
+from models.user import User, UserRole
 from security import get_password_hash
 from utils.utils import get_app_logger
 

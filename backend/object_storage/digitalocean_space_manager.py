@@ -7,11 +7,10 @@ scalable and secure storage for documents, images, and data backups.
 It's compatible with the S3 API, which allows it to integrate
 with existing tools and workflows.
 """
-import boto3
 import os
-
 from typing import List
 
+import boto3
 from settings import (
     SPACES_ACCESS_KEY,
     SPACES_BUCKET_NAME,

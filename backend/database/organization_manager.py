@@ -3,8 +3,8 @@ This module provides a OrganizationManager class that handles database operation
 It uses SQLAlchemy for ORM operations and facilitates CRUD operations on user data.
 """
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
 from models.organization import Organization
+from sqlalchemy.orm import Session
 
 
 class OrganizationManager:

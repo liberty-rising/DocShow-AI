@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
-
 from database.database_manager import DatabaseManager
 from database.organization_manager import OrganizationManager
+from fastapi import APIRouter, Depends, HTTPException
 from models.organization import (
     Organization,
     OrganizationCreateRequest,

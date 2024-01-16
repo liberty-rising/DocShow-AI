@@ -1,21 +1,20 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import Cookie, Depends, HTTPException, Request, Response, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from pydantic import EmailStr
 from typing import Optional
 
 from database.database_manager import DatabaseManager
 from database.user_manager import UserManager
+from fastapi import Cookie, Depends, HTTPException, Request, Response, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from models.token import EmailVerificationTokenData, ResetTokenData
 from models.user import User
+from passlib.context import CryptContext
+from pydantic import EmailStr
 from settings import (
     EMAIL_VERIFICATION_EXPIRE_MINUTES,
     JWT_SECRET_KEY,
     PASSWORD_RESET_EXPIRE_MINUTES,
 )
-
 
 # Configuration for JWT token
 ALGORITHM = "HS256"  # HMAC SHA-256

@@ -1,6 +1,7 @@
-from sqlalchemy.orm import joinedload, Session
 from typing import List
+
 from models.dashboard import Dashboard
+from sqlalchemy.orm import Session, joinedload
 
 
 class DashboardManager:

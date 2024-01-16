@@ -4,22 +4,22 @@ It integrates with a database manager to perform CRUD operations on the User mod
 the security module for creating JWT tokens and password hashing/verification.
 """
 from datetime import timedelta
-from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
-from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 from database.database_manager import DatabaseManager
 from database.user_manager import UserManager
+from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
 from models.auth import CustomOAuth2PasswordRequestForm
 from models.user import User, UserCreate
+from pydantic import BaseModel, EmailStr
 from security import (
     authenticate_user,
     create_token,
     get_current_user,
     get_password_hash,
     set_tokens_in_cookies,
-    verify_refresh_token,
     update_user_refresh_token,
+    verify_refresh_token,
 )
 from settings import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -27,7 +27,6 @@ from settings import (
     REMEMBER_ME_ACCESS_TOKEN_EXPIRE_MINUTES,
     REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS,
 )
-
 
 auth_router = APIRouter()
 

@@ -1,19 +1,19 @@
-from openai import ChatCompletion
+import json
 from typing import Dict, List, Optional
 
-import json
 import openai
 import tiktoken
-
-from .base import BaseLLM
 from database.chat_history_manager import ChatHistoryManager
 from database.database_manager import DatabaseManager
 from llms.prompt_manager import PromptManager
 from llms.system_message_manager import SystemMessageManager
 from models.user import User
+from openai import ChatCompletion
 from settings import OPENAI_API_KEY
 from utils.file_manager import FileManager
 from utils.nivo_assistant import NivoAssistant
+
+from .base import BaseLLM
 
 
 class GPTLLM(BaseLLM):

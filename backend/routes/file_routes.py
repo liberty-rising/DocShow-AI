@@ -1,14 +1,13 @@
+from database.database_manager import DatabaseManager
+from database.table_manager import TableManager
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-
-from database.database_manager import DatabaseManager
-from database.table_manager import TableManager
 from llms.base import BaseLLM
 from llms.utils import get_llm_sql_object
-from utils.utils import process_file, save_to_data_lake
 from models.user import User
 from security import get_current_user
+from utils.utils import process_file, save_to_data_lake
 
 file_router = APIRouter()
 

@@ -1,11 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+import tempfile
 from typing import List
 
-import tempfile
-
-from database.database_manager import DatabaseManager
 from database.data_profile_manager import DataProfileManager
+from database.database_manager import DatabaseManager
 from database.organization_manager import OrganizationManager
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from llms.gpt import GPTLLM
 from models.data_profile import (
     DataProfile,
