@@ -1,5 +1,5 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 function RequireAuth({ children }) {
   const { isAuthenticated, isLoading, isEmailVerified } = useAuth();
@@ -14,7 +14,7 @@ function RequireAuth({ children }) {
   }
 
   if (!isEmailVerified) {
-    console.log("from require auth")
+    console.log("from require auth");
     // Redirect to the verify-email page if email is not verified
     return <Navigate to="/verify-email" />;
   }
@@ -22,4 +22,4 @@ function RequireAuth({ children }) {
   return children;
 }
 
-export default RequireAuth
+export default RequireAuth;

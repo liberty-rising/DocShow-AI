@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button } from '@mui/material';
+import React from "react";
+import { Button } from "@mui/material";
 
 const FileUploader = ({ fileType, setFile }) => {
-  const fileAcceptType = fileType === 'csv' ? '.csv' : ''; // Adjust this logic based on your file types
+  const fileAcceptType = fileType === "csv" ? ".csv" : ""; // Adjust this logic based on your file types
 
   const handleFileChange = (event) => {
     const uploadedFile = event.target.files[0];
@@ -17,7 +17,7 @@ const FileUploader = ({ fileType, setFile }) => {
         accept={fileAcceptType}
         type="file"
         id="contained-button-file"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleFileChange}
       />
       <label htmlFor="contained-button-file">

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import {
   Box,
   Typography,
@@ -12,47 +12,48 @@ import {
   Paper,
   Link,
   Button,
-  TextField
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../../utils/constants';
+  TextField,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../utils/constants";
 
 function DataProfilingPage() {
   const [dataProfiles, setDataProfiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFileName, setSelectedFileName] = useState('');
-  const [instructions, setInstructions] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [instructions, setInstructions] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [previewData, setPreviewData] = useState(null); 
+  const [previewData, setPreviewData] = useState(null);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [selectedFiles, setSelectedFiles] = useState([]); // Array of files
   const [selectedFileNames, setSelectedFileNames] = useState([]); // Array of file names
 
   useEffect(() => {
-    axios.get(`${API_URL}data-profiles/`)
-      .then(response => {
+    axios
+      .get(`${API_URL}data-profiles/`)
+      .then((response) => {
         if (Array.isArray(response.data)) {
           setDataProfiles(response.data);
         } else {
-          console.error('Received data is not an array:', response.data);
+          console.error("Received data is not an array:", response.data);
           setDataProfiles([]);
         }
       })
-      .catch(error => console.error('Error fetching data profiles:', error));
+      .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
 
   const generateTableHeaders = (data) => {
     if (data && data.length > 0) {
-      return Object.keys(data[0]).map(key => (
-        <TableCell key={key}>{key.replace(/_/g, ' ').toUpperCase()}</TableCell>
+      return Object.keys(data[0]).map((key) => (
+        <TableCell key={key}>{key.replace(/_/g, " ").toUpperCase()}</TableCell>
       ));
     }
     return null;
   };
 
   const handleProfileCreate = () => {
-    navigate('/data-profiling/create');
+    navigate("/data-profiling/create");
   };
 
   const handleUploadClick = () => {
@@ -63,7 +64,7 @@ function DataProfilingPage() {
     const files = Array.from(event.target.files);
     if (files.length) {
       setSelectedFiles(files);
-      setSelectedFileNames(files.map(file => file.name));
+      setSelectedFileNames(files.map((file) => file.name));
     }
   };
 
@@ -75,22 +76,23 @@ function DataProfilingPage() {
     if (selectedFiles.length) {
       setIsUploading(true);
       const formData = new FormData();
-      selectedFiles.forEach(file => {
-        formData.append('files', file); // Append each file to the form data
+      selectedFiles.forEach((file) => {
+        formData.append("files", file); // Append each file to the form data
       });
-      formData.append('instructions', instructions);
+      formData.append("instructions", instructions);
 
-      axios.post(`${API_URL}upload-url`, formData)
-        .then(response => {
+      axios
+        .post(`${API_URL}upload-url`, formData)
+        .then((response) => {
           console.log(response);
           setIsUploading(false);
           // Reset states after upload
           setSelectedFiles([]);
           setSelectedFileNames([]);
-          setInstructions('');
+          setInstructions("");
         })
-        .catch(error => {
-          console.error('Error uploading file:', error);
+        .catch((error) => {
+          console.error("Error uploading file:", error);
           setIsUploading(false);
         });
     }
@@ -99,26 +101,29 @@ function DataProfilingPage() {
   const handlePreview = () => {
     if (selectedFiles.length && instructions) {
       const formData = new FormData();
-      selectedFiles.forEach(file => {
-        formData.append('files', file); // Append each file
+      selectedFiles.forEach((file) => {
+        formData.append("files", file); // Append each file
       });
-      formData.append('instructions', instructions);
+      formData.append("instructions", instructions);
 
-      axios.post(`${API_URL}data-profiles/preview/`, formData, { 
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-        .then(response => {
+      axios
+        .post(`${API_URL}data-profiles/preview/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
           setPreviewData(response.data); // Store the preview data
         })
-        .catch(error => console.error('Error on preview:', error));
+        .catch((error) => console.error("Error on preview:", error));
     }
   };
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>🔍 Data Profiling</Typography>
+      <Typography variant="h4" gutterBottom>
+        🔍 Data Profiling
+      </Typography>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Button
           variant="contained"
@@ -132,7 +137,7 @@ function DataProfilingPage() {
           variant="contained"
           onClick={handleUploadClick}
           disabled={isUploading}
-          sx={{ bgcolor: isUploading ? 'secondary.main' : 'grey.500' }}
+          sx={{ bgcolor: isUploading ? "secondary.main" : "grey.500" }}
         >
           Upload File
         </Button>
@@ -152,7 +157,7 @@ function DataProfilingPage() {
           ref={fileInputRef}
           onChange={handleFileChange}
           multiple // Allow multiple file selection
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
         />
       </Box>
 
@@ -168,7 +173,7 @@ function DataProfilingPage() {
 
       {selectedFileNames.length > 0 && (
         <Typography variant="subtitle1" gutterBottom>
-          Files selected: {selectedFileNames.join(', ')}
+          Files selected: {selectedFileNames.join(", ")}
         </Typography>
       )}
 
@@ -177,9 +182,7 @@ function DataProfilingPage() {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow>
-                {generateTableHeaders(previewData)}
-              </TableRow>
+              <TableRow>{generateTableHeaders(previewData)}</TableRow>
             </TableHead>
             <TableBody>
               {previewData.map((row, index) => (
@@ -206,7 +209,11 @@ function DataProfilingPage() {
             {dataProfiles.map((profile) => (
               <TableRow key={profile.id}>
                 <TableCell>
-                  <Link component="button" variant="body2" onClick={() => handleProfileClick(profile.id)}>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => handleProfileClick(profile.id)}
+                  >
                     {profile.name}
                   </Link>
                 </TableCell>

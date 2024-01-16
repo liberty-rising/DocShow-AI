@@ -1,0 +1,21 @@
+name: React Code Quality Check
+
+on: 
+  pull_request:
+    paths:
+      - 'frontend/**'
+
+jobs:
+  python-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14'
+    - name: Install dependencies and run Prettier
+      run: |
+        cd frontend
+        npm install
+        npx prettier --check .
