@@ -1,12 +1,10 @@
 import { React } from 'react';
 import {
   BrowserRouter as Router,
-  Navigate,
   Routes,
   Route
 } from 'react-router-dom';
 import './api/axiosInterceptor'
-import { NavigationProvider } from './hooks/useNavigation';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LandingLayout from './components/layouts/LandingLayout';
@@ -39,16 +37,14 @@ function AppWrapper() {
   return (
     <AuthProvider>
       <Router>
-        <NavigationProvider>
-          <App />
-        </NavigationProvider>
+        <App />
       </Router>
     </AuthProvider>
   )
 }
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth(); // Use the `isAuthenticated` from the context
+  const { isLoading } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>; // Or any other loading indicator
