@@ -40,7 +40,7 @@ class ImageConversionManager:
                     jpg_file_path = os.path.join(output_folder, jpg_filename)
 
                     # Resize the image
-                    image.thumbnail((1024, 1024))
+                    # image.thumbnail((1024, 1024))
 
                     image.save(jpg_file_path, "JPEG")
                     jpg_file_paths.append(jpg_file_path)

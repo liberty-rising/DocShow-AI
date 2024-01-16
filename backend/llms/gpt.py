@@ -412,5 +412,9 @@ class GPTLLM(BaseLLM):
         assistant_message_content = await self._send_and_receive_message(
             prompt, jpg_presigned_urls
         )
-        # data = json.loads(assistant_message_content) TODO: Ajust prompt to only return the json
-        return assistant_message_content
+        json_string = assistant_message_content.replace("```json\n", "").replace(
+            "\n```", ""
+        )
+        data = json.loads(json_string)
+        print(data)
+        return data
