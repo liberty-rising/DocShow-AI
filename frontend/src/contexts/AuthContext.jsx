@@ -17,11 +17,11 @@ export const AuthProvider = ({ children }) => {
   const [isEmailVerified, setIsEmailVerified] = useState(false); // Add a state for email verification
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
+  const [loginProcessCompleted, setLoginProcessCompleted] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        // Replace '/api/verifyToken' with your actual API endpoint
         const response = await axios.get(`${API_URL}verify-token/`);
         // Update based on the response message
         if (response.data.message === "User is authenticated") {
@@ -29,11 +29,7 @@ export const AuthProvider = ({ children }) => {
 
           const userResponse = await axios.get(`${API_URL}users/me/`);
           setUserRole(userResponse.data.role);
-
-          const emailResponse = await axios.get(
-            `${API_URL}users/is-email-verified/`,
-          );
-          setIsEmailVerified(emailResponse.data.email_verified);
+          setIsEmailVerified(userResponse.data.email_verified);
         } else {
           setIsAuthenticated(false);
         }
@@ -57,12 +53,19 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(newAuthState);
   };
 
-  const updateEmailVerification = (newEmailVerificationState) => {
+  const updateEmailVerification = (newEmailVerificationState, callback) => {
     setIsEmailVerified(newEmailVerificationState);
+    if (callback) {
+      callback();
+    }
   };
 
   const updateUserRole = (newUserRole) => {
     setUserRole(newUserRole);
+  };
+
+  const markLoginProcessCompleted = (newState) => {
+    setLoginProcessCompleted(newState);
   };
 
   // The Provider component from our created context is used here.
@@ -77,6 +80,8 @@ export const AuthProvider = ({ children }) => {
         updateUserRole,
         userRole,
         isLoading,
+        loginProcessCompleted,
+        markLoginProcessCompleted,
       }}
     >
       {children}

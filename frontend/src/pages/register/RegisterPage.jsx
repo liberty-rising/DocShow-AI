@@ -40,7 +40,7 @@ function RegisterPage() {
         });
 
         // Navigate to the verify-email page instead of login
-        navigate("/verify-email", { state: { email } });
+        navigate("/verify-email");
       }
     } catch (error) {
       if (error.response) {
