@@ -58,6 +58,7 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
         organization_id=current_user.organization_id,
         role=current_user.role,
         requires_password_update=current_user.requires_password_update,
+        email_verified=current_user.email_verified,
     )
     return user_out
 

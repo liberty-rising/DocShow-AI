@@ -114,6 +114,7 @@ class UserOut(BaseModel):
     organization_id: Optional[int]
     role: Optional[str]
     requires_password_update: bool
+    email_verified: bool
 
 
 class UserUpdate(BaseModel):

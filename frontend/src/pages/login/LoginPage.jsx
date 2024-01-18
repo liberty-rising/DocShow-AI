@@ -27,16 +27,19 @@ function LoginPage({ onLogin }) {
     updateEmailVerification,
     updateUserRole,
     isAuthenticated,
+    isEmailVerified,
+    markLoginProcessCompleted,
   } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
   const location = useLocation();
   const [emailVerifiedMessage, setEmailVerifiedMessage] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isEmailVerified) {
+      console.log("Navigating to dashboards");
       navigate("/dashboards");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isEmailVerified, navigate]);
 
   useEffect(() => {
     if (location.state?.emailVerified) {
@@ -70,24 +73,24 @@ function LoginPage({ onLogin }) {
       );
 
       if (response.status === 200) {
-        updateAuth(true);
+        markLoginProcessCompleted(true);
         const userResponse = await axios.get(`${API_URL}users/me/`, {
           headers: {
             Authorization: `Bearer ${response.data.access_token}`,
           },
         });
-        console.log(userResponse.data.role);
         updateUserRole(userResponse.data.role);
+        updateAuth(true);
 
         if (userResponse.data.requires_password_update) {
           navigate("/change-password");
-        } else if (userResponse.data.email_verified == false) {
-          console.log("email_verified is false");
-          navigate("/verify-email");
         } else {
-          console.log("email_verified is true");
-          updateEmailVerification(true);
-          navigate("/dashboards");
+          updateEmailVerification(userResponse.data.email_verified);
+          if (userResponse.data.email_verified) {
+            navigate("/dashboards");
+          } else {
+            navigate("/verify-email");
+          }
         }
       }
     } catch (error) {

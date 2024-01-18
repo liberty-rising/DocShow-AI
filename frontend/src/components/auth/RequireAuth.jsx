@@ -2,8 +2,10 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 function RequireAuth({ children }) {
-  const { isAuthenticated, isLoading, isEmailVerified } = useAuth();
+  const { isAuthenticated, isLoading, isEmailVerified, loginProcessCompleted } =
+    useAuth();
 
+  // if (isLoading || !loginProcessCompleted) {
   if (isLoading) {
     return <div>Loading...</div>; // Or your preferred loading indicator/component
   }
@@ -13,8 +15,13 @@ function RequireAuth({ children }) {
     return <Navigate to="/login" />;
   }
 
-  if (!isEmailVerified) {
-    console.log("from require auth");
+  if (isAuthenticated && !isEmailVerified) {
+    // Redirect to the verify-email page if email is not verified
+    console.log("triggered");
+    return <Navigate to="/verify-email" />;
+  }
+
+  if (loginProcessCompleted && !isEmailVerified) {
     // Redirect to the verify-email page if email is not verified
     return <Navigate to="/verify-email" />;
   }

@@ -1,22 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Button, Container, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import { useAuth } from "../../contexts/AuthContext";
 import { API_URL } from "../../utils/constants";
 import axios from "axios";
+import { set } from "date-fns";
 
 const VerifyEmailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const email = location.state?.email || null;
+  const [userResponse, setUserResponse] = useState(null);
   const [token, setToken] = useState(null);
-  const { updateAuth, updateEmailVerification } = useAuth();
+  const { updateAuth, updateEmailVerification, loginProcessCompleted } =
+    useAuth();
+  const [openAlert, setOpenAlert] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
     setToken(token);
   }, [location]);
+
+  useEffect(() => {
+    if (!token) {
+      axios
+        .get(`${API_URL}users/me/`)
+        .then((response) => {
+          if (response.data) {
+            setUserResponse(response.data);
+          } else {
+            // If no user data is returned, navigate to the login page
+            navigate("/login");
+          }
+        })
+        .catch((error) => {
+          // If an error occurs, navigate to the login page
+          navigate("/login");
+        });
+    }
+  }, [token]);
 
   useEffect(() => {
     if (token) {
@@ -38,7 +67,7 @@ const VerifyEmailPage = () => {
             .catch((error) => {
               // Handle failed token verification
               console.log("Failed to verify token");
-              navigate("/login", { state: { emailVerified: true } });
+              navigate("/login");
             });
         })
         .catch((error) => {
@@ -51,15 +80,25 @@ const VerifyEmailPage = () => {
   const handleResendEmail = async (event) => {
     event.preventDefault();
     axios
-      .post(`${API_URL}users/send-verification-email/`, { email })
+      .post(`${API_URL}users/send-verification-email/`, {
+        email: userResponse.email,
+      })
       .then((response) => {
         // Handle successful email resend
         console.log("Verification email sent successfully");
+        setOpenAlert(true);
       })
       .catch((error) => {
         // Handle failed email resend
         console.log("Failed to send verification email");
       });
+  };
+
+  const handleCloseAlert = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenAlert(false);
   };
 
   return (
@@ -87,6 +126,19 @@ const VerifyEmailPage = () => {
         >
           Resend Verification Email
         </Button>
+        <Snackbar
+          open={openAlert}
+          autoHideDuration={6000}
+          onClose={handleCloseAlert}
+        >
+          <Alert
+            onClose={handleCloseAlert}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Verification email has been resent!
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );
