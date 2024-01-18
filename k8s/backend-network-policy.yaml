@@ -44,3 +44,5 @@ spec:
       port: 443  # For outbound web traffic like SendGrid
     - protocol: TCP
       port: 25060  # For PostgreSQL database
+    - protocol: TCP
+      port: 25061  # For PostgreSQL database pool
