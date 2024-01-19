@@ -13,6 +13,16 @@ class DataProfileManager:
         """Retrieve all DataProfiles."""
         return self.session.query(DataProfile).all()
 
+    def get_all_data_profile_names_by_org_id(self, org_id):
+        """Retrieve all DataProfiles."""
+        result = (
+            self.session.query(DataProfile.name)
+            .filter(DataProfile.organization_id == org_id)
+            .all()
+        )
+        data_profile_names = [name for (name,) in result]
+        return data_profile_names
+
     def create_dataprofile(self, data_profile_data: DataProfileCreateRequest):
         """Create a new DataProfile."""
         new_data_profile = DataProfile(
