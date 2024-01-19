@@ -31,7 +31,7 @@ function AnalyticsPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        📊 Data Analytics
+        📊 AI Analyst
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12}>

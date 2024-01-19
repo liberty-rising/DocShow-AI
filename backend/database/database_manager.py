@@ -2,6 +2,7 @@ from settings import (
     APP_ENV,
     DATABASE_POOL_MAX_OVERFLOW,
     DATABASE_POOL_SIZE,
+    DATABASE_POOL_URL,
     DATABASE_URL,
 )
 from sqlalchemy import create_engine
@@ -13,7 +14,7 @@ class DatabaseManager:
     def __init__(self):
         if APP_ENV == "prod":
             self.engine = create_engine(
-                DATABASE_URL,
+                DATABASE_POOL_URL,
                 poolclass=QueuePool,
                 pool_size=DATABASE_POOL_SIZE,
                 max_overflow=DATABASE_POOL_MAX_OVERFLOW,

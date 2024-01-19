@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import axios from "axios";
-import FileTypeSelector from "./FileTypeSelector";
-import EncodingSelector from "./EncodingSelector";
-import DescriptionField from "./DescriptionField";
-import NewTableSelector from "./NewTableSelector";
-import FileUploader from "./FileUploader";
 import AlertSnackbar from "./AlertSnackbar";
+import DataProfileSelector from "./DataProfileSelector";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
-  const [fileTypes, setFileTypes] = useState([]);
-  const [encodings, setEncodings] = useState([]);
-  const [fileType, setFileType] = useState("");
-  const [encoding, setEncoding] = useState("");
-  const [description, setDescription] = useState("");
-  const [isNewTable, setIsNewTable] = useState("no");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState(null);
+  const [dataProfile, setDataProfile] = useState([]);
+  const [dataProfiles, setDataProfiles] = useState([]);
   const [analyzed, setAnalyzed] = useState(false);
   const [alertInfo, setAlertInfo] = useState({
     open: false,
@@ -25,22 +17,13 @@ function UploadPage() {
   });
 
   useEffect(() => {
-    // Fetch file types
     axios
-      .get(`${API_URL}file_types/`)
-      .then((response) => setFileTypes(response.data))
-      .catch((error) => console.error("Error fetching file types", error));
+      .get(`${API_URL}data-profiles/org/`)
+      .then((response) => {
+        setDataProfiles(response.data);
+      })
+      .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
-
-  useEffect(() => {
-    if (fileType === "csv") {
-      // Fetch encodings
-      axios
-        .get(`${API_URL}encodings/`, { params: { file_type: fileType } })
-        .then((response) => setEncodings(response.data))
-        .catch((error) => console.error("Error fetching encodings", error));
-    }
-  }, [fileType]);
 
   const handleAnalyze = () => {
     // Placeholder for analyze functionality
@@ -49,7 +32,7 @@ function UploadPage() {
 
   const handleSubmit = async () => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", files);
     formData.append("extra_desc", description);
     formData.append("is_new_table", isNewTable === "yes");
     formData.append("encoding", encoding);
@@ -92,35 +75,25 @@ function UploadPage() {
         </Typography>
       </Box>
 
-      <FileTypeSelector
-        fileTypes={fileTypes}
-        fileType={fileType}
-        setFileType={setFileType}
-      />
+      {/* <FileUploader fileType={fileType} setFile={setFile} /> */}
 
-      {fileType === "csv" && (
-        <EncodingSelector
-          encodings={encodings}
-          encoding={encoding}
-          setEncoding={setEncoding}
+      <Stack direction="row" spacing={2} alignItems="center">
+        <DataProfileSelector
+          dataProfiles={dataProfiles}
+          dataProfile={dataProfile}
+          setDataProfile={setDataProfile}
         />
-      )}
-
-      <DescriptionField
-        description={description}
-        setDescription={setDescription}
-      />
-
-      <NewTableSelector isNewTable={isNewTable} setIsNewTable={setIsNewTable} />
-
-      <FileUploader fileType={fileType} setFile={setFile} />
+        <Button variant="contained" color="primary">
+          Create a data profile
+        </Button>
+      </Stack>
 
       <Stack direction="row" spacing={2} mt={2}>
         <Button
           variant="contained"
           color="secondary"
           onClick={handleAnalyze}
-          disabled={!file}
+          disabled={!files}
         >
           Analyze
         </Button>

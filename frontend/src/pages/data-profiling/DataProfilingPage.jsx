@@ -19,8 +19,6 @@ import { API_URL } from "../../utils/constants";
 
 function DataProfilingPage() {
   const [dataProfiles, setDataProfiles] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFileName, setSelectedFileName] = useState("");
   const [instructions, setInstructions] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [previewData, setPreviewData] = useState(null);

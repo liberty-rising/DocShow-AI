@@ -36,7 +36,7 @@ const Navigation = () => {
   let menuItems = [
     { text: "Dashboards", icon: <DashboardIcon />, path: "/dashboards" },
     { text: "Data Upload", icon: <UploadFileIcon />, path: "/upload" },
-    { text: "Data Analytics", icon: <AnalyticsIcon />, path: "/analytics" },
+    { text: "AI Analyst", icon: <AnalyticsIcon />, path: "/analytics" },
     {
       text: "Data Profiling",
       icon: <AnalyticsIcon />,
