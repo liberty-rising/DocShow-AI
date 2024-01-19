@@ -3,6 +3,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import AlertSnackbar from "./AlertSnackbar";
 import DataProfileSelector from "./DataProfileSelector";
+import CreateDataProfilePage from "./CreateDataProfilePage";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
@@ -15,6 +16,7 @@ function UploadPage() {
     message: "",
     severity: "info",
   });
+  const [showCreateDataProfile, setShowCreateDataProfile] = useState(false);
 
   useEffect(() => {
     axios
@@ -28,6 +30,11 @@ function UploadPage() {
   const handleAnalyze = () => {
     // Placeholder for analyze functionality
     setAnalyzed(true);
+  };
+
+  const handleCreateDataProfile = (dataProfile) => {
+    setDataProfiles([...dataProfiles, dataProfile]);
+    setShowCreateDataProfile(false);
   };
 
   const handleSubmit = async () => {
@@ -83,9 +90,18 @@ function UploadPage() {
           dataProfile={dataProfile}
           setDataProfile={setDataProfile}
         />
-        <Button variant="contained" color="primary">
+        <Button
+          onClick={() => setShowCreateDataProfile(true)}
+          variant="contained"
+          color="primary"
+        >
           Create a data profile
         </Button>
+        <CreateDataProfilePage
+          open={showCreateDataProfile}
+          onClose={() => setShowCreateDataProfile(false)}
+          onCreate={handleCreateDataProfile}
+        />
       </Stack>
 
       <Stack direction="row" spacing={2} mt={2}>
