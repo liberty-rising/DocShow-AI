@@ -191,36 +191,6 @@ function App() {
         }
       />
       <Route
-        path="/data-profiling"
-        element={
-          <RequireAuth>
-            <AppLayout>
-              <DataProfilingPage />
-            </AppLayout>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/data-profiling/:dataProfileId"
-        element={
-          <RequireAuth>
-            <AppLayout>
-              <SpecificDataProfilePage />
-            </AppLayout>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/data-profiling/create"
-        element={
-          <RequireAuth>
-            <AppLayout>
-              <CreateDataProfile />
-            </AppLayout>
-          </RequireAuth>
-        }
-      />
-      <Route
         path="/user"
         element={
           <RequireAuth>
@@ -234,9 +204,11 @@ function App() {
         path="/admin"
         element={
           <RequireSysAdminAuth>
-            <AppLayout>
-              <AdminPage />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <AdminPage />
+              </AppLayout>
+            </RequireAuth>
           </RequireSysAdminAuth>
         }
       />

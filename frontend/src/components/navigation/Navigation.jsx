@@ -37,11 +37,6 @@ const Navigation = () => {
     { text: "Dashboards", icon: <DashboardIcon />, path: "/dashboards" },
     { text: "Data Upload", icon: <UploadFileIcon />, path: "/upload" },
     { text: "AI Analyst", icon: <AnalyticsIcon />, path: "/analytics" },
-    {
-      text: "Data Profiling",
-      icon: <AnalyticsIcon />,
-      path: "/data-profiling",
-    },
     { text: "User Panel", icon: <AccountBoxIcon />, path: "/user" },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }
   ];
