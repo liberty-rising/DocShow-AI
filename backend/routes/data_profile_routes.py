@@ -27,6 +27,16 @@ async def get_data_profiles(current_user: User = Depends(get_current_user)):
         return data_profiles
 
 
+@data_profile_router.get("/data-profiles/org/")
+async def get_data_profiles_by_org_id(current_user: User = Depends(get_current_user)):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile_names = data_profile_manager.get_all_data_profile_names_by_org_id(
+            current_user.organization_id
+        )
+    return data_profile_names
+
+
 @data_profile_router.post("/data-profile/")
 async def save_data_profiles(
     request: DataProfileCreateRequest, current_user: User = Depends(get_current_user)
