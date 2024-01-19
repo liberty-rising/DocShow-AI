@@ -234,9 +234,11 @@ function App() {
         path="/admin"
         element={
           <RequireSysAdminAuth>
-            <AppLayout>
-              <AdminPage />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <AdminPage />
+              </AppLayout>
+            </RequireAuth>
           </RequireSysAdminAuth>
         }
       />
