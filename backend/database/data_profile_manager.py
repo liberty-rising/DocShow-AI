@@ -5,9 +5,14 @@ class DataProfileManager:
     def __init__(self, session):
         self.session = session
 
-    def get_dataprofile_by_name(self, name):
+    def get_dataprofile_by_name_and_org(self, name, org_id) -> DataProfile:
         """Retrieve a DataProfile by its name."""
-        return self.session.query(DataProfile).filter(DataProfile.name == name).first()
+        return (
+            self.session.query(DataProfile)
+            .filter(DataProfile.name == name)
+            .filter(DataProfile.organization_id == org_id)
+            .first()
+        )
 
     def get_all_data_profiles(self):
         """Retrieve all DataProfiles."""

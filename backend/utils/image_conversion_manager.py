@@ -20,12 +20,19 @@ class ImageConversionManager:
                     os.unlink(converted_file_path)  # Delete the file
 
     def convert_to_jpgs(self):
-        if all(file_path.endswith(".pdf") for file_path in self.file_paths):
+        if all(file_path.lower().endswith(".pdf") for file_path in self.file_paths):
             return self._convert_pdfs_to_jpgs(self.file_paths)
-        elif all(file_path.endswith(".png") for file_path in self.file_paths):
+        elif all(file_path.lower().endswith(".png") for file_path in self.file_paths):
             return self._convert_pngs_to_jpgs(self.file_paths)
+        elif all(
+            file_path.lower().endswith((".jpg", ".jpeg"))
+            for file_path in self.file_paths
+        ):
+            return self.file_paths
         else:
-            print("All files must be of the same type (either all .pdf or all .png)")
+            print(
+                "All files must be of the same type (either all .pdf, all .png, or all .jpg/.jpeg)"
+            )
             return []
 
     def _convert_pdfs_to_jpgs(self, file_paths: List[str]):
