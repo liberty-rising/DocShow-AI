@@ -102,6 +102,7 @@ class PromptManager:
             {instructions}
 
             Provide output in a JSON string using the requested information as keys.
+            The JSON string should be flat, not nested.
 
             Example output:
             {{

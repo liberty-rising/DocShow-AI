@@ -40,10 +40,6 @@ function AppWrapper() {
 function App() {
   const { isLoading } = useAuth();
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Or any other loading indicator
-  }
-
   useEffect(() => {
     if (APP_ENV === "dev") {
       document.title = "DocShow AI - Dev";
@@ -51,6 +47,10 @@ function App() {
       document.title = "DocShow AI";
     }
   }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or any other loading indicator
+  }
 
   return (
     <Routes>

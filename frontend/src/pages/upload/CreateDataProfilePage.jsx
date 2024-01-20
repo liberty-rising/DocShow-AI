@@ -24,7 +24,7 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onCreate({ name, extractInstructions });
+    onCreate(name, extractInstructions);
   };
 
   const handlePreview = () => {
@@ -101,7 +101,7 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
               type="submit"
               color="primary"
               variant="contained"
-              disabled={!isPreviewTableOpen}
+              disabled={!isPreviewTableOpen || !name || !extractInstructions}
             >
               Create
             </Button>

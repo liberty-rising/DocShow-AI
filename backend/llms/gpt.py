@@ -7,6 +7,7 @@ from database.chat_history_manager import ChatHistoryManager
 from database.database_manager import DatabaseManager
 from llms.prompt_manager import PromptManager
 from llms.system_message_manager import SystemMessageManager
+from models.data_profile import DataProfile
 from models.user import User
 from openai import ChatCompletion
 from settings import OPENAI_API_KEY
@@ -402,11 +403,12 @@ class GPTLLM(BaseLLM):
         return assistant_message_content
 
     async def extract_data_from_jpgs(
-        self, instructions: str, jpg_presigned_urls: List[str]
+        self, data_profile: DataProfile, jpg_presigned_urls: List[str]
     ):
         self._add_system_message(assistant_type="jpg_data_extraction")
         self._set_model(model_type="img")
 
+        instructions = data_profile.description
         prompt = self.prompt_manager.jpg_data_extraction_prompt(instructions)
 
         assistant_message_content = await self._send_and_receive_message(
