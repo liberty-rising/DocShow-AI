@@ -14,6 +14,8 @@ COPY . .
 # Set the VITE_API_URL environment variable (VITE env variables are set during build time)
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_APP_ENV
+ENV VITE_APP_ENV=$VITE_APP_ENV
 
 # Build the app
 RUN npm run build

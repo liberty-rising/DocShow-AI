@@ -15,7 +15,7 @@ jobs:
 
     - name: Build and Push Frontend Docker Image
       run: |
-        docker build --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} -t registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }} -f frontend/Dockerfile.prod frontend/
+        docker build --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} --build-arg VITE_APP_ENV=${{ secrets.VITE_APP_ENV }} -t registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }} -f frontend/Dockerfile.prod frontend/
         echo ${{ secrets.REGISTRY_PASSWORD }} | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
         docker push registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }}
 

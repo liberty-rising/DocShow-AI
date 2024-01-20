@@ -1,7 +1,8 @@
-import { React } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./api/axiosInterceptor";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { APP_ENV } from "./utils/constants";
 import AppLayout from "./components/layouts/AppLayout";
 import LandingLayout from "./components/layouts/LandingLayout";
 import RequireAuth from "./components/auth/RequireAuth";
@@ -13,17 +14,14 @@ import BlogPage from "./pages/blog/BlogPage";
 import ChangePasswordPage from "./pages/change-password/ChangePasswordPage";
 import CreateChartPage from "./pages/charts/CreateChartPage";
 import CreateDashboardPage from "./pages/dashboards/CreateDashboard";
-import CreateDataProfile from "./pages/data-profiling/CreateDataProfile";
 import DashboardMenuPage from "./pages/dashboards/DashboardsMenuPage";
 import Dashboard from "./pages/dashboards/Dashboard";
-import DataProfilingPage from "./pages/data-profiling/DataProfilingPage";
 import ForgotPasswordPage from "./pages/forgot-password/ForgotPasswordPage";
 import LandingPage from "./pages/landing/LandingPage";
 import LoginPage from "./pages/login/LoginPage";
 import PricingPage from "./pages/pricing/PricingPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import ResetPasswordPage from "./pages/reset-password/ResetPasswordPage";
-import SpecificDataProfilePage from "./pages/data-profiling/SpecificDataProfilePage";
 import UploadPage from "./pages/upload/UploadPage";
 import UserPage from "./pages/user/UserPage";
 import VerifyEmailPage from "./pages/verify-email/VerifyEmailPage";
@@ -45,6 +43,14 @@ function App() {
   if (isLoading) {
     return <div>Loading...</div>; // Or any other loading indicator
   }
+
+  useEffect(() => {
+    if (APP_ENV === "dev") {
+      document.title = "DocShow AI - Dev";
+    } else {
+      document.title = "DocShow AI";
+    }
+  }, []);
 
   return (
     <Routes>
