@@ -11,6 +11,7 @@ import os
 from typing import List
 
 import boto3
+from fastapi import UploadFile
 from settings import (
     SPACES_ACCESS_KEY,
     SPACES_BUCKET_NAME,
@@ -21,7 +22,12 @@ from settings import (
 
 
 class DigitalOceanSpaceManager:
-    def __init__(self, organization_name: str = "", file_paths: List[str] = []):
+    def __init__(
+        self,
+        organization_name: str = "",
+        files: List[UploadFile] = [],
+        file_paths: List[str] = [],
+    ):
         session = boto3.session.Session()
         self.client = session.client(
             "s3",
@@ -34,6 +40,7 @@ class DigitalOceanSpaceManager:
 
         self.organization_name = organization_name.replace(" ", "_")
 
+        self.files = files
         self.file_paths = file_paths
         self.file_names = [os.path.basename(file_path) for file_path in file_paths]
         self.object_names: List[str] = []
@@ -47,6 +54,27 @@ class DigitalOceanSpaceManager:
 
     def upload_files(self):
         """Upload multiple files to an S3 bucket
+
+        :return: True if files were uploaded, else False
+        """
+        all_uploaded = True
+
+        # Upload the files
+        for file in self.files:
+            # Prepend the organization_name to the object_name
+            object_name = f"{self.organization_name}/{file.filename}"
+            try:
+                file.file.seek(0)  # Ensure we're at the start of the file
+                self.client.upload_fileobj(file.file, self.bucket_name, object_name)
+                self.object_names.append(object_name)
+            except Exception as e:
+                print(e)
+                all_uploaded = False
+
+        return all_uploaded
+
+    def upload_files_by_paths(self):
+        """Upload multiple files using their file paths to an S3 bucket
 
         :return: True if files were uploaded, else False
         """

@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
 import AlertSnackbar from "./AlertSnackbar";
-import DataProfileSelector from "./DataProfileSelector";
 import CreateDataProfilePage from "./CreateDataProfilePage";
+import DataProfileSelector from "./DataProfileSelector";
+import FileUploader from "./FileUploader";
+import PreviewTable from "./PreviewTable";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
-  const [files, setFiles] = useState(null);
-  const [dataProfile, setDataProfile] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [dataProfile, setDataProfile] = useState(null);
   const [dataProfiles, setDataProfiles] = useState([]);
-  const [analyzed, setAnalyzed] = useState(false);
   const [alertInfo, setAlertInfo] = useState({
     open: false,
     message: "",
     severity: "info",
   });
   const [showCreateDataProfile, setShowCreateDataProfile] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
 
   useEffect(() => {
     axios
@@ -27,14 +37,46 @@ function UploadPage() {
       .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
 
-  const handleAnalyze = () => {
-    // Placeholder for analyze functionality
-    setAnalyzed(true);
+  const handleCreateDataProfile = (name, extractInstructions) => {
+    axios
+      .post(`${API_URL}data-profile/`, {
+        name: name,
+        description: extractInstructions,
+      })
+      .then((response) => {
+        // Handle successful data profile creation
+        setDataProfiles((prevDataProfiles) => [...prevDataProfiles, name]);
+        setShowCreateDataProfile(false);
+      })
+      .catch((error) => {
+        console.error("Error creating data profile:", error);
+      });
   };
 
-  const handleCreateDataProfile = (dataProfile) => {
-    setDataProfiles([...dataProfiles, dataProfile]);
-    setShowCreateDataProfile(false);
+  const handlePreview = () => {
+    if (files.length && dataProfile) {
+      setIsPreviewLoading(true);
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append("files", file); // Append each file
+      });
+
+      axios
+        .post(`${API_URL}data-profiles/${dataProfile}/preview/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          setPreviewData(response.data); // Store the preview data
+          setIsPreviewTableOpen(true);
+          setIsPreviewLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error on preview:", error);
+          setIsPreviewLoading(false);
+        });
+    }
   };
 
   const handleSubmit = async () => {
@@ -82,8 +124,6 @@ function UploadPage() {
         </Typography>
       </Box>
 
-      {/* <FileUploader fileType={fileType} setFile={setFile} /> */}
-
       <Stack direction="row" spacing={2} alignItems="center">
         <DataProfileSelector
           dataProfiles={dataProfiles}
@@ -104,20 +144,37 @@ function UploadPage() {
         />
       </Stack>
 
+      <Box mt={2}>
+        <FileUploader setFiles={setFiles} />
+      </Box>
+
+      <Box mt={2}>
+        {previewData && <PreviewTable previewData={previewData} />}
+      </Box>
+      <Box display="flex" justifyContent="center" mt={2}>
+        {isPreviewLoading && <CircularProgress />}
+      </Box>
+
       <Stack direction="row" spacing={2} mt={2}>
         <Button
           variant="contained"
           color="secondary"
-          onClick={handleAnalyze}
-          disabled={!files}
+          onClick={handlePreview}
+          disabled={!files.length || !dataProfile || isPreviewLoading}
         >
-          Analyze
+          Preview
         </Button>
         <Button
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={!analyzed}
+          disabled={
+            !files ||
+            !dataProfile ||
+            !previewData ||
+            !isPreviewTableOpen ||
+            isPreviewLoading
+          }
         >
           Submit
         </Button>

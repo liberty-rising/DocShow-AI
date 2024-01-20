@@ -178,7 +178,9 @@ def create_sample_dataprofile():
     # Using DatabaseManager to manage the database session
     with DatabaseManager() as session:
         profile_manager = DataProfileManager(session)
-        existing_profile = profile_manager.get_dataprofile_by_name(sample_profile.name)
+        existing_profile = profile_manager.get_dataprofile_by_name_and_org(
+            sample_profile.name, 1
+        )
         if not existing_profile:
             profile_manager.create_dataprofile(sample_profile)
             logger.debug("Sample data profile created.")

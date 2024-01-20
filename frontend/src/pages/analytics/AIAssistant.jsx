@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import { API_URL } from "../../utils/constants";
 
-const AIAssistant = ({ table }) => {
+const AIAssistant = () => {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const chatEndRef = useRef(null);
