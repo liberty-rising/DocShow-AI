@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -36,7 +36,7 @@ const Navigation = () => {
   let menuItems = [
     { text: "Dashboards", icon: <DashboardIcon />, path: "/dashboards" },
     { text: "Data Upload", icon: <UploadFileIcon />, path: "/upload" },
-    { text: "AI Analyst", icon: <AnalyticsIcon />, path: "/analytics" },
+    { text: "AI Analyst", icon: <SmartToyIcon />, path: "/ai-analyst" },
     { text: "User Panel", icon: <AccountBoxIcon />, path: "/user" },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }
   ];

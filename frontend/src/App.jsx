@@ -9,7 +9,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import RequireSysAdminAuth from "./components/auth/RequireSysAdminAuth";
 import AboutPage from "./pages/about/AboutPage";
 import AdminPage from "./pages/admin/AdminPage";
-import AnalyticsPage from "./pages/analytics/AnalyticsPage";
+import AIAnalystPage from "./pages/ai-analyst/AIAnalystPage";
 import BlogPage from "./pages/blog/BlogPage";
 import ChangePasswordPage from "./pages/change-password/ChangePasswordPage";
 import CreateChartPage from "./pages/charts/CreateChartPage";
@@ -187,11 +187,11 @@ function App() {
         }
       />
       <Route
-        path="/analytics"
+        path="/ai-analyst"
         element={
           <RequireAuth>
             <AppLayout>
-              <AnalyticsPage />
+              <AIAnalystPage />
             </AppLayout>
           </RequireAuth>
         }
