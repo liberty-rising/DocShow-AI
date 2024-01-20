@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 
 function PreviewTable({ previewData }) {
+  const data = Array.isArray(previewData) ? previewData : [previewData];
+
   const generateTableHeaders = (data) => {
     if (data && data.length > 0) {
       return Object.keys(data[0]).map((key) => (
@@ -23,10 +25,10 @@ function PreviewTable({ previewData }) {
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow>{generateTableHeaders(previewData)}</TableRow>
+          <TableRow>{generateTableHeaders(data)}</TableRow>
         </TableHead>
         <TableBody>
-          {previewData.map((row, index) => (
+          {data.map((row, index) => (
             <TableRow key={index}>
               {Object.values(row).map((value, idx) => (
                 <TableCell key={idx}>{value}</TableCell>
