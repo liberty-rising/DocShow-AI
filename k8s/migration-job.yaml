@@ -18,4 +18,34 @@ spec:
             secretKeyRef:
               name: db-credentials
               key: DATABASE_URL
+        - name: DATABASE_POOL_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: DATABASE_POOL_URL
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-secret
+              key: OPENAI_API_KEY
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: JWT_SECRET_KEY
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sendgrid-api-key
+              key: SENDGRID_API_KEY
+        - name: SPACES_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: spaces-access-key
+              key: SPACES_ACCESS_KEY
+        - name: SPACES_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: spaces-secret-access-key
+              key: SPACES_SECRET_ACCESS_KEY
       restartPolicy: OnFailure
