@@ -37,4 +37,5 @@ jobs:
         kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend=registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }}
         kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend=registry.digitalocean.com/docshow-ai/backend-prod:${{ github.sha }}
         kubectl --kubeconfig=kubeconfig.yml delete job alembic-migration --ignore-not-found
+        sed -i 's|registry.digitalocean.com/docshow-ai/migration-prod:latest|registry.digitalocean.com/docshow-ai/migration-prod:'"${{ github.sha }}"'|' k8s/migration-job.yaml
         kubectl --kubeconfig=kubeconfig.yml apply -f k8s/migration-job.yaml
