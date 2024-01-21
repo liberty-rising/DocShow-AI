@@ -41,7 +41,7 @@ function UploadPage() {
     axios
       .post(`${API_URL}data-profile/`, {
         name: name,
-        description: extractInstructions,
+        extract_instructions: extractInstructions,
       })
       .then((response) => {
         // Handle successful data profile creation
