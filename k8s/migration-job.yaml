@@ -11,7 +11,7 @@ spec:
         command: ["alembic", "upgrade", "head"]
         envFrom:
         - configMapRef:
-            name: migration-config
+            name: backend-config
         env:
         - name: DATABASE_URL
           valueFrom:
