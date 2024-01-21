@@ -9,6 +9,9 @@ spec:
       - name: migration
         image: registry.digitalocean.com/docshow-ai/migration-prod:latest
         command: ["alembic", "upgrade", "head"]
+        envFrom:
+        - configMapRef:
+            name: migration-config
         env:
         - name: DATABASE_URL
           valueFrom:
