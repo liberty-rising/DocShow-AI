@@ -36,4 +36,5 @@ jobs:
         echo "${{ secrets.KUBECONFIG_SECRET }}" | base64 --decode > kubeconfig.yml
         kubectl --kubeconfig=kubeconfig.yml set image deployment/frontend-deployment frontend=registry.digitalocean.com/docshow-ai/frontend-prod:${{ github.sha }}
         kubectl --kubeconfig=kubeconfig.yml set image deployment/backend-deployment backend=registry.digitalocean.com/docshow-ai/backend-prod:${{ github.sha }}
+        kubectl --kubeconfig=kubeconfig.yml delete job alembic-migration --ignore-not-found
         kubectl --kubeconfig=kubeconfig.yml apply -f k8s/migration-job.yaml
