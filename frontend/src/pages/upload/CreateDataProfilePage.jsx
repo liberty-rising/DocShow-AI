@@ -34,7 +34,7 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
       sampleFiles.forEach((file) => {
         formData.append("files", file); // Append each file
       });
-      formData.append("instructions", extractInstructions);
+      formData.append("extract_instructions", extractInstructions);
 
       axios
         .post(`${API_URL}data-profiles/preview/`, formData, {

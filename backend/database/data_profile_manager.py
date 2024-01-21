@@ -34,7 +34,7 @@ class DataProfileManager:
             name=data_profile_data.name,
             file_type=data_profile_data.file_type,
             organization_id=data_profile_data.organization_id,
-            description=data_profile_data.description,
+            extract_instructions=data_profile_data.extract_instructions,
         )
         self.session.add(new_data_profile)
         self.session.commit()
