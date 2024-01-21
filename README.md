@@ -73,3 +73,27 @@ docker-compose logs backend
 ```
 
 That's it! You're now up and running with your development environment.
+
+### Database Migrations
+
+For any change to the schema you should create a database migration using alembic.
+
+Generate a new alembic version:
+```bash
+cd backend
+alembic revision -m "{description of revision}"
+```
+
+Your revision will be located within `/backend/alembic/versions`
+Edit the generated revision file with your changes, make sure to specify both upgrade and downgrade function for reverse compatibility.
+After making changes to your revision file, apply them using:
+```bash
+alembic upgrade head
+```
+
+If you deleted volumes and recreated the containers, you must point alembic to the latest version.
+This is because the backend automatically creates the latest schema for you.
+You can do this by running the following command:
+```bash
+alembic stamp head
+```
