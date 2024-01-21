@@ -14,7 +14,7 @@ class DataProfile(Base):
     - name: The name of the data profile.
     - file_type: The type of file associated with the data profile.
     - organization_id: The organization associated with the data profile.
-    - description: The description of the data profile.
+    - extract_instructions: The instructions for extracting data from the file.
     The class also is converting the model instance into a dictionary.
     """
 
@@ -23,7 +23,8 @@ class DataProfile(Base):
     name = Column(String, unique=True)
     file_type = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"))
-    description = Column(String)  # New description column
+    extract_instructions = Column(String)
+    table_id = Column(Integer)
 
     __table_args__ = (
         UniqueConstraint("name", "organization_id", name="uq_name_organization_id"),
@@ -38,15 +39,16 @@ class DataProfile(Base):
             "name": self.name,
             "file_type": self.file_type,
             "organization_id": self.organization_id,
-            "description": self.description,
+            "extract_instructions": self.extract_instructions,
+            "table_id": self.table_id,
         }
 
 
 class DataProfileCreateRequest(BaseModel):
     name: str
-    description: str
+    extract_instructions: str
 
 
 class DataProfileCreateResponse(BaseModel):
     name: str
-    description: str
+    extract_instructions: str

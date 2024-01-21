@@ -40,7 +40,7 @@ async def get_data_profiles_by_org_id(current_user: User = Depends(get_current_u
 
 
 @data_profile_router.post("/data-profile/")
-async def save_data_profiles(
+async def save_data_profile(
     request: DataProfileCreateRequest, current_user: User = Depends(get_current_user)
 ) -> DataProfileCreateResponse:
     with DatabaseManager() as session:
@@ -52,7 +52,7 @@ async def save_data_profiles(
 
         new_data_profile = DataProfile(
             name=request.name,
-            description=request.description,
+            extract_instructions=request.extract_instructions,
             organization_id=current_user.organization_id,
         )
         created_data_profile = data_profile_manager.create_dataprofile(new_data_profile)
@@ -60,7 +60,7 @@ async def save_data_profiles(
         # Make sure to pass the fields as keyword arguments
         response = DataProfileCreateResponse(
             name=created_data_profile.name,
-            description=created_data_profile.description,
+            extract_instructions=created_data_profile.extract_instructions,
         )
         return response
 
