@@ -15,7 +15,7 @@ import PreviewTable from "./PreviewTable";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
-  const [files, setFiles] = useState([]);
+  const [uploadFiles, setUploadFiles] = useState([]);
   const [dataProfile, setDataProfile] = useState(null);
   const [dataProfiles, setDataProfiles] = useState([]);
   const [alertInfo, setAlertInfo] = useState({
@@ -54,10 +54,10 @@ function UploadPage() {
   };
 
   const handlePreview = () => {
-    if (files.length && dataProfile) {
+    if (uploadFiles.length && dataProfile) {
       setIsPreviewLoading(true);
       const formData = new FormData();
-      files.forEach((file) => {
+      uploadFiles.forEach((file) => {
         formData.append("files", file); // Append each file
       });
 
@@ -81,7 +81,7 @@ function UploadPage() {
 
   const handleSubmit = async () => {
     const formData = new FormData();
-    formData.append("file", files);
+    formData.append("file", uploadFiles);
     formData.append("extra_desc", description);
     formData.append("is_new_table", isNewTable === "yes");
     formData.append("encoding", encoding);
@@ -145,7 +145,7 @@ function UploadPage() {
       </Stack>
 
       <Box mt={2}>
-        <FileUploader setFiles={setFiles} />
+        <FileUploader setFiles={setUploadFiles} />
       </Box>
 
       <Box mt={2}>
@@ -160,7 +160,7 @@ function UploadPage() {
           variant="contained"
           color="secondary"
           onClick={handlePreview}
-          disabled={!files.length || !dataProfile || isPreviewLoading}
+          disabled={!uploadFiles.length || !dataProfile || isPreviewLoading}
         >
           Preview
         </Button>
@@ -169,7 +169,7 @@ function UploadPage() {
           color="primary"
           onClick={handleSubmit}
           disabled={
-            !files ||
+            !uploadFiles ||
             !dataProfile ||
             !previewData ||
             !isPreviewTableOpen ||
