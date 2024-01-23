@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const FileUploader = ({ setFiles }) => {
+const FileUploader = ({ setFiles, id }) => {
   const [fileNames, setFileNames] = useState([]);
   const [fileType, setFileType] = useState(null);
 
@@ -85,12 +85,12 @@ const FileUploader = ({ setFiles }) => {
     >
       <input
         type="file"
-        id="contained-button-file"
+        id={id}
         style={{ display: "none" }}
         onChange={handleFileChange}
         multiple
       />
-      <label htmlFor="contained-button-file">
+      <label htmlFor={id}>
         <Typography variant="body1" component="span">
           {fileNames.length === 0
             ? "Drag 'n' drop some files here, or click to select files"

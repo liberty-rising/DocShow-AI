@@ -14,7 +14,7 @@ import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
 import { API_URL } from "../../utils/constants";
 
-function CreateDataProfilePage({ open, onClose, onCreate }) {
+function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const [name, setName] = useState("");
   const [extractInstructions, setExtractInstructions] = useState("");
   const [sampleFiles, setSampleFiles] = useState([]);
@@ -29,6 +29,7 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
 
   const handlePreview = () => {
     if (sampleFiles.length && extractInstructions) {
+      console.log(extractInstructions);
       setIsPreviewLoading(true);
       const formData = new FormData();
       sampleFiles.forEach((file) => {
@@ -68,7 +69,10 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
             />
           </Box>
           <Box mt={2}>
-            <FileUploader setFiles={setSampleFiles} />
+            <FileUploader
+              setFiles={setSampleFiles}
+              id="create-data-profile-uploader"
+            />
           </Box>
           <Box mt={2}>
             <TextField
@@ -112,4 +116,4 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
   );
 }
 
-export default CreateDataProfilePage;
+export default CreateDataProfileWindow;

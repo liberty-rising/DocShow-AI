@@ -408,7 +408,7 @@ class GPTLLM(BaseLLM):
         self._add_system_message(assistant_type="jpg_data_extraction")
         self._set_model(model_type="img")
 
-        instructions = data_profile.description
+        instructions = data_profile.extract_instructions
         prompt = self.prompt_manager.jpg_data_extraction_prompt(instructions)
 
         assistant_message_content = await self._send_and_receive_message(
