@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import AlertSnackbar from "./AlertSnackbar";
-import CreateDataProfilePage from "./CreateDataProfilePage";
+import CreateDataProfileWindow from "./CreateDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
@@ -137,7 +137,7 @@ function UploadPage() {
         >
           Create a data profile
         </Button>
-        <CreateDataProfilePage
+        <CreateDataProfileWindow
           open={showCreateDataProfile}
           onClose={() => setShowCreateDataProfile(false)}
           onCreate={handleCreateDataProfile}

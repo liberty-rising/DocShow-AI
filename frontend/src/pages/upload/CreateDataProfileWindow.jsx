@@ -14,7 +14,7 @@ import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
 import { API_URL } from "../../utils/constants";
 
-function CreateDataProfilePage({ open, onClose, onCreate }) {
+function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const [name, setName] = useState("");
   const [extractInstructions, setExtractInstructions] = useState("");
   const [sampleFiles, setSampleFiles] = useState([]);
@@ -112,4 +112,4 @@ function CreateDataProfilePage({ open, onClose, onCreate }) {
   );
 }
 
-export default CreateDataProfilePage;
+export default CreateDataProfileWindow;
