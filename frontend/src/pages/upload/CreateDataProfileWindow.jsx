@@ -29,6 +29,7 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
 
   const handlePreview = () => {
     if (sampleFiles.length && extractInstructions) {
+      console.log(extractInstructions);
       setIsPreviewLoading(true);
       const formData = new FormData();
       sampleFiles.forEach((file) => {
@@ -68,7 +69,10 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
             />
           </Box>
           <Box mt={2}>
-            <FileUploader setFiles={setSampleFiles} />
+            <FileUploader
+              setFiles={setSampleFiles}
+              id="create-data-profile-uploader"
+            />
           </Box>
           <Box mt={2}>
             <TextField

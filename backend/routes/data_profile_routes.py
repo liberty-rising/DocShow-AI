@@ -80,9 +80,13 @@ async def get_data_profile(
 @data_profile_router.post("/data-profiles/preview/")
 async def preview_data_profile(
     files: List[UploadFile] = File(...),
-    instructions: str = Form(...),
+    extract_instructions: str = Form(...),
     current_user: User = Depends(get_current_user),
 ):
+    preview_data_profile = DataProfile(
+        name="preview", extract_instructions=extract_instructions
+    )
+
     temp_file_paths = []
     for file in files:
         if file.filename:
@@ -113,7 +117,7 @@ async def preview_data_profile(
             jpg_presigned_urls = space_manager.create_presigned_urls()
             gpt = GPTLLM(chat_id=1, user=current_user)
             extracted_data = await gpt.extract_data_from_jpgs(
-                instructions, jpg_presigned_urls
+                preview_data_profile, jpg_presigned_urls
             )
 
     # Delete the temporary files

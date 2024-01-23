@@ -145,7 +145,7 @@ function UploadPage() {
       </Stack>
 
       <Box mt={2}>
-        <FileUploader setFiles={setUploadFiles} />
+        <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
       <Box mt={2}>
