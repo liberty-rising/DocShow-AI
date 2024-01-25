@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import FileUploader from "./FileUploader";
-import PreviewTable from "./PreviewTable";
+import DataPreviewAndSchemaEditor from "./DataPreviewAndSchemaEditor";
 import { API_URL } from "../../utils/constants";
 
 function CreateDataProfileWindow({ open, onClose, onCreate }) {
@@ -29,7 +29,6 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
 
   const handlePreview = () => {
     if (sampleFiles.length && extractInstructions) {
-      console.log(extractInstructions);
       setIsPreviewLoading(true);
       const formData = new FormData();
       sampleFiles.forEach((file) => {
@@ -85,7 +84,9 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
             />
           </Box>
           <Box mt={2}>
-            {previewData && <PreviewTable previewData={previewData} />}
+            {previewData && (
+              <DataPreviewAndSchemaEditor previewData={previewData} />
+            )}
           </Box>
           <Box display="flex" justifyContent="center" mt={2}>
             {isPreviewLoading && <CircularProgress />}
@@ -98,6 +99,11 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
               disabled={
                 !sampleFiles || !extractInstructions || isPreviewLoading
               }
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                }
+              }}
             >
               Preview
             </Button>
@@ -106,6 +112,11 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
               color="primary"
               variant="contained"
               disabled={!isPreviewTableOpen || !name || !extractInstructions}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                }
+              }}
             >
               Create
             </Button>

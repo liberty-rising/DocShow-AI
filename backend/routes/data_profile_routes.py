@@ -43,6 +43,7 @@ async def get_data_profiles_by_org_id(current_user: User = Depends(get_current_u
 async def save_data_profile(
     request: DataProfileCreateRequest, current_user: User = Depends(get_current_user)
 ) -> DataProfileCreateResponse:
+    """Save a new data profile to the database"""
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
         if data_profile_manager.get_dataprofile_by_name_and_org(
