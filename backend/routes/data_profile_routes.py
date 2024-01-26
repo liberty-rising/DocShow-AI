@@ -14,9 +14,9 @@ from models.data_profile import (
     DataProfileCreateResponse,
 )
 from models.user import User
-from object_storage.digitalocean_space_manager import DigitalOceanSpaceManager
 from security import get_current_user
 from utils.image_conversion_manager import ImageConversionManager
+from utils.object_storage.digitalocean_space_manager import DigitalOceanSpaceManager
 
 data_profile_router = APIRouter()
 
