@@ -26,7 +26,12 @@ function DataPreviewAndSchemaEditor({ previewData }) {
   useEffect(() => {
     if (data && data.length > 0) {
       const newColumnNames = Object.keys(data[0]);
-      const newColumnTypes = newColumnNames.map(() => "string");
+      let newColumnTypes;
+      if (columnTypes.length === 0) {
+        newColumnTypes = newColumnNames.map(() => "text");
+      } else {
+        newColumnTypes = columnTypes;
+      }
       if (JSON.stringify(newColumnNames) !== JSON.stringify(columnNames)) {
         setColumnNames(newColumnNames);
       }
@@ -78,7 +83,7 @@ function DataPreviewAndSchemaEditor({ previewData }) {
               handleColumnTypeChange(index, event.target.value)
             }
           >
-            <MenuItem value={"string"}>String</MenuItem>
+            <MenuItem value={"text"}>Text</MenuItem>
             <MenuItem value={"number"}>Number</MenuItem>
             <MenuItem value={"boolean"}>Boolean</MenuItem>
             <MenuItem value={"date"}>Date</MenuItem>
@@ -90,11 +95,9 @@ function DataPreviewAndSchemaEditor({ previewData }) {
   };
 
   const handleColumnTypeChange = (index, newType) => {
-    setColumnTypes((prevColumnTypes) => {
-      const newColumnTypes = [...prevColumnTypes];
-      newColumnTypes[index] = newType;
-      return newColumnTypes;
-    });
+    let newColumnTypes = [...columnTypes];
+    newColumnTypes[index] = newType;
+    setColumnTypes(newColumnTypes);
   };
 
   const handleEditClick = (index) => {

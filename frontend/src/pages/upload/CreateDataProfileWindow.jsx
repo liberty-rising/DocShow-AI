@@ -55,7 +55,18 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={() => {
+        onClose();
+        setName(""); // Reset name
+        setExtractInstructions(""); // Reset extractInstructions
+        setSampleFiles([]); // Reset sampleFiles
+        setPreviewData(null); // Reset previewData
+      }}
+      maxWidth="md"
+      fullWidth
+    >
       <DialogTitle>Create a Data Profile</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit}>
