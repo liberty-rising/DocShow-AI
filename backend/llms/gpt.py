@@ -368,6 +368,17 @@ class GPTLLM(BaseLLM):
 
         return parsed_config
 
+    async def generate_suggested_column_types(self, data: dict):
+        """Generate suggested column types for the given data."""
+        self._add_system_message(assistant_type="column_type_suggestion")
+        self._set_response_format(is_json=True)
+
+        prompt = self.prompt_manager.create_column_type_suggestion_prompt(data)
+
+        gpt_response = await self._send_and_receive_message(prompt)
+
+        return gpt_response
+
     def fetch_table_name_from_sample(
         self, sample_content: str, extra_desc: str, table_metadata: str
     ):
