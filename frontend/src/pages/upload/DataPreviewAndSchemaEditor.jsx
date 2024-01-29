@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   IconButton,
@@ -13,117 +13,108 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
-function DataPreviewAndSchemaEditor({ previewData }) {
-  const data = Array.isArray(previewData) ? previewData : [previewData];
-  const [columnNames, setColumnNames] = useState([]);
-  const [columnTypes, setColumnTypes] = useState([]);
-  const [editingColumnIndex, setEditingColumnIndex] = useState(null);
-  const inputRefs = useRef([]);
+function DataPreviewAndSchemaEditor({
+  previewData,
+  availableColumnTypes,
+  selectedColumnTypes,
+}) {
+  const [columns, setColumns] = useState([]);
 
   useEffect(() => {
-    if (data && data.length > 0) {
-      const newColumnNames = Object.keys(data[0]);
-      let newColumnTypes;
-      if (columnTypes.length === 0) {
-        newColumnTypes = newColumnNames.map(() => "text");
-      } else {
-        newColumnTypes = columnTypes;
-      }
-      if (JSON.stringify(newColumnNames) !== JSON.stringify(columnNames)) {
-        setColumnNames(newColumnNames);
-      }
-      if (JSON.stringify(newColumnTypes) !== JSON.stringify(columnTypes)) {
-        setColumnTypes(newColumnTypes);
-      }
+    if (Array.isArray(previewData) && previewData.length > 0) {
+      const initialColumns = Object.keys(previewData[0]).map((key) => ({
+        name: key,
+        type: selectedColumnTypes[key] || "text",
+        isEditing: false,
+      }));
+      setColumns(initialColumns);
     }
-  }, [data]);
-
-  const generateHeaderRow = (data) => {
-    if (data && data.length > 0) {
-      return columnNames.map((key, index) => (
-        <TableCell key={index}>
-          <TextField
-            defaultValue={key.replace(/_/g, " ").toUpperCase()}
-            onChange={(event) =>
-              handleColumnNameChange(index, event.target.value)
-            }
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-              readOnly: editingColumnIndex !== index,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => handleEditClick(index)}>
-                    <EditIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            inputRef={(ref) => (inputRefs.current[index] = ref)}
-            onClick={() => handleEditClick(index)}
-            style={{ cursor: "pointer" }}
-            inputProps={{
-              style: {
-                cursor: editingColumnIndex === index ? "text" : "pointer",
-              },
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                setEditingColumnIndex(null);
-              }
-            }}
-          />
-          <Select
-            value={columnTypes[index]}
-            onChange={(event) =>
-              handleColumnTypeChange(index, event.target.value)
-            }
-          >
-            <MenuItem value={"text"}>Text</MenuItem>
-            <MenuItem value={"number"}>Number</MenuItem>
-            <MenuItem value={"boolean"}>Boolean</MenuItem>
-            <MenuItem value={"date"}>Date</MenuItem>
-            // Add more MenuItem components for other data types as needed
-          </Select>
-        </TableCell>
-      ));
-    }
-  };
+  }, [previewData, selectedColumnTypes]);
 
   const handleColumnTypeChange = (index, newType) => {
-    let newColumnTypes = [...columnTypes];
-    newColumnTypes[index] = newType;
-    setColumnTypes(newColumnTypes);
+    setColumns((prevColumns) =>
+      prevColumns.map((column, colIndex) =>
+        colIndex === index ? { ...column, type: newType } : column,
+      ),
+    );
   };
 
   const handleEditClick = (index) => {
-    setEditingColumnIndex(index);
-    inputRefs.current[index].select();
+    setColumns((prevColumns) =>
+      prevColumns.map((column, colIndex) =>
+        colIndex === index
+          ? { ...column, isEditing: !column.isEditing }
+          : column,
+      ),
+    );
   };
 
   const handleColumnNameChange = (index, newName) => {
-    setColumnNames((prevColumnNames) => {
-      const newColumnNames = [...prevColumnNames];
-      newColumnNames[index] = newName;
-      return newColumnNames;
-    });
+    setColumns((prevColumns) =>
+      prevColumns.map((column, colIndex) =>
+        colIndex === index ? { ...column, name: newName } : column,
+      ),
+    );
   };
 
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow>{generateHeaderRow(data)}</TableRow>
+          <TableRow>
+            {columns.map((column, index) => (
+              <TableCell key={index}>
+                <TextField
+                  defaultValue={column.name.replace(/_/g, " ").toUpperCase()}
+                  onChange={(event) =>
+                    handleColumnNameChange(index, event.target.value)
+                  }
+                  variant="standard"
+                  InputProps={{
+                    disableUnderline: true,
+                    readOnly: !column.isEditing,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => handleEditClick(index)}>
+                          <EditIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+                <Tooltip title="Select the format of this column">
+                  <Select
+                    fullWidth
+                    value={
+                      availableColumnTypes.includes(column.type)
+                        ? column.type
+                        : ""
+                    }
+                    onChange={(event) =>
+                      handleColumnTypeChange(index, event.target.value)
+                    }
+                  >
+                    {availableColumnTypes.map((type) => (
+                      <MenuItem value={type} key={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Tooltip>
+              </TableCell>
+            ))}
+          </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
-              {Object.values(row).map((value, idx) => (
-                <TableCell key={idx}>{value}</TableCell>
+          {previewData.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {Object.values(row).map((value, cellIndex) => (
+                <TableCell key={cellIndex}>{value}</TableCell>
               ))}
             </TableRow>
           ))}

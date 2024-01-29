@@ -12,6 +12,7 @@ from models.data_profile import (
     DataProfile,
     DataProfileCreateRequest,
     DataProfileCreateResponse,
+    SuggestedColumnTypesRequest,
 )
 from models.user import User
 from security import get_current_user
@@ -78,6 +79,11 @@ async def get_data_profile(
         return data_profile
 
 
+@data_profile_router.get("/data-profiles/column-types/")
+async def get_column_types(current_user: User = Depends(get_current_user)):
+    return ["text", "integer", "money", "date", "boolean"]
+
+
 @data_profile_router.post("/data-profiles/preview/")
 async def preview_data_profile(
     files: List[UploadFile] = File(...),
@@ -128,12 +134,20 @@ async def preview_data_profile(
     return extracted_data
 
 
-# @data_profile_router.post("/data-profiles/preview/column-types/")
-# async def generate_suggested_column_types(
-#     data, current_user: User = Depends(get_current_user)
-# ):
-#     gpt = GPTLLM(chat_id=1, user=current_user)
-#     suggested_column_types = await gpt.generate_suggested_column_types(data)
+@data_profile_router.post("/data-profiles/preview/column-types/")
+async def generate_suggested_column_types(
+    request: SuggestedColumnTypesRequest, current_user: User = Depends(get_current_user)
+):
+    gpt = GPTLLM(chat_id=1, user=current_user)
+    if request.data:
+        column_names = list(request.data[0].keys())
+    suggested_column_types = await gpt.generate_suggested_column_types(
+        column_names, request.data
+    )
+
+    print(suggested_column_types)
+
+    return suggested_column_types
 
 
 @data_profile_router.post("/data-profiles/{data_profile_name}/preview/")

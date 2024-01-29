@@ -122,3 +122,18 @@ class PromptManager:
             Return only the requested information, no additional text or formatting.
             """
         return prompt
+
+    def create_column_type_suggestion_prompt(self, column_names, data):
+        prompt = f"""
+            Based on the following data, suggest the data types for each column in the table.
+            The available column types are: text, integer, money, date, boolean
+
+            Column names:
+            {column_names}
+
+            Data:
+            {data}
+
+            Return a JSON with the column names as keys and the suggested data types as values.
+            """
+        return prompt

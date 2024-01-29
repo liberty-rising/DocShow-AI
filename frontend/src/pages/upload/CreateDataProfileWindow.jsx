@@ -9,16 +9,21 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import axios from "axios";
 import FileUploader from "./FileUploader";
 import DataPreviewAndSchemaEditor from "./DataPreviewAndSchemaEditor";
-import { API_URL } from "../../utils/constants";
+import {
+  getPreviewData,
+  getAvailableColumnTypes,
+  getSuggestedColumnTypes,
+} from "../../api/dataProfilesRequests";
 
 function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const [name, setName] = useState("");
   const [extractInstructions, setExtractInstructions] = useState("");
   const [sampleFiles, setSampleFiles] = useState([]);
   const [previewData, setPreviewData] = useState(null);
+  const [availableColumnTypes, setAvailableColumnTypes] = useState([]);
+  const [selectedColumnTypes, setSelectedColumnTypes] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
 
@@ -30,25 +35,33 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const handlePreview = () => {
     if (sampleFiles.length && extractInstructions) {
       setIsPreviewLoading(true);
+      setPreviewData(null);
+      setSelectedColumnTypes(null);
+
       const formData = new FormData();
       sampleFiles.forEach((file) => {
-        formData.append("files", file); // Append each file
+        formData.append("files", file);
       });
       formData.append("extract_instructions", extractInstructions);
 
-      axios
-        .post(`${API_URL}data-profiles/preview/`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      Promise.all([
+        getPreviewData(sampleFiles, extractInstructions),
+        getAvailableColumnTypes(),
+      ])
+        .then(([previewDataResponse, availableTypesResponse]) => {
+          setPreviewData(previewDataResponse.data);
+          setAvailableColumnTypes(availableTypesResponse.data);
+
+          return getSuggestedColumnTypes(previewDataResponse.data);
         })
-        .then((response) => {
-          setPreviewData(response.data); // Store the preview data
+        .then((suggestedTypesResponse) => {
+          setSelectedColumnTypes(suggestedTypesResponse.data);
           setIsPreviewTableOpen(true);
-          setIsPreviewLoading(false);
         })
         .catch((error) => {
-          console.error("Error on preview:", error);
+          console.error("Error during preview setup:", error);
+        })
+        .finally(() => {
           setIsPreviewLoading(false);
         });
     }
@@ -95,8 +108,12 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
             />
           </Box>
           <Box mt={2}>
-            {previewData && (
-              <DataPreviewAndSchemaEditor previewData={previewData} />
+            {previewData && selectedColumnTypes && (
+              <DataPreviewAndSchemaEditor
+                previewData={previewData}
+                availableColumnTypes={availableColumnTypes}
+                selectedColumnTypes={selectedColumnTypes}
+              />
             )}
           </Box>
           <Box display="flex" justifyContent="center" mt={2}>
