@@ -52,3 +52,7 @@ class DataProfileCreateRequest(BaseModel):
 class DataProfileCreateResponse(BaseModel):
     name: str
     extract_instructions: str
+
+
+class SuggestedColumnTypesRequest(BaseModel):
+    data: list
