@@ -3,12 +3,14 @@ from typing import List
 import pandas as pd
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
+from utils.sql_string_manager import SQLStringManager
 
 
 class SQLExecutor:
     def __init__(self, session: Session):
         self.session = session
         self.database_type = "postgres"
+        self.sql_string_manager = SQLStringManager()
 
     def append_df_to_table(self, df: pd.DataFrame, table_name: str):
         try:
@@ -18,6 +20,23 @@ class SQLExecutor:
             print(
                 f"An error occurred while appending data to table {table_name}: {str(e)}"
             )
+            raise
+
+    def create_table_for_data_profile(
+        self, org_id: int, table_name: str, column_names_and_types: dict
+    ):
+        """Creates a table for a data profile."""
+        try:
+            create_query = (
+                self.sql_string_manager.generate_create_query_for_data_profile_table(
+                    table_name, column_names_and_types
+                )
+            )
+            self.session.execute(text(create_query))
+            self.session.commit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            self.session.rollback()
             raise
 
     def execute_create_query(self, create_query: str):

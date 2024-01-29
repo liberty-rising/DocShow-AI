@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from llms.base import BaseLLM
 from models.table_map import TableMap
 from sqlalchemy.orm import Session
-from utils.sql_string_manipulator import SQLStringManipulator
+from utils.sql_string_manager import SQLStringManager
 
 
 class TableManager:
@@ -42,6 +42,20 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
+    def create_table_for_data_profile(
+        self, org_id: int, table_name: str, column_names_and_types: dict
+    ):
+        """Creates a table for a data profile."""
+        try:
+            executor = SQLExecutor(self.session)
+            executor.create_table_for_data_profile(
+                org_id, table_name, column_names_and_types
+            )
+            self._map_table_to_org(org_id, table_name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
         """
         Creates a table using an LLM based on sample file content and a message.
@@ -61,11 +75,11 @@ class TableManager:
                 sample_content, header, table_names, extra_desc
             )
 
-            create_query = SQLStringManipulator(
+            create_query = SQLStringManager(
                 raw_create_query
             ).extract_sql_query_from_text()  # Just in case
 
-            if SQLStringManipulator(
+            if SQLStringManager(
                 create_query
             ).is_valid_create_table_query():  # Checks if the query is valid
                 sql_executor = SQLExecutor(self.session)
@@ -94,9 +108,7 @@ class TableManager:
                 create_query, sample_content, extra_desc
             )
 
-            table_name = SQLStringManipulator(
-                create_query
-            ).get_table_from_create_query()
+            table_name = SQLStringManager(create_query).get_table_from_create_query()
 
             # Store description in separate table
             manager = TableMetadataManager(self.session)
