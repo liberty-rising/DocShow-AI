@@ -21,6 +21,7 @@ function DataPreviewAndSchemaEditor({
   previewData,
   availableColumnTypes,
   selectedColumnTypes,
+  onColumnsChange,
 }) {
   const [columns, setColumns] = useState([]);
 
@@ -34,6 +35,10 @@ function DataPreviewAndSchemaEditor({
       setColumns(initialColumns);
     }
   }, [previewData, selectedColumnTypes]);
+
+  useEffect(() => {
+    onColumnsChange(columns); // Call the callback function when columns change
+  }, [columns]);
 
   const handleColumnTypeChange = (index, newType) => {
     setColumns((prevColumns) =>
