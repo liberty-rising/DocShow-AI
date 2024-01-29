@@ -37,11 +37,16 @@ function UploadPage() {
       .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
 
-  const handleCreateDataProfile = (name, extractInstructions) => {
+  const handleCreateDataProfile = (
+    name,
+    extractInstructions,
+    columnNamesAndTypes,
+  ) => {
     axios
       .post(`${API_URL}data-profile/`, {
         name: name,
         extract_instructions: extractInstructions,
+        column_names_and_types: columnNamesAndTypes,
       })
       .then((response) => {
         // Handle successful data profile creation

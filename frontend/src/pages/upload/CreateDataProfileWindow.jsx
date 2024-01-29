@@ -26,10 +26,11 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const [selectedColumnTypes, setSelectedColumnTypes] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
+  const [columnNamesAndTypes, setColumnNamesAndTypes] = useState({});
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onCreate(name, extractInstructions);
+    onCreate(name, extractInstructions, columnNamesAndTypes);
   };
 
   const handlePreview = () => {
@@ -65,6 +66,15 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
           setIsPreviewLoading(false);
         });
     }
+  };
+
+  const handleColumnsChange = (columns) => {
+    const newColumnNamesAndTypes = columns.reduce((acc, column) => {
+      acc[column.name] = column.type;
+      return acc;
+    }, {});
+
+    setColumnNamesAndTypes(newColumnNamesAndTypes);
   };
 
   return (
@@ -113,6 +123,7 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
                 previewData={previewData}
                 availableColumnTypes={availableColumnTypes}
                 selectedColumnTypes={selectedColumnTypes}
+                onColumnsChange={handleColumnsChange}
               />
             )}
           </Box>

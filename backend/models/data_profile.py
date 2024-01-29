@@ -47,6 +47,7 @@ class DataProfile(Base):
 class DataProfileCreateRequest(BaseModel):
     name: str
     extract_instructions: str
+    column_names_and_types: dict
 
 
 class DataProfileCreateResponse(BaseModel):
