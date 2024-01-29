@@ -18,7 +18,7 @@ jobs:
         python-version: '3.8'
 
     - name: Install dependencies
-      run: pip install black flake8 mypy isort
+      run: pip install black==23.11.0 flake8 mypy isort
 
     - name: Check Python code formatting with Black
       run: black --check --exclude backend/alembic/versions backend/

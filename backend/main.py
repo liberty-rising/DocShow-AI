@@ -9,6 +9,7 @@ from routes.dashboard_routes import dashboard_router
 from routes.data_profile_routes import data_profile_router
 from routes.file_routes import file_router
 from routes.organization_routes import organization_router
+from routes.powerbi_routes import powerbi_router
 from routes.table_routes import table_router
 from routes.user_routes import user_router
 from settings import APP_ENV
@@ -54,6 +55,7 @@ app.include_router(dashboard_router)
 app.include_router(data_profile_router)
 app.include_router(file_router)
 app.include_router(organization_router)
+app.include_router(powerbi_router)
 app.include_router(table_router)
 app.include_router(user_router)
 
