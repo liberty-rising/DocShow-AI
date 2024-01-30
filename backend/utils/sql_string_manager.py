@@ -100,7 +100,7 @@ class SQLStringManager:
         pattern = r"^CREATE TABLE .+;\s*$"
         return bool(re.match(pattern, clean_query))
 
-    def is_valid_pg_table_name(self, table_name) -> bool:
+    def is_valid_table_name(self, table_name) -> bool:
         # Check if the table name matches the allowed pattern
         # Pattern explanation:
         # ^[_a-z]       : Must start with an underscore or a lowercase letter

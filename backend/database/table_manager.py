@@ -42,8 +42,22 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
+    def _unmap_table_from_org(self, table_name: str):
+        """Unmaps a table from an organization."""
+        try:
+            if self.session:
+                table_map_manager = TableMapManager(self.session)
+                table_map_manager.delete_table_map(table_name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     def create_table_for_data_profile(
-        self, org_id: int, table_name: str, column_names_and_types: dict
+        self,
+        org_id: int,
+        table_name: str,
+        table_alias: str,
+        column_names_and_types: dict,
     ):
         """Creates a table for a data profile."""
         try:
@@ -51,7 +65,7 @@ class TableManager:
             executor.create_table_for_data_profile(
                 org_id, table_name, column_names_and_types
             )
-            self._map_table_to_org(org_id, table_name)
+            self._map_table_to_org(org_id, table_name, table_alias)
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
@@ -180,6 +194,7 @@ class TableManager:
         try:
             executor = SQLExecutor(self.session)
             executor.drop_table(table_name)
+            self._unmap_table_from_org(table_name)
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
@@ -193,11 +208,11 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
-    def get_table_columns(self, table_name: str):
+    def get_table_column_names(self, table_name: str):
         """Returns a list of all of the columns present within the table."""
         try:
             executor = SQLExecutor(self.session)
-            columns = executor.get_table_columns(table_name)
+            columns = executor.get_table_column_names(table_name)
             return columns
         except Exception as e:
             print(f"An error occurred: {e}")

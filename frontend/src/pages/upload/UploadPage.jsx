@@ -24,6 +24,7 @@ function UploadPage() {
     severity: "info",
   });
   const [showCreateDataProfile, setShowCreateDataProfile] = useState(false);
+  const [columnNames, setColumnNames] = useState([]);
   const [previewData, setPreviewData] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
@@ -36,6 +37,18 @@ function UploadPage() {
       })
       .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
+
+  useEffect(() => {
+    if (dataProfile) {
+      axios
+        .get(`${API_URL}data-profiles/${dataProfile}/table/column-names/`)
+        .then((response) => {
+          setColumnNames(response.data);
+          setPreviewData(null); // Reset preview data
+        })
+        .catch((error) => console.error("Error fetching column names:", error));
+    }
+  }, [dataProfile]);
 
   const handleCreateDataProfile = (
     name,
@@ -154,7 +167,9 @@ function UploadPage() {
       </Box>
 
       <Box mt={2}>
-        {previewData && <PreviewTable previewData={previewData} />}
+        {(columnNames.length > 0 || previewData) && (
+          <PreviewTable columnNames={columnNames} previewData={previewData} />
+        )}
       </Box>
       <Box display="flex" justifyContent="center" mt={2}>
         {isPreviewLoading && <CircularProgress />}

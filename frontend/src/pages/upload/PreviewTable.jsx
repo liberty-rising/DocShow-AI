@@ -9,32 +9,29 @@ import {
   TableRow,
 } from "@mui/material";
 
-function PreviewTable({ previewData }) {
-  const data = Array.isArray(previewData) ? previewData : [previewData];
-
-  const generateTableHeaders = (data) => {
-    if (data && data.length > 0) {
-      return Object.keys(data[0]).map((key) => (
-        <TableCell key={key}>{key.replace(/_/g, " ").toUpperCase()}</TableCell>
-      ));
-    }
-    return null;
-  };
-
+function PreviewTable({ columnNames, previewData }) {
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow>{generateTableHeaders(data)}</TableRow>
+          <TableRow>
+            {columnNames &&
+              columnNames.map((columnName) => (
+                <TableCell key={columnName}>
+                  {columnName.replace(/_/g, " ").toUpperCase()}
+                </TableCell>
+              ))}
+          </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
-              {Object.values(row).map((value, idx) => (
-                <TableCell key={idx}>{value}</TableCell>
-              ))}
-            </TableRow>
-          ))}
+          {previewData &&
+            previewData.map((row, index) => (
+              <TableRow key={index}>
+                {Object.values(row).map((value, idx) => (
+                  <TableCell key={idx}>{value}</TableCell>
+                ))}
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

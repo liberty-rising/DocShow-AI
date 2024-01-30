@@ -101,7 +101,7 @@ class SQLExecutor:
             print(f"An error occurred: {e}")
             raise
 
-    def get_table_columns(self, table_name: str) -> List:
+    def get_table_column_names(self, table_name: str) -> List:
         try:
             engine = self.session.bind
             inspector = inspect(engine)
