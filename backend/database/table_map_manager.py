@@ -42,6 +42,24 @@ class TableMapManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
+    def delete_table_map(self, table_name: str):
+        """
+        Delete a table map from the database.
+
+        Args:
+            table_name (str): The name of the table to be deleted.
+        """
+        try:
+            if self.db_session:
+                self.db_session.query(TableMap).filter(
+                    TableMap.table_name == table_name
+                ).delete()
+                self.db_session.commit()
+        except Exception as e:
+            self.db_session.rollback() if self.db_session else None
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     def get_org_tables(self, org_id: int) -> List:
         """Returns a list of names of all of the tables associated with an organization."""
         try:

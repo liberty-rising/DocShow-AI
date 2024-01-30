@@ -72,15 +72,17 @@ async def save_data_profile(
         table_manager.create_table_for_data_profile(
             org_id=current_user.organization_id,
             table_name=table_name,
+            table_alias=request.name,
             column_names_and_types=request.column_names_and_types,
         )
 
+        print(table_name)
         # Create the data profile
         new_data_profile = DataProfile(
             name=request.name,
             extract_instructions=request.extract_instructions,
             organization_id=current_user.organization_id,
-            table_name=table_name,  # TODO: To be further implemented
+            table_name=table_name,
         )
         created_data_profile = data_profile_manager.create_dataprofile(new_data_profile)
 
@@ -173,6 +175,24 @@ async def generate_suggested_column_types(
     print(suggested_column_types)
 
     return suggested_column_types
+
+
+@data_profile_router.get("/data-profiles/{data_profile_name}/table/column-names/")
+async def get_data_profile_table_column_names(
+    data_profile_name: str, current_user: User = Depends(get_current_user)
+):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile = data_profile_manager.get_dataprofile_by_name_and_org(
+            data_profile_name, current_user.organization_id
+        )
+        if data_profile is None:
+            raise HTTPException(status_code=404, detail="Data Profile not found")
+        print("data_profile.table_name", data_profile.table_name)
+        table_manager = TableManager(session)
+        column_names = table_manager.get_table_column_names(data_profile.table_name)
+        print("column_names", column_names)
+        return column_names
 
 
 @data_profile_router.post("/data-profiles/{data_profile_name}/preview/")
