@@ -7,18 +7,18 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { API_URL } from "../../utils/constants";
+import axios from "axios";
 
 function DashboardTable() {
-  const [dashboards, setDashboards] = useState([]);
+  const [reports, setReports] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/dashboards/`)
-      .then((response) => response.json())
-      .then((data) => setDashboards(data))
-      .catch((error) => console.error("Error fetching dashboards:", error));
+    axios
+      .get(`${API_URL}powerbi/reports/`)
+      .then((response) => setReports(response.data.reports))
+      .catch((error) => console.error("Error fetching reports:", error));
   }, []);
 
   return (
@@ -32,10 +32,16 @@ function DashboardTable() {
         </TableRow>
       </TableHead>
       <TableBody>
-        {dashboards.map((dashboard) => (
-          <TableRow key={dashboard.name} hover>
+        {reports.map((report) => (
+          <TableRow key={report.name} hover>
             <TableCell>
-              <Link to={`/dashboards/${dashboard.id}`}>{dashboard.name}</Link>
+              <a
+                href={`https://app.powerbi.com/reportEmbed?reportId=${report.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {report.name}
+              </a>
             </TableCell>
             <TableCell
               style={{
@@ -44,15 +50,19 @@ function DashboardTable() {
                 whiteSpace: "nowrap",
               }}
             >
-              <Tooltip title={dashboard.description} placement="top">
-                <div>{dashboard.description}</div>
+              <Tooltip title={report.description} placement="top">
+                <div>{report.description}</div>
               </Tooltip>
             </TableCell>
             <TableCell>
-              {format(new Date(dashboard.created_at), "yyyy-MM-dd")}
+              {report.created_at
+                ? format(new Date(report.created_at), "yyyy-MM-dd")
+                : "N/A"}
             </TableCell>
             <TableCell>
-              {format(new Date(dashboard.updated_at), "yyyy-MM-dd")}
+              {report.updated_at
+                ? format(new Date(report.updated_at), "yyyy-MM-dd")
+                : "N/A"}
             </TableCell>
           </TableRow>
         ))}

@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./api/axiosInterceptor";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { APP_ENV } from "./utils/constants";
-import AppLayout from "./components/layouts/AppLayout";
-import LandingLayout from "./components/layouts/LandingLayout";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireSysAdminAuth from "./components/auth/RequireSysAdminAuth";
+import AppLayout from "./components/layouts/AppLayout";
+import LandingLayout from "./components/layouts/LandingLayout";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AboutPage from "./pages/about/AboutPage";
 import AdminPage from "./pages/admin/AdminPage";
 import AIAnalystPage from "./pages/ai-analyst/AIAnalystPage";
@@ -14,18 +13,20 @@ import BlogPage from "./pages/blog/BlogPage";
 import ChangePasswordPage from "./pages/change-password/ChangePasswordPage";
 import CreateChartPage from "./pages/charts/CreateChartPage";
 import CreateDashboardPage from "./pages/dashboards/CreateDashboard";
-import DashboardMenuPage from "./pages/dashboards/DashboardsMenuPage";
 import Dashboard from "./pages/dashboards/Dashboard";
+import DashboardMenuPage from "./pages/dashboards/DashboardsMenuPage";
 import ForgotPasswordPage from "./pages/forgot-password/ForgotPasswordPage";
 import LandingPage from "./pages/landing/LandingPage";
 import LoginPage from "./pages/login/LoginPage";
+import Logout from "./pages/logout/LogoutPage";
 import PricingPage from "./pages/pricing/PricingPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import ResetPasswordPage from "./pages/reset-password/ResetPasswordPage";
 import UploadPage from "./pages/upload/UploadPage";
 import UserPage from "./pages/user/UserPage";
 import VerifyEmailPage from "./pages/verify-email/VerifyEmailPage";
-import Logout from "./pages/logout/LogoutPage";
+import ReportPage from "./pages/dashboards/ReportPage";
+import { APP_ENV } from "./utils/constants";
 
 function AppWrapper() {
   return (
@@ -143,6 +144,14 @@ function App() {
             <AppLayout>
               <DashboardMenuPage />
             </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboards/:organization_id/:report_id"
+        element={
+          <RequireAuth>
+            <ReportPage />
           </RequireAuth>
         }
       />
