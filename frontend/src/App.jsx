@@ -148,7 +148,7 @@ function App() {
         }
       />
       <Route
-        path="/dashboards/:organization_id/:report_id"
+        path="/dashboards/:report_id"
         element={
           <RequireAuth>
             <ReportPage />

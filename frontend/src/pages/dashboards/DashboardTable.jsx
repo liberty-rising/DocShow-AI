@@ -14,10 +14,12 @@ import axios from "axios";
 function DashboardTable() {
   const [reports, setReports] = useState([]);
 
+  console.log("reports", reports);
+
   useEffect(() => {
     axios
       .get(`${API_URL}powerbi/reports/`)
-      .then((response) => setReports(response.data.reports))
+      .then((response) => setReports(response.data.reports.value))
       .catch((error) => console.error("Error fetching reports:", error));
   }, []);
 
@@ -32,40 +34,41 @@ function DashboardTable() {
         </TableRow>
       </TableHead>
       <TableBody>
-        {reports.map((report) => (
-          <TableRow key={report.name} hover>
-            <TableCell>
-              <a
-                href={`https://app.powerbi.com/reportEmbed?reportId=${report.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
+        {reports.length > 0 &&
+          reports.map((report) => (
+            <TableRow key={report.name} hover>
+              <TableCell>
+                <a
+                  href={`https://app.powerbi.com/reportEmbed?reportId=${report.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {report.name}
+                </a>
+              </TableCell>
+              <TableCell
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
               >
-                {report.name}
-              </a>
-            </TableCell>
-            <TableCell
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <Tooltip title={report.description} placement="top">
-                <div>{report.description}</div>
-              </Tooltip>
-            </TableCell>
-            <TableCell>
-              {report.created_at
-                ? format(new Date(report.created_at), "yyyy-MM-dd")
-                : "N/A"}
-            </TableCell>
-            <TableCell>
-              {report.updated_at
-                ? format(new Date(report.updated_at), "yyyy-MM-dd")
-                : "N/A"}
-            </TableCell>
-          </TableRow>
-        ))}
+                <Tooltip title={report.description} placement="top">
+                  <div>{report.description}</div>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                {report.created_at
+                  ? format(new Date(report.created_at), "yyyy-MM-dd")
+                  : "N/A"}
+              </TableCell>
+              <TableCell>
+                {report.updated_at
+                  ? format(new Date(report.updated_at), "yyyy-MM-dd")
+                  : "N/A"}
+              </TableCell>
+            </TableRow>
+          ))}
       </TableBody>
     </Table>
   );

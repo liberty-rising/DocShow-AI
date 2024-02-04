@@ -11,15 +11,22 @@ async def get_powerbi_token():
     return {"token": token}
 
 
-@powerbi_router.get("/powerbi/reports/")  # Uncomment this route
+@powerbi_router.get("/powerbi/reports/")
 async def get_powerbi_reports():
     azure_manager = AzureManager()
-    reports = azure_manager.get_powerbi_reports()
+    reports = await azure_manager.get_powerbi_reports()
     return {"reports": reports}
 
 
 @powerbi_router.get("/powerbi/reports/{report_id}")
 async def get_powerbi_report(report_id: str):
     azure_manager = AzureManager()
-    report = azure_manager.get_powerbi_report(report_id)
+    report = await azure_manager.get_powerbi_report(report_id)
     return {"report": report}
+
+
+@powerbi_router.get("/powerbi/workspaces/")
+async def get_powerbi_workspaces():
+    azure_manager = AzureManager()
+    workspaces = await azure_manager.get_powerbi_workspaces()
+    return {"workspaces": workspaces}

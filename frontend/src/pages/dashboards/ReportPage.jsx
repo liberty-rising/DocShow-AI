@@ -5,7 +5,7 @@ import { API_URL } from "../../utils/constants";
 import * as pbi from "powerbi-client";
 
 function ReportPage() {
-  const { organization_id, report_id } = useParams();
+  const { report_id } = useParams();
   const [token, setToken] = useState("");
   const [report, setReport] = useState(null);
 
