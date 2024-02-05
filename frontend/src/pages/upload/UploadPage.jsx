@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import AlertSnackbar from "./AlertSnackbar";
 import CreateDataProfileWindow from "./CreateDataProfileWindow";
+import DeleteDataProfileWindow from "./DeleteDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
@@ -23,6 +24,8 @@ function UploadPage() {
     message: "",
     severity: "info",
   });
+  const [showDeleteDataProfile, setShowDeleteDataProfile] = useState(false);
+  const [dataProfileToDelete, setDataProfileToDelete] = useState(null);
   const [showCreateDataProfile, setShowCreateDataProfile] = useState(false);
   const [columnNames, setColumnNames] = useState([]);
   const [previewData, setPreviewData] = useState(null);
@@ -49,6 +52,35 @@ function UploadPage() {
         .catch((error) => console.error("Error fetching column names:", error));
     }
   }, [dataProfile]);
+
+  const handleOpenDeleteDialog = (dataProfile) => {
+    setDataProfileToDelete(dataProfile);
+    setShowDeleteDataProfile(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDataProfile(false);
+    setDataProfileToDelete(null);
+  };
+
+  const handleDeleteDataProfile = async () => {
+    axios
+      .delete(`${API_URL}data-profiles/${dataProfileToDelete}/`)
+      .then(() => {
+        setDataProfiles((prevDataProfiles) =>
+          prevDataProfiles.filter((profile) => profile !== dataProfileToDelete),
+        );
+        if (dataProfileToDelete === dataProfile) {
+          setDataProfile(null);
+        }
+        setShowDeleteDataProfile(false);
+      })
+      .catch((error) => {
+        console.error("Error deleting data profile:", error);
+        // handle the error as necessary
+      });
+    handleCloseDeleteDialog();
+  };
 
   const handleCreateDataProfile = (
     name,
@@ -161,6 +193,13 @@ function UploadPage() {
           dataProfiles={dataProfiles}
           dataProfile={dataProfile}
           setDataProfile={setDataProfile}
+          handleOpenDeleteDialog={handleOpenDeleteDialog}
+        />
+        <DeleteDataProfileWindow
+          open={showDeleteDataProfile}
+          onClose={handleCloseDeleteDialog}
+          dataProfileToDelete={dataProfileToDelete}
+          onDelete={handleDeleteDataProfile}
         />
         <Button
           onClick={() => setShowCreateDataProfile(true)}

@@ -76,7 +76,6 @@ async def save_data_profile(
             column_names_and_types=request.column_names_and_types,
         )
 
-        print(table_name)
         # Create the data profile
         new_data_profile = DataProfile(
             name=request.name,
@@ -172,8 +171,6 @@ async def generate_suggested_column_types(
         column_names, request.data
     )
 
-    print(suggested_column_types)
-
     return suggested_column_types
 
 
@@ -188,10 +185,8 @@ async def get_data_profile_table_column_names(
         )
         if data_profile is None:
             raise HTTPException(status_code=404, detail="Data Profile not found")
-        print("data_profile.table_name", data_profile.table_name)
         table_manager = TableManager(session)
         column_names = table_manager.get_table_column_names(data_profile.table_name)
-        print("column_names", column_names)
         return column_names
 
 
@@ -277,3 +272,23 @@ async def save_extracted_data(
         space_manager.upload_files()
 
     return {"message": "Extracted data saved successfully"}
+
+
+@data_profile_router.delete("/data-profiles/{data_profile_name}/")
+async def delete_data_profile(
+    data_profile_name: str, current_user: User = Depends(get_current_user)
+):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile = data_profile_manager.get_dataprofile_by_name_and_org(
+            data_profile_name, current_user.organization_id
+        )
+        if data_profile is None:
+            raise HTTPException(status_code=404, detail="Data Profile not found")
+
+        if data_profile.table_name:
+            table_manager = TableManager(session)
+            table_manager.drop_table(data_profile.table_name)
+
+        data_profile_manager.delete_dataprofile(data_profile.id)
+    return {"detail": "Data Profile deleted successfully"}
