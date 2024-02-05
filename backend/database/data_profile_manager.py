@@ -41,3 +41,11 @@ class DataProfileManager:
             .filter(DataProfile.id == data_profile_id)
             .first()
         )
+
+    def delete_dataprofile(self, data_profile_id: int):
+        """Delete a DataProfile."""
+        self.session.query(DataProfile).filter(
+            DataProfile.id == data_profile_id
+        ).delete()
+        self.session.commit()
+        return True
