@@ -12,7 +12,6 @@ import CreateDataProfileWindow from "./CreateDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
-import PreviewTableTest from "./PreviewTableTest";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
@@ -181,18 +180,9 @@ function UploadPage() {
         <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
-      {/* <Box mt={2}>
-        {((columnNames && columnNames.length > 0) || previewData) && (
-          <PreviewTable
-            columnNames={columnNames}
-            previewData={previewData}
-            onChangePreviewData={handleChangePreviewData}
-          />
-        )}
-      </Box> */}
       <Box mt={2}>
         {((columnNames && columnNames.length > 0) || previewData) && (
-          <PreviewTableTest
+          <PreviewTable
             columnNames={columnNames}
             previewData={previewData}
             onChangePreviewData={handleChangePreviewData}
