@@ -12,6 +12,7 @@ import CreateDataProfileWindow from "./CreateDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
+import PreviewTableTest from "./PreviewTableTest";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
@@ -97,6 +98,20 @@ function UploadPage() {
     }
   };
 
+  const handleChangePreviewData = (rowIndex, columnId, value) => {
+    setPreviewData((old) =>
+      old.map((row, index) => {
+        if (index === rowIndex) {
+          return {
+            ...old[rowIndex],
+            [columnId]: value,
+          };
+        }
+        return row;
+      }),
+    );
+  };
+
   const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("file", uploadFiles);
@@ -166,9 +181,22 @@ function UploadPage() {
         <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
+      {/* <Box mt={2}>
+        {((columnNames && columnNames.length > 0) || previewData) && (
+          <PreviewTable
+            columnNames={columnNames}
+            previewData={previewData}
+            onChangePreviewData={handleChangePreviewData}
+          />
+        )}
+      </Box> */}
       <Box mt={2}>
-        {(columnNames.length > 0 || previewData) && (
-          <PreviewTable columnNames={columnNames} previewData={previewData} />
+        {((columnNames && columnNames.length > 0) || previewData) && (
+          <PreviewTableTest
+            columnNames={columnNames}
+            previewData={previewData}
+            onChangePreviewData={handleChangePreviewData}
+          />
         )}
       </Box>
       <Box display="flex" justifyContent="center" mt={2}>
