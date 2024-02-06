@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -38,13 +39,7 @@ function DashboardTable() {
           reports.map((report) => (
             <TableRow key={report.name} hover>
               <TableCell>
-                <a
-                  href={`https://app.powerbi.com/reportEmbed?reportId=${report.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {report.name}
-                </a>
+                <Link to={`/dashboards/${report.id}`}>{report.name}</Link>
               </TableCell>
               <TableCell
                 style={{

@@ -37,13 +37,17 @@ function ReportPage() {
         },
       };
 
-      const powerbi = new pbi.service.Service(
-        pbi.factories.hpmFactory,
-        pbi.factories.wpmpFactory,
-        pbi.factories.routerFactory,
-      );
+      // Get a reference to the HTML element
       const reportContainer = document.getElementById("reportContainer");
-      powerbi.embed(reportContainer, config);
+
+      // Check if the element already has an embedded component
+      if (reportContainer.firstChild) {
+        // If it does, remove the existing component
+        reportContainer.removeChild(reportContainer.firstChild);
+      }
+
+      // Embed the report
+      const report = pbi.embed(reportContainer, config);
     }
   }, [report, token]);
 

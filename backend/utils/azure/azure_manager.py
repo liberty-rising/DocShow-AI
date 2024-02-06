@@ -44,15 +44,14 @@ class AzureManager:
                 traceback.print_exc()
                 return None
 
-    # async def get_powerbi_report(self, report_id):
-    #     headers = {"Authorization": f"Bearer {self.get_powerbi_token()}"}
-    #     async with httpx.AsyncClient() as client:
-    #         response = await client.get(
-    #             f"https://api.powerbi.com/v1.0/myorg/reports/{report_id}",
-    #             headers=headers,
-    #         )
-    #     print(response.json())
-    #     return response.json()
+    async def get_powerbi_report(self, report_id):
+        headers = {"Authorization": f"Bearer {self.get_powerbi_token()}"}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.powerbi.com/v1.0/myorg/groups/361eea67-d03b-4799-8779-7c1d6c175182/reports/{report_id}",
+                headers=headers,
+            )
+        return response.json()
 
     # async def create_powerbi_workspace(self, name):
     #     headers = {"Authorization": f"Bearer {self.get_powerbi_token()}"}
