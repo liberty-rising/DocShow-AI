@@ -31,6 +31,7 @@ function UploadPage() {
   const [previewData, setPreviewData] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
+  const [isEditingCell, setIsEditingCell] = useState(false);
 
   useEffect(() => {
     axios
@@ -219,12 +220,13 @@ function UploadPage() {
         <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
-      <Box mt={2}>
+      <Box mt={2} sx={{ width: "100%", maxWidth: "100%" }}>
         {((columnNames && columnNames.length > 0) || previewData) && (
           <PreviewTable
             columnNames={columnNames}
             previewData={previewData}
             onChangePreviewData={handleChangePreviewData}
+            setIsEditingCell={setIsEditingCell}
           />
         )}
       </Box>
@@ -250,7 +252,8 @@ function UploadPage() {
             !dataProfile ||
             !previewData ||
             !isPreviewTableOpen ||
-            isPreviewLoading
+            isPreviewLoading ||
+            isEditingCell
           }
         >
           Submit
