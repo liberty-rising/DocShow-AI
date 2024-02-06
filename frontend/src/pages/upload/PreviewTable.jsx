@@ -5,8 +5,14 @@ import { Column } from "primereact/column";
 import { InputTextarea } from "primereact/inputtextarea";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "../../styles/tableStyles.css";
+import { set } from "date-fns";
 
-function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
+function PreviewTable({
+  columnNames,
+  previewData,
+  onChangePreviewData,
+  setIsEditingCell,
+}) {
   const columns = columnNames.map((name) => ({
     Header: name.toUpperCase(),
     accessor: name,
@@ -15,6 +21,7 @@ function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
   const data = previewData || [];
 
   const cellEditor = (options) => {
+    setIsEditingCell(true);
     return textEditor(options);
   };
 
@@ -24,7 +31,7 @@ function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
         autoResize={true}
         style={{ width: "100%", height: "100%" }}
         value={options.value}
-        onChange={(e) => options.onEditorValueChange(e.target.value)}
+        onChange={(e) => options.editorCallback(e.target.value)}
       />
     );
   };
@@ -38,6 +45,7 @@ function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
         field,
         newValue,
       );
+      setIsEditingCell(false);
     } else {
       event.preventDefault();
     }
@@ -47,6 +55,11 @@ function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
     <DataTable
       value={data}
       emptyMessage="Upload your files and click preview to see the data"
+      paginator
+      rows={5}
+      rowsPerPageOptions={[5, 10, 25, 50]}
+      paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      currentPageReportTemplate="{first}-{last} of {totalRecords}"
       editMode="cell"
       resizableColumns
       scrollable
