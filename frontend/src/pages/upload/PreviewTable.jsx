@@ -49,6 +49,8 @@ function PreviewTable({ columnNames, previewData, onChangePreviewData }) {
       emptyMessage="Upload your files and click preview to see the data"
       editMode="cell"
       resizableColumns
+      scrollable
+      scrollHeight="flex"
       showGridlines
       tableStyle={{ minWidth: "150px" }}
     >

@@ -219,7 +219,7 @@ function UploadPage() {
         <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
-      <Box mt={2}>
+      <Box mt={2} sx={{ width: "100%", maxWidth: "100%" }}>
         {((columnNames && columnNames.length > 0) || previewData) && (
           <PreviewTable
             columnNames={columnNames}
