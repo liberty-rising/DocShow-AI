@@ -151,7 +151,9 @@ function App() {
         path="/dashboards/:report_id"
         element={
           <RequireAuth>
-            <ReportPage />
+            <AppLayout>
+              <ReportPage />
+            </AppLayout>
           </RequireAuth>
         }
       />

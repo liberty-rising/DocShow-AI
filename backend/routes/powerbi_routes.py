@@ -1,13 +1,16 @@
 from fastapi import APIRouter
+from models.powerbi import GenerateEmbededTokenRequest
 from utils.azure.azure_manager import AzureManager
 
 powerbi_router = APIRouter()
 
 
-@powerbi_router.get("/powerbi/token/")
-async def get_powerbi_token():
+@powerbi_router.post("/powerbi/embeded-token/")
+async def generate_powerbi_token(request: GenerateEmbededTokenRequest):
     azure_manager = AzureManager()
-    token = azure_manager.get_powerbi_token()
+    token = await azure_manager.get_powerbi_embeded_token(
+        request.workspace_ids, request.dataset_ids, request.report_ids
+    )
     return {"token": token}
 
 
