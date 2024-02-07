@@ -12,11 +12,13 @@ from models.data_profile import (
     DataProfile,
     DataProfileCreateRequest,
     DataProfileCreateResponse,
+    SuggestedColumnTypesRequest,
 )
 from models.user import User
 from security import get_current_user
 from utils.image_conversion_manager import ImageConversionManager
 from utils.object_storage.digitalocean_space_manager import DigitalOceanSpaceManager
+from utils.sql_string_manager import SQLStringManager
 
 data_profile_router = APIRouter()
 
@@ -44,6 +46,20 @@ async def save_data_profile(
     request: DataProfileCreateRequest, current_user: User = Depends(get_current_user)
 ) -> DataProfileCreateResponse:
     """Save a new data profile to the database"""
+    if len(request.name) > 50:
+        raise HTTPException(
+            status_code=400, detail="Data Profile name cannot be longer than 50 chars"
+        )
+
+    formatted_name = request.name.replace(" ", "_").lower()
+    table_name = f"org_{current_user.organization_id}_{formatted_name}"
+    sql_string_manager = SQLStringManager()
+    if not sql_string_manager.is_valid_table_name(table_name):
+        raise HTTPException(
+            status_code=400,
+            detail="Data Profile name must only contain letters, numbers, and underscores",
+        )
+
     with DatabaseManager() as session:
         data_profile_manager = DataProfileManager(session)
         if data_profile_manager.get_dataprofile_by_name_and_org(
@@ -51,10 +67,21 @@ async def save_data_profile(
         ):
             raise HTTPException(status_code=400, detail="Data Profile already exists")
 
+        # Create the table for the data profile
+        table_manager = TableManager(session)
+        table_manager.create_table_for_data_profile(
+            org_id=current_user.organization_id,
+            table_name=table_name,
+            table_alias=request.name,
+            column_names_and_types=request.column_names_and_types,
+        )
+
+        # Create the data profile
         new_data_profile = DataProfile(
             name=request.name,
             extract_instructions=request.extract_instructions,
             organization_id=current_user.organization_id,
+            table_name=table_name,
         )
         created_data_profile = data_profile_manager.create_dataprofile(new_data_profile)
 
@@ -76,6 +103,11 @@ async def get_data_profile(
         if data_profile is None:
             raise HTTPException(status_code=404, detail="Data Profile not found")
         return data_profile
+
+
+@data_profile_router.get("/data-profiles/column-types/")
+async def get_column_types(current_user: User = Depends(get_current_user)):
+    return ["text", "integer", "money", "date", "boolean"]
 
 
 @data_profile_router.post("/data-profiles/preview/")
@@ -128,12 +160,34 @@ async def preview_data_profile(
     return extracted_data
 
 
-# @data_profile_router.post("/data-profiles/preview/column-types/")
-# async def generate_suggested_column_types(
-#     data, current_user: User = Depends(get_current_user)
-# ):
-#     gpt = GPTLLM(chat_id=1, user=current_user)
-#     suggested_column_types = await gpt.generate_suggested_column_types(data)
+@data_profile_router.post("/data-profiles/preview/column-types/")
+async def generate_suggested_column_types(
+    request: SuggestedColumnTypesRequest, current_user: User = Depends(get_current_user)
+):
+    gpt = GPTLLM(chat_id=1, user=current_user)
+    if request.data:
+        column_names = list(request.data[0].keys())
+    suggested_column_types = await gpt.generate_suggested_column_types(
+        column_names, request.data
+    )
+
+    return suggested_column_types
+
+
+@data_profile_router.get("/data-profiles/{data_profile_name}/table/column-names/")
+async def get_data_profile_table_column_names(
+    data_profile_name: str, current_user: User = Depends(get_current_user)
+):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile = data_profile_manager.get_dataprofile_by_name_and_org(
+            data_profile_name, current_user.organization_id
+        )
+        if data_profile is None:
+            raise HTTPException(status_code=404, detail="Data Profile not found")
+        table_manager = TableManager(session)
+        column_names = table_manager.get_table_column_names(data_profile.table_name)
+        return column_names
 
 
 @data_profile_router.post("/data-profiles/{data_profile_name}/preview/")
@@ -218,3 +272,23 @@ async def save_extracted_data(
         space_manager.upload_files()
 
     return {"message": "Extracted data saved successfully"}
+
+
+@data_profile_router.delete("/data-profiles/{data_profile_name}/")
+async def delete_data_profile(
+    data_profile_name: str, current_user: User = Depends(get_current_user)
+):
+    with DatabaseManager() as session:
+        data_profile_manager = DataProfileManager(session)
+        data_profile = data_profile_manager.get_dataprofile_by_name_and_org(
+            data_profile_name, current_user.organization_id
+        )
+        if data_profile is None:
+            raise HTTPException(status_code=404, detail="Data Profile not found")
+
+        if data_profile.table_name:
+            table_manager = TableManager(session)
+            table_manager.drop_table(data_profile.table_name)
+
+        data_profile_manager.delete_dataprofile(data_profile.id)
+    return {"detail": "Data Profile deleted successfully"}

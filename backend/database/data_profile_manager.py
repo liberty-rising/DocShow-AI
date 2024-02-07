@@ -1,4 +1,4 @@
-from models.data_profile import DataProfile, DataProfileCreateRequest
+from models.data_profile import DataProfile
 
 
 class DataProfileManager:
@@ -28,17 +28,11 @@ class DataProfileManager:
         data_profile_names = [name for (name,) in result]
         return data_profile_names
 
-    def create_dataprofile(self, data_profile_data: DataProfileCreateRequest):
+    def create_dataprofile(self, data_profile: DataProfile):
         """Create a new DataProfile."""
-        new_data_profile = DataProfile(
-            name=data_profile_data.name,
-            file_type=data_profile_data.file_type,
-            organization_id=data_profile_data.organization_id,
-            extract_instructions=data_profile_data.extract_instructions,
-        )
-        self.session.add(new_data_profile)
+        self.session.add(data_profile)
         self.session.commit()
-        return new_data_profile
+        return data_profile
 
     def get_dataprofile_by_id(self, data_profile_id: int):
         """Retrieve a DataProfile by its ID."""
@@ -47,3 +41,11 @@ class DataProfileManager:
             .filter(DataProfile.id == data_profile_id)
             .first()
         )
+
+    def delete_dataprofile(self, data_profile_id: int):
+        """Delete a DataProfile."""
+        self.session.query(DataProfile).filter(
+            DataProfile.id == data_profile_id
+        ).delete()
+        self.session.commit()
+        return True

@@ -368,16 +368,20 @@ class GPTLLM(BaseLLM):
 
         return parsed_config
 
-    async def generate_suggested_column_types(self, data: dict):
+    async def generate_suggested_column_types(self, column_names: list, data: dict):
         """Generate suggested column types for the given data."""
         self._add_system_message(assistant_type="column_type_suggestion")
         self._set_response_format(is_json=True)
 
-        prompt = self.prompt_manager.create_column_type_suggestion_prompt(data)
+        prompt = self.prompt_manager.create_column_type_suggestion_prompt(
+            column_names, data
+        )
 
         gpt_response = await self._send_and_receive_message(prompt)
 
-        return gpt_response
+        suggested_column_types = json.loads(gpt_response)
+
+        return suggested_column_types
 
     def fetch_table_name_from_sample(
         self, sample_content: str, extra_desc: str, table_metadata: str
@@ -429,5 +433,9 @@ class GPTLLM(BaseLLM):
             "\n```", ""
         )
         data = json.loads(json_string)
+
+        # If data is a dictionary, wrap it in a list
+        if isinstance(data, dict):
+            data = [data]
         print(data)
         return data

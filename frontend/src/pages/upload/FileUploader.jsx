@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const FileUploader = ({ setFiles, id }) => {
   const [fileNames, setFileNames] = useState([]);
   const [fileType, setFileType] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const uploadedFiles = Array.from(event.target.files);
@@ -57,7 +58,8 @@ const FileUploader = ({ setFiles, id }) => {
     }
   };
 
-  const handleDelete = (indexToDelete) => {
+  const handleDelete = (event, indexToDelete) => {
+    event.stopPropagation();
     setFileNames(fileNames.filter((_, index) => index !== indexToDelete));
     setFiles((prevFiles) =>
       Array.from(prevFiles).filter((_, index) => index !== indexToDelete),
@@ -65,6 +67,10 @@ const FileUploader = ({ setFiles, id }) => {
     if (fileNames.length === 1) {
       setFileType(null);
     }
+  };
+
+  const handleClickBox = () => {
+    fileInputRef.current.click();
   };
 
   return (
@@ -82,6 +88,7 @@ const FileUploader = ({ setFiles, id }) => {
       }}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onClick={handleClickBox}
     >
       <input
         type="file"
@@ -89,8 +96,9 @@ const FileUploader = ({ setFiles, id }) => {
         style={{ display: "none" }}
         onChange={handleFileChange}
         multiple
+        ref={fileInputRef}
       />
-      <label htmlFor={id}>
+      <label>
         <Typography variant="body1" component="span">
           {fileNames.length === 0
             ? "Drag 'n' drop some files here, or click to select files"
@@ -100,7 +108,10 @@ const FileUploader = ({ setFiles, id }) => {
       {fileNames.map((name, index) => (
         <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
           <Typography variant="body2">{name}</Typography>
-          <IconButton onClick={() => handleDelete(index)} size="small">
+          <IconButton
+            onClick={(event) => handleDelete(event, index)}
+            size="small"
+          >
             <DeleteIcon />
           </IconButton>
         </Box>

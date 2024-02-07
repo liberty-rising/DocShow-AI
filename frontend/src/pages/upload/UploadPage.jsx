@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import AlertSnackbar from "./AlertSnackbar";
 import CreateDataProfileWindow from "./CreateDataProfileWindow";
+import DeleteDataProfileWindow from "./DeleteDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
 import PreviewTable from "./PreviewTable";
@@ -23,10 +24,14 @@ function UploadPage() {
     message: "",
     severity: "info",
   });
+  const [showDeleteDataProfile, setShowDeleteDataProfile] = useState(false);
+  const [dataProfileToDelete, setDataProfileToDelete] = useState(null);
   const [showCreateDataProfile, setShowCreateDataProfile] = useState(false);
+  const [columnNames, setColumnNames] = useState([]);
   const [previewData, setPreviewData] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
+  const [isEditingCell, setIsEditingCell] = useState(false);
 
   useEffect(() => {
     axios
@@ -37,11 +42,57 @@ function UploadPage() {
       .catch((error) => console.error("Error fetching data profiles:", error));
   }, []);
 
-  const handleCreateDataProfile = (name, extractInstructions) => {
+  useEffect(() => {
+    if (dataProfile) {
+      axios
+        .get(`${API_URL}data-profiles/${dataProfile}/table/column-names/`)
+        .then((response) => {
+          setColumnNames(response.data);
+          setPreviewData(null); // Reset preview data
+        })
+        .catch((error) => console.error("Error fetching column names:", error));
+    }
+  }, [dataProfile]);
+
+  const handleOpenDeleteDialog = (dataProfile) => {
+    setDataProfileToDelete(dataProfile);
+    setShowDeleteDataProfile(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDataProfile(false);
+    setDataProfileToDelete(null);
+  };
+
+  const handleDeleteDataProfile = async () => {
+    axios
+      .delete(`${API_URL}data-profiles/${dataProfileToDelete}/`)
+      .then(() => {
+        setDataProfiles((prevDataProfiles) =>
+          prevDataProfiles.filter((profile) => profile !== dataProfileToDelete),
+        );
+        if (dataProfileToDelete === dataProfile) {
+          setDataProfile(null);
+        }
+        setShowDeleteDataProfile(false);
+      })
+      .catch((error) => {
+        console.error("Error deleting data profile:", error);
+        // handle the error as necessary
+      });
+    handleCloseDeleteDialog();
+  };
+
+  const handleCreateDataProfile = (
+    name,
+    extractInstructions,
+    columnNamesAndTypes,
+  ) => {
     axios
       .post(`${API_URL}data-profile/`, {
         name: name,
         extract_instructions: extractInstructions,
+        column_names_and_types: columnNamesAndTypes,
       })
       .then((response) => {
         // Handle successful data profile creation
@@ -77,6 +128,20 @@ function UploadPage() {
           setIsPreviewLoading(false);
         });
     }
+  };
+
+  const handleChangePreviewData = (rowIndex, columnId, value) => {
+    setPreviewData((old) =>
+      old.map((row, index) => {
+        if (index === rowIndex) {
+          return {
+            ...old[rowIndex],
+            [columnId]: value,
+          };
+        }
+        return row;
+      }),
+    );
   };
 
   const handleSubmit = async () => {
@@ -129,6 +194,13 @@ function UploadPage() {
           dataProfiles={dataProfiles}
           dataProfile={dataProfile}
           setDataProfile={setDataProfile}
+          handleOpenDeleteDialog={handleOpenDeleteDialog}
+        />
+        <DeleteDataProfileWindow
+          open={showDeleteDataProfile}
+          onClose={handleCloseDeleteDialog}
+          dataProfileToDelete={dataProfileToDelete}
+          onDelete={handleDeleteDataProfile}
         />
         <Button
           onClick={() => setShowCreateDataProfile(true)}
@@ -148,8 +220,15 @@ function UploadPage() {
         <FileUploader setFiles={setUploadFiles} id="upload-page-uploader" />
       </Box>
 
-      <Box mt={2}>
-        {previewData && <PreviewTable previewData={previewData} />}
+      <Box mt={2} sx={{ width: "100%", maxWidth: "100%" }}>
+        {((columnNames && columnNames.length > 0) || previewData) && (
+          <PreviewTable
+            columnNames={columnNames}
+            previewData={previewData}
+            onChangePreviewData={handleChangePreviewData}
+            setIsEditingCell={setIsEditingCell}
+          />
+        )}
       </Box>
       <Box display="flex" justifyContent="center" mt={2}>
         {isPreviewLoading && <CircularProgress />}
@@ -173,7 +252,8 @@ function UploadPage() {
             !dataProfile ||
             !previewData ||
             !isPreviewTableOpen ||
-            isPreviewLoading
+            isPreviewLoading ||
+            isEditingCell
           }
         >
           Submit

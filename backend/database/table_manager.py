@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from llms.base import BaseLLM
 from models.table_map import TableMap
 from sqlalchemy.orm import Session
-from utils.sql_string_manipulator import SQLStringManipulator
+from utils.sql_string_manager import SQLStringManager
 
 
 class TableManager:
@@ -42,6 +42,34 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
+    def _unmap_table_from_org(self, table_name: str):
+        """Unmaps a table from an organization."""
+        try:
+            if self.session:
+                table_map_manager = TableMapManager(self.session)
+                table_map_manager.delete_table_map(table_name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
+    def create_table_for_data_profile(
+        self,
+        org_id: int,
+        table_name: str,
+        table_alias: str,
+        column_names_and_types: dict,
+    ):
+        """Creates a table for a data profile."""
+        try:
+            executor = SQLExecutor(self.session)
+            executor.create_table_for_data_profile(
+                org_id, table_name, column_names_and_types
+            )
+            self._map_table_to_org(org_id, table_name, table_alias)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     def create_table_with_llm(self, sample_content: str, header: str, extra_desc: str):
         """
         Creates a table using an LLM based on sample file content and a message.
@@ -61,11 +89,11 @@ class TableManager:
                 sample_content, header, table_names, extra_desc
             )
 
-            create_query = SQLStringManipulator(
+            create_query = SQLStringManager(
                 raw_create_query
             ).extract_sql_query_from_text()  # Just in case
 
-            if SQLStringManipulator(
+            if SQLStringManager(
                 create_query
             ).is_valid_create_table_query():  # Checks if the query is valid
                 sql_executor = SQLExecutor(self.session)
@@ -94,9 +122,7 @@ class TableManager:
                 create_query, sample_content, extra_desc
             )
 
-            table_name = SQLStringManipulator(
-                create_query
-            ).get_table_from_create_query()
+            table_name = SQLStringManager(create_query).get_table_from_create_query()
 
             # Store description in separate table
             manager = TableMetadataManager(self.session)
@@ -168,6 +194,7 @@ class TableManager:
         try:
             executor = SQLExecutor(self.session)
             executor.drop_table(table_name)
+            self._unmap_table_from_org(table_name)
         except Exception as e:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
@@ -181,11 +208,11 @@ class TableManager:
             print(f"An error occurred: {e}")
             raise HTTPException(status_code=400, detail=str(e))
 
-    def get_table_columns(self, table_name: str):
+    def get_table_column_names(self, table_name: str):
         """Returns a list of all of the columns present within the table."""
         try:
             executor = SQLExecutor(self.session)
-            columns = executor.get_table_columns(table_name)
+            columns = executor.get_table_column_names(table_name)
             return columns
         except Exception as e:
             print(f"An error occurred: {e}")

@@ -1,43 +1,83 @@
-import React from "react";
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
 
-function PreviewTable({ previewData }) {
-  const data = Array.isArray(previewData) ? previewData : [previewData];
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { InputTextarea } from "primereact/inputtextarea";
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "../../styles/tableStyles.css";
+import { set } from "date-fns";
 
-  const generateTableHeaders = (data) => {
-    if (data && data.length > 0) {
-      return Object.keys(data[0]).map((key) => (
-        <TableCell key={key}>{key.replace(/_/g, " ").toUpperCase()}</TableCell>
-      ));
+function PreviewTable({
+  columnNames,
+  previewData,
+  onChangePreviewData,
+  setIsEditingCell,
+}) {
+  const columns = columnNames.map((name) => ({
+    Header: name.toUpperCase(),
+    accessor: name,
+  }));
+
+  const data = previewData || [];
+
+  const cellEditor = (options) => {
+    setIsEditingCell(true);
+    return textEditor(options);
+  };
+
+  const textEditor = (options) => {
+    return (
+      <InputTextarea
+        autoResize={true}
+        style={{ width: "100%", height: "100%" }}
+        value={options.value}
+        onChange={(e) => options.editorCallback(e.target.value)}
+      />
+    );
+  };
+
+  const onCellEditComplete = (e) => {
+    let { rowData, newValue, field, originalEvent: event } = e;
+
+    if (newValue.trim().length > 0) {
+      onChangePreviewData(
+        data.findIndex((row) => row === rowData),
+        field,
+        newValue,
+      );
+      setIsEditingCell(false);
+    } else {
+      event.preventDefault();
     }
-    return null;
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>{generateTableHeaders(data)}</TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
-              {Object.values(row).map((value, idx) => (
-                <TableCell key={idx}>{value}</TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <DataTable
+      value={data}
+      emptyMessage="Upload your files and click preview to see the data"
+      paginator
+      rows={5}
+      rowsPerPageOptions={[5, 10, 25, 50]}
+      paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      currentPageReportTemplate="{first}-{last} of {totalRecords}"
+      editMode="cell"
+      resizableColumns
+      scrollable
+      scrollHeight="flex"
+      showGridlines
+      tableStyle={{ minWidth: "150px" }}
+    >
+      {columns.map((column) => (
+        <Column
+          key={column.accessor}
+          field={column.accessor}
+          header={column.Header}
+          editor={(options) => cellEditor(options)}
+          onCellEditComplete={onCellEditComplete}
+          bodyClassName="multi-line"
+        />
+      ))}
+    </DataTable>
   );
 }
 

@@ -17,12 +17,12 @@ async def get_org_tables(org_id: int, current_user: User = Depends(get_current_u
 
 
 @table_router.get("/table/columns/")
-async def get_table_columns(
+async def get_table_column_names(
     table_name: str, current_user: User = Depends(get_current_user)
 ):
     with DatabaseManager() as session:
         manager = TableManager(session)
-        columns = manager.get_table_columns(table_name)
+        columns = manager.get_table_column_names(table_name)
     return columns
 
 

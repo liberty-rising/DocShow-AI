@@ -17,7 +17,17 @@ const AppLayout = ({ children }) => {
     <Box sx={{ display: "flex" }}>
       <Header navLinks={navLinks} />
       <Navigation />
-      <Box component="main" sx={{ flexGrow: 1, p: 6, marginTop: "10px" }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 6,
+          marginTop: "10px",
+          marginTop: "10px",
+          maxWidth: "100vw", // Ensures the main content does not exceed the viewport width
+          overflowX: "hidden",
+        }}
+      >
         <Toolbar />
         {children}
       </Box>

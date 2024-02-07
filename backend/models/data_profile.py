@@ -24,7 +24,7 @@ class DataProfile(Base):
     file_type = Column(String)
     organization_id = Column(Integer, ForeignKey("organizations.id"))
     extract_instructions = Column(String)
-    table_id = Column(Integer)
+    table_name = Column(String)
 
     __table_args__ = (
         UniqueConstraint("name", "organization_id", name="uq_name_organization_id"),
@@ -40,15 +40,20 @@ class DataProfile(Base):
             "file_type": self.file_type,
             "organization_id": self.organization_id,
             "extract_instructions": self.extract_instructions,
-            "table_id": self.table_id,
+            "table_name": self.table_name,
         }
 
 
 class DataProfileCreateRequest(BaseModel):
     name: str
     extract_instructions: str
+    column_names_and_types: dict
 
 
 class DataProfileCreateResponse(BaseModel):
     name: str
     extract_instructions: str
+
+
+class SuggestedColumnTypesRequest(BaseModel):
+    data: list
