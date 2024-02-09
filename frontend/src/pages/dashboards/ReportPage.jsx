@@ -67,8 +67,14 @@ function ReportPage() {
     }
   }, [report, token]);
 
+  // Inline style for the report container
+  const containerStyle = {
+    height: "100vh", // Full height of the viewport
+    width: "100%", // Full width of the container
+  };
+
   return (
-    <div id="reportContainer">
+    <div id="reportContainer" style={containerStyle}>
       {/* The Power BI report will be embedded here */}
     </div>
   );
