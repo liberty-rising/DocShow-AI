@@ -123,10 +123,10 @@ class PromptManager:
             """
         return prompt
 
-    def create_column_type_suggestion_prompt(self, column_names, data):
+    def create_column_metadata_suggestion_prompt(self, column_names, data):
         prompt = f"""
-            Based on the following data, suggest the data types for each column in the table.
-            The available column types are: text, integer, money, date, boolean
+            Based on the following data, suggest the data types for each column in the table and indicate which column should be a primary key.
+            The available data types are: text, integer, money, date, boolean.
 
             Column names:
             {column_names}
@@ -134,6 +134,17 @@ class PromptManager:
             Data:
             {data}
 
-            Return a JSON with the column names as keys and the suggested data types as values.
+            Return a JSON object where each key is a column name.
+            For each key, provide an object specifying 'data_type' and 'primary_key' status (a boolean indicating whether the column is a primary key).
+
+            Example output:
+            {{
+                client_name: {{ data_type: "text", primary_key: false }},
+                net_amount: {{ data_type: "money", primary_key: true }},
+                gross_amount: {{ data_type: "money", primary_key: false }},
+                date: {{ data_type: "date", primary_key: false }},
+            }}
+
+            If no column appears that it should be a primary key, set the 'primary_key' value to false for all columns.
             """
         return prompt

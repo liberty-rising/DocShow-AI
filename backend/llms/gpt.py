@@ -368,12 +368,12 @@ class GPTLLM(BaseLLM):
 
         return parsed_config
 
-    async def generate_suggested_column_types(self, column_names: list, data: dict):
+    async def generate_suggested_column_metadata(self, column_names: list, data: dict):
         """Generate suggested column types for the given data."""
-        self._add_system_message(assistant_type="column_type_suggestion")
+        self._add_system_message(assistant_type="column_metadata_suggestion")
         self._set_response_format(is_json=True)
 
-        prompt = self.prompt_manager.create_column_type_suggestion_prompt(
+        prompt = self.prompt_manager.create_column_metadata_suggestion_prompt(
             column_names, data
         )
 

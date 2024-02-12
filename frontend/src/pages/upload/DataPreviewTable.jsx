@@ -5,16 +5,16 @@ import { Column } from "primereact/column";
 import { InputTextarea } from "primereact/inputtextarea";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "../../styles/tableStyles.css";
-import { set } from "date-fns";
 
-function PreviewTable({
+function DataPreviewTable({
   columnNames,
   previewData,
-  onChangePreviewData,
+  isEditCellMode,
   setIsEditingCell,
+  onEditCellData,
 }) {
   const columns = columnNames.map((name) => ({
-    Header: name.toUpperCase(),
+    Header: name.replace(/_/g, " ").toUpperCase(),
     accessor: name,
   }));
 
@@ -40,7 +40,7 @@ function PreviewTable({
     let { rowData, newValue, field, originalEvent: event } = e;
 
     if (newValue.trim().length > 0) {
-      onChangePreviewData(
+      onEditCellData(
         data.findIndex((row) => row === rowData),
         field,
         newValue,
@@ -60,25 +60,29 @@ function PreviewTable({
       rowsPerPageOptions={[5, 10, 25, 50]}
       paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first}-{last} of {totalRecords}"
-      editMode="cell"
       resizableColumns
       scrollable
       scrollHeight="flex"
       showGridlines
       tableStyle={{ minWidth: "150px" }}
+      {...(isEditCellMode ? { editMode: "cell" } : {})}
     >
       {columns.map((column) => (
         <Column
           key={column.accessor}
           field={column.accessor}
           header={column.Header}
-          editor={(options) => cellEditor(options)}
-          onCellEditComplete={onCellEditComplete}
           bodyClassName="multi-line"
+          {...(isEditCellMode
+            ? {
+                editor: (options) => cellEditor(options),
+                onCellEditComplete: onCellEditComplete,
+              }
+            : {})}
         />
       ))}
     </DataTable>
   );
 }
 
-export default PreviewTable;
+export default DataPreviewTable;

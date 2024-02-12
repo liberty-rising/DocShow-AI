@@ -45,7 +45,25 @@ async def get_data_profiles_by_org_id(current_user: User = Depends(get_current_u
 async def save_data_profile(
     request: DataProfileCreateRequest, current_user: User = Depends(get_current_user)
 ) -> DataProfileCreateResponse:
-    """Save a new data profile to the database"""
+    """
+    Creates a new data profile and saves it to the database.
+
+    This function first validates the name of the data profile, ensuring it is not longer than 50 characters and only contains valid characters for a table name.
+    It then checks if a data profile with the same name already exists for the current user's organization.
+
+    If the validation passes and no duplicate data profile exists, it creates a new table for the data profile using the provided column metadata.
+    It then creates a new data profile with the provided name, extract instructions, and the current user's organization id, and saves it to the database.
+
+    Args:
+        request (DataProfileCreateRequest): The data profile creation request containing the name, extract instructions, and column metadata for the new data profile.
+        current_user (User, optional): The current user. Defaults to the result of `get_current_user()`.
+
+    Raises:
+        HTTPException: If the data profile name is invalid or a data profile with the same name already exists for the current user's organization.
+
+    Returns:
+        DataProfileCreateResponse: The created data profile.
+    """
     if len(request.name) > 50:
         raise HTTPException(
             status_code=400, detail="Data Profile name cannot be longer than 50 chars"
@@ -73,7 +91,7 @@ async def save_data_profile(
             org_id=current_user.organization_id,
             table_name=table_name,
             table_alias=request.name,
-            column_names_and_types=request.column_names_and_types,
+            column_metadata=request.column_metadata,
         )
 
         # Create the data profile
@@ -160,14 +178,14 @@ async def preview_data_profile(
     return extracted_data
 
 
-@data_profile_router.post("/data-profiles/preview/column-types/")
-async def generate_suggested_column_types(
+@data_profile_router.post("/data-profiles/preview/column-metadata/")
+async def generate_suggested_column_metadata(
     request: SuggestedColumnTypesRequest, current_user: User = Depends(get_current_user)
 ):
     gpt = GPTLLM(chat_id=1, user=current_user)
     if request.data:
         column_names = list(request.data[0].keys())
-    suggested_column_types = await gpt.generate_suggested_column_types(
+    suggested_column_types = await gpt.generate_suggested_column_metadata(
         column_names, request.data
     )
 
@@ -248,6 +266,7 @@ async def save_extracted_data(
     files: List[UploadFile] = File(...),
     current_user: User = Depends(get_current_user),
 ):
+    """Save the extracted data to the database using the data profile. Save the original files to DigitalOcean Spaces."""
     # Get the organization name
     with DatabaseManager() as session:
         org_manager = OrganizationManager(session)

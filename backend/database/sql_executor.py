@@ -23,13 +23,13 @@ class SQLExecutor:
             raise
 
     def create_table_for_data_profile(
-        self, org_id: int, table_name: str, column_names_and_types: dict
+        self, org_id: int, table_name: str, column_metadata: dict
     ):
         """Creates a table for a data profile."""
         try:
             create_query = (
                 self.sql_string_manager.generate_create_query_for_data_profile_table(
-                    table_name, column_names_and_types
+                    table_name, column_metadata
                 )
             )
             self.session.execute(text(create_query))

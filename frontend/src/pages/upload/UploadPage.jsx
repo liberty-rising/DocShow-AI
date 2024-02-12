@@ -12,7 +12,7 @@ import CreateDataProfileWindow from "./CreateDataProfileWindow";
 import DeleteDataProfileWindow from "./DeleteDataProfileWindow";
 import DataProfileSelector from "./DataProfileSelector";
 import FileUploader from "./FileUploader";
-import PreviewTable from "./PreviewTable";
+import DataPreviewTable from "./DataPreviewTable";
 import { API_URL } from "../../utils/constants";
 
 function UploadPage() {
@@ -86,13 +86,13 @@ function UploadPage() {
   const handleCreateDataProfile = (
     name,
     extractInstructions,
-    columnNamesAndTypes,
+    columnMetadata,
   ) => {
     axios
       .post(`${API_URL}data-profile/`, {
         name: name,
         extract_instructions: extractInstructions,
-        column_names_and_types: columnNamesAndTypes,
+        column_metadata: columnMetadata,
       })
       .then((response) => {
         // Handle successful data profile creation
@@ -222,11 +222,12 @@ function UploadPage() {
 
       <Box mt={2} sx={{ width: "100%", maxWidth: "100%" }}>
         {((columnNames && columnNames.length > 0) || previewData) && (
-          <PreviewTable
+          <DataPreviewTable
             columnNames={columnNames}
             previewData={previewData}
-            onChangePreviewData={handleChangePreviewData}
+            isEditCellMode={true}
             setIsEditingCell={setIsEditingCell}
+            onEditCellData={handleChangePreviewData}
           />
         )}
       </Box>

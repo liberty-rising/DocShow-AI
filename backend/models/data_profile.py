@@ -1,3 +1,5 @@
+from typing import Dict, Union
+
 from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 
@@ -45,9 +47,20 @@ class DataProfile(Base):
 
 
 class DataProfileCreateRequest(BaseModel):
+    """
+    DataProfileCreateRequest Model
+    ------------------------------
+    This class represents the request body for creating a new data profile.
+    Attributes:
+    - name: The name of the data profile.
+    - extract_instructions: The instructions for extracting data from the file.
+    - column_metadata: A dictionary where each key is a column name and each value is another dictionary specifying the attributes of the column.
+        The inner dictionary includes 'data_type' and 'primary_key' fields.
+    """
+
     name: str
     extract_instructions: str
-    column_names_and_types: dict
+    column_metadata: Dict[str, Dict[str, Union[str, bool]]]
 
 
 class DataProfileCreateResponse(BaseModel):
