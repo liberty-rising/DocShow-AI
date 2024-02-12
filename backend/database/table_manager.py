@@ -57,14 +57,12 @@ class TableManager:
         org_id: int,
         table_name: str,
         table_alias: str,
-        column_names_and_types: dict,
+        column_metadata: dict,
     ):
         """Creates a table for a data profile."""
         try:
             executor = SQLExecutor(self.session)
-            executor.create_table_for_data_profile(
-                org_id, table_name, column_names_and_types
-            )
+            executor.create_table_for_data_profile(org_id, table_name, column_metadata)
             self._map_table_to_org(org_id, table_name, table_alias)
         except Exception as e:
             print(f"An error occurred: {e}")

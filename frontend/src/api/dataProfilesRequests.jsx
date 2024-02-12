@@ -19,8 +19,8 @@ export const getAvailableColumnTypes = () => {
   return axios.get(`${API_URL}data-profiles/column-types/`);
 };
 
-export const getSuggestedColumnTypes = (previewData) => {
-  return axios.post(`${API_URL}data-profiles/preview/column-types/`, {
+export const getSuggestedColumnMetadata = (previewData) => {
+  return axios.post(`${API_URL}data-profiles/preview/column-metadata/`, {
     data: previewData,
   });
 };

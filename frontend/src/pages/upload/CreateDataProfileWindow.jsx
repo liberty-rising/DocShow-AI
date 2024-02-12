@@ -10,11 +10,11 @@ import {
   TextField,
 } from "@mui/material";
 import FileUploader from "./FileUploader";
-import DataPreviewAndSchemaEditor from "./DataPreviewAndSchemaEditor";
+import DataPreviewAndFormatEditor from "./DataPreviewAndFormatEditor";
 import {
   getPreviewData,
   getAvailableColumnTypes,
-  getSuggestedColumnTypes,
+  getSuggestedColumnMetadata,
 } from "../../api/dataProfilesRequests";
 
 function CreateDataProfileWindow({ open, onClose, onCreate }) {
@@ -23,21 +23,20 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
   const [sampleFiles, setSampleFiles] = useState([]);
   const [previewData, setPreviewData] = useState(null);
   const [availableColumnTypes, setAvailableColumnTypes] = useState([]);
-  const [selectedColumnTypes, setSelectedColumnTypes] = useState(null);
+  const [columnMetadata, setColumnMetadata] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewTableOpen, setIsPreviewTableOpen] = useState(false);
-  const [columnNamesAndTypes, setColumnNamesAndTypes] = useState({});
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onCreate(name, extractInstructions, columnNamesAndTypes);
+    onCreate(name, extractInstructions, columnMetadata);
   };
 
   const handlePreview = () => {
     if (sampleFiles.length && extractInstructions) {
       setIsPreviewLoading(true);
       setPreviewData(null);
-      setSelectedColumnTypes(null);
+      setColumnMetadata(null);
 
       const formData = new FormData();
       sampleFiles.forEach((file) => {
@@ -53,10 +52,10 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
           setPreviewData(previewDataResponse.data);
           setAvailableColumnTypes(availableTypesResponse.data);
 
-          return getSuggestedColumnTypes(previewDataResponse.data);
+          return getSuggestedColumnMetadata(previewDataResponse.data);
         })
         .then((suggestedTypesResponse) => {
-          setSelectedColumnTypes(suggestedTypesResponse.data);
+          setColumnMetadata(suggestedTypesResponse.data);
           setIsPreviewTableOpen(true);
         })
         .catch((error) => {
@@ -66,15 +65,6 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
           setIsPreviewLoading(false);
         });
     }
-  };
-
-  const handleColumnsChange = (columns) => {
-    const newColumnNamesAndTypes = columns.reduce((acc, column) => {
-      acc[column.name] = column.type;
-      return acc;
-    }, {});
-
-    setColumnNamesAndTypes(newColumnNamesAndTypes);
   };
 
   return (
@@ -118,12 +108,13 @@ function CreateDataProfileWindow({ open, onClose, onCreate }) {
             />
           </Box>
           <Box mt={2}>
-            {previewData && selectedColumnTypes && (
-              <DataPreviewAndSchemaEditor
+            {previewData && columnMetadata && (
+              <DataPreviewAndFormatEditor
                 previewData={previewData}
+                setPreviewData={setPreviewData}
                 availableColumnTypes={availableColumnTypes}
-                selectedColumnTypes={selectedColumnTypes}
-                onColumnsChange={handleColumnsChange}
+                columnMetadata={columnMetadata}
+                setColumnMetadata={setColumnMetadata}
               />
             )}
           </Box>

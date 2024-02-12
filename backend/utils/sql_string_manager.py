@@ -52,24 +52,30 @@ class SQLStringManager:
         return type_mapping.get(column_type, "TEXT")
 
     def generate_create_query_for_data_profile_table(
-        self, table_name: str, column_names_and_types: dict
+        self, table_name: str, column_metadata: dict
     ) -> str:
         """
         Generates a CREATE TABLE query for a data profile table.
 
         Parameters:
             table_name (str): The name of the table.
-            column_names_and_types (dict): A dictionary of column names and types.
+            column_metadata (dict):  A dictionary of column names, types, and primary key information.
 
         Returns:
             str: The CREATE TABLE query.
         """
         # Generate the CREATE TABLE query
         create_query = f"CREATE TABLE {table_name} ("
-        for column_name, column_type in column_names_and_types.items():
-            postgres_type = self.map_to_postgres_type(column_type)
+        primary_key = None
+        for column_name, column_info in column_metadata.items():
+            postgres_type = self.map_to_postgres_type(column_info["data_type"])
             create_query += f"{column_name} {postgres_type}, "
-        create_query = create_query[:-2] + ");"
+            if column_info.get("primary_key"):
+                primary_key = column_name
+        create_query = create_query[:-2]
+        if primary_key:
+            create_query += f", PRIMARY KEY ({primary_key})"
+        create_query += ");"
 
         return create_query
 

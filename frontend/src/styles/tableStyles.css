@@ -1,3 +1,7 @@
 .multi-line {
   white-space: normal !important;
 }
+
+.p-dropdown-panel {
+  z-index: 1300 !important;
+}

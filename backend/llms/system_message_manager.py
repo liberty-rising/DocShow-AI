@@ -4,9 +4,9 @@ class SystemMessageManager:
             "analytics_chat": """
                 You are an analytics assistant.
                 You will be generating SQL queries, and providing useful information for reports and analytics based on the given prompt.""",
-            "column_type_suggestion": """
-                You are a column type suggestion assistant.
-                You will be suggesting column data types based on the given prompt.
+            "column_metadata_suggestion": """
+                You are a column metadata suggestion assistant.
+                You will be suggesting column data types and primary keys based on the given prompt.
             """,
             "sql_code": """
                 You are a PostgreSQL SQL statement assistant.

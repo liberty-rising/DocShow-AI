@@ -184,7 +184,7 @@ function LoginPage({ onLogin }) {
           align="center"
           sx={{ mt: 5 }}
         >
-          Copyright © Your Website 2023.
+          Copyright © DocShow AI 2024.
         </Typography>
       </Box>
     </Container>
