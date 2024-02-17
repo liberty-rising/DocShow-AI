@@ -16,6 +16,7 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -38,6 +39,7 @@ const Navigation = () => {
     { text: "Data Upload", icon: <UploadFileIcon />, path: "/upload" },
     { text: "AI Analyst", icon: <SmartToyIcon />, path: "/ai-analyst" },
     { text: "User Panel", icon: <AccountBoxIcon />, path: "/user" },
+    { text: "PowerBI", icon: <TableChartIcon />, path: "/powerbi" },
     // { text: 'Logout', icon: <LogoutIcon />, path: '/logout' }
   ];
 

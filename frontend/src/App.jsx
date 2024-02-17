@@ -12,9 +12,12 @@ import AIAnalystPage from "./pages/ai-analyst/AIAnalystPage";
 import BlogPage from "./pages/blog/BlogPage";
 import ChangePasswordPage from "./pages/change-password/ChangePasswordPage";
 import CreateChartPage from "./pages/charts/CreateChartPage";
+import CreatePowerBIDashboard from "./pages/powerbi/CreatePowerBIDashboard";
 import CreateDashboardPage from "./pages/dashboards/CreateDashboard";
-import Dashboard from "./pages/dashboards/Dashboard";
 import DashboardMenuPage from "./pages/dashboards/DashboardsMenuPage";
+import Dashboard from "./pages/dashboards/Dashboard";
+import PowerBIDashboardTable from "./pages/powerbi/PowerBIDashboardTable";
+import PowerBIDashboardsMenuPage from "./pages/powerbi/PowerBIDashboardsMenuPage";
 import ForgotPasswordPage from "./pages/forgot-password/ForgotPasswordPage";
 import LandingPage from "./pages/landing/LandingPage";
 import LoginPage from "./pages/login/LoginPage";
@@ -25,7 +28,7 @@ import ResetPasswordPage from "./pages/reset-password/ResetPasswordPage";
 import UploadPage from "./pages/upload/UploadPage";
 import UserPage from "./pages/user/UserPage";
 import VerifyEmailPage from "./pages/verify-email/VerifyEmailPage";
-import ReportPage from "./pages/dashboards/ReportPage";
+import PowerBIReportPage from "./pages/powerbi/PowerBIReportPage";
 import { APP_ENV } from "./utils/constants";
 
 function AppWrapper() {
@@ -138,21 +141,51 @@ function App() {
         }
       />
       <Route
-        path="/dashboards"
+        path="/powerbi"
         element={
           <RequireAuth>
             <AppLayout>
-              <DashboardMenuPage />
+              <PowerBIDashboardsMenuPage />
             </AppLayout>
           </RequireAuth>
         }
       />
       <Route
-        path="/dashboards/:report_id"
+        path="/powerbi/:report_id"
         element={
           <RequireAuth>
             <AppLayout>
-              <ReportPage />
+              <PowerBIReportPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/powerbi/create"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <CreatePowerBIDashboard />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/powerbi/:dashboardId"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <PowerBIDashboardTable />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboards"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <DashboardMenuPage />
             </AppLayout>
           </RequireAuth>
         }
