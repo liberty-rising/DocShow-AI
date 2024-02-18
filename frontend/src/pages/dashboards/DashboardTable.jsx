@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -8,20 +7,18 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { API_URL } from "../../utils/constants";
-import axios from "axios";
 
 function DashboardTable() {
-  const [reports, setReports] = useState([]);
-
-  console.log("reports", reports);
+  const [dashboards, setDashboards] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}powerbi/reports/`)
-      .then((response) => setReports(response.data.reports.value))
-      .catch((error) => console.error("Error fetching reports:", error));
+    fetch(`${API_URL}/dashboards/`)
+      .then((response) => response.json())
+      .then((data) => setDashboards(data))
+      .catch((error) => console.error("Error fetching dashboards:", error));
   }, []);
 
   return (
@@ -35,35 +32,30 @@ function DashboardTable() {
         </TableRow>
       </TableHead>
       <TableBody>
-        {reports.length > 0 &&
-          reports.map((report) => (
-            <TableRow key={report.name} hover>
-              <TableCell>
-                <Link to={`/dashboards/${report.id}`}>{report.name}</Link>
-              </TableCell>
-              <TableCell
-                style={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <Tooltip title={report.description} placement="top">
-                  <div>{report.description}</div>
-                </Tooltip>
-              </TableCell>
-              <TableCell>
-                {report.created_at
-                  ? format(new Date(report.created_at), "yyyy-MM-dd")
-                  : "N/A"}
-              </TableCell>
-              <TableCell>
-                {report.updated_at
-                  ? format(new Date(report.updated_at), "yyyy-MM-dd")
-                  : "N/A"}
-              </TableCell>
-            </TableRow>
-          ))}
+        {dashboards.map((dashboard) => (
+          <TableRow key={dashboard.name} hover>
+            <TableCell>
+              <Link to={`/dashboards/${dashboard.id}`}>{dashboard.name}</Link>
+            </TableCell>
+            <TableCell
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Tooltip title={dashboard.description} placement="top">
+                <div>{dashboard.description}</div>
+              </Tooltip>
+            </TableCell>
+            <TableCell>
+              {format(new Date(dashboard.created_at), "yyyy-MM-dd")}
+            </TableCell>
+            <TableCell>
+              {format(new Date(dashboard.updated_at), "yyyy-MM-dd")}
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );

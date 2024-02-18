@@ -13,7 +13,7 @@ function DashboardMenuPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        📊 Reports
+        📊 Dashboards
       </Typography>
       <Button
         variant="contained"
