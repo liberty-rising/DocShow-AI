@@ -25,6 +25,12 @@ class TableManager:
         self.session = session
         self.llm = llm
 
+    # def get_org_tables(self, org_id):
+    #     # your code to get organization tables here
+    #     # this is just a placeholder, replace with your actual code
+    #     tables = []  # fetch tables based on org_id
+    #     return tables
+
     def _map_table_to_org(
         self, org_id: int, table_name: str, alias: Optional[str] = None
     ):
